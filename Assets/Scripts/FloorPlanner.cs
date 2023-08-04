@@ -15,14 +15,14 @@ public class FloorPlanner : CreateRoom
     void Start()
     {
         //プランを表示
-        pm.planMake2();
+        //pm.planMake2();
 
-        outerRooms = new GameObject[]{pm.plan[0], pm.plan[1], pm.plan[2], pm.plan[3]};
-
-        
-        placement();
+        //outerRooms = new GameObject[]{pm.plan[0], pm.plan[1], pm.plan[2], pm.plan[3]};
 
         
+        //placement();
+
+        /*
         //水回り(仮)
         //outerRooms[0]
         CreateAndCorrect("Toilet", Rotation(pa.toilet_coordinates), outerRooms[0], -3550f, 300f);
@@ -51,6 +51,7 @@ public class FloorPlanner : CreateRoom
         CreateAndCorrect("Ub", pa.ub_coordinates, outerRooms[3], 5600f, -850f);
         CreateAndCorrect("Washroom", pa.washroom_coordinates, outerRooms[3], 3850f, -950f);
         CreateAndCorrect("Western", new Vector3[]{new Vector3(6550, -150, 0), new Vector3(9650, -150, 0), new Vector3(9650, -3550, 0), new Vector3(5600, -3550, 0), new Vector3(5600, -1550, 0), new Vector3(6550, -1550, 0)}, outerRooms[0], 0, 0);
+        */
     }
 
     void Update()
