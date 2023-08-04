@@ -1,0 +1,12 @@
+fileFormatVersion: 2
+guid: ac2b54f2cbb70aa4c80f2270fa359731
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - MBPS_Type1: {fileID: 8635556863244994406, guid: 80906a567455da0448737a088e679521, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
