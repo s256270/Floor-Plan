@@ -21,7 +21,27 @@ public class Packing : CreateRoom
         //Vector3[] mbps = new Vector3[]{new Vector3(1050, -1550, 0), new Vector3(2050, -1550, 0), new Vector3(2050, -1850, 0), new Vector3(1050, -1850, 0)};
         //createRoom("mbps", mbps);
 
+        //placement();
+
         /*
+        //PointAddテスト
+        Vector3 testPoint = new Vector3(0, 1850, 0);
+        for (int i = 0; i < PointAdd(range, testPoint).Length; i++) {
+            Debug.Log(PointAdd(range, testPoint)[i]);
+        }
+        */
+        
+        /*
+        //FrameChangeテスト
+        Vector3[] test = new Vector3[]{new Vector3(-2050, 1850, 0), new Vector3(-500, 1850, 0), new Vector3(-500, 1350, 0), new Vector3(-1000, 1350, 0), new Vector3(-1000, 1000, 0), new Vector3(-2050, 1000, 0)};
+        createRoom("test", test);
+        for (int i = 0; i < FrameChange(range, test).Length; i++) {
+            Debug.Log(FrameChange(range, test)[i]);
+        }
+        */
+
+        /*
+        //AllPermutationテスト
         int[] roomsIndex = new int[]{1, 2, 3, 4, 5};
 
         Debug.Log("パターン数:" + AllPermutation(roomsIndex).Count);
@@ -33,14 +53,6 @@ public class Packing : CreateRoom
         }
         Debug.Log("---");
         */
-
-        //placement();
-
-        Vector3[] test = new Vector3[]{new Vector3(-2050, 1850, 0), new Vector3(-500, 1850, 0), new Vector3(-500, 1350, 0), new Vector3(-1000, 1350, 0), new Vector3(-1000, 1000, 0), new Vector3(-2050, 1000, 0)};
-        createRoom("test", test);
-        for (int i = 0; i < FrameChanger(range, test).Length; i++) {
-            Debug.Log(FrameChanger(range, test)[i]);
-        }
     }
 
     //部屋パーツ配置
@@ -62,10 +74,42 @@ public class Packing : CreateRoom
 
     /***
 
+    多角形を辺上の2点を通るように切り取った座標
+
+    ***/
+    public Vector3[] FrameSlice(Vector3[] room, Vector3[] points) {
+        return room;
+    }
+
+    /***
+
+    多角形の辺上の点を座標配列に追加
+
+    ***/
+    public Vector3[] PointAdd(Vector3[] room, Vector3 point) {
+        List<Vector3> addedRoom = room.ToList();
+
+        for (int i = 0; i < room.Length; i++) {
+            if ((Mathf.Min(room[i].x, room[(i+1)%room.Length].x) <= point.x) && (point.x <= Mathf.Max(room[i].x, room[(i+1)%room.Length].x))) {
+                if ((Mathf.Min(room[i].y, room[(i+1)%room.Length].y) <= point.y) && (point.y <= Mathf.Max(room[i].y, room[(i+1)%room.Length].y))) {
+                    if (Vector3.Distance(room[i], point) + Vector3.Distance(point, room[(i+1)%room.Length]) == Vector3.Distance(room[i], room[(i+1)%room.Length])) {
+                        addedRoom.Insert(i+1, point);
+    
+                        return addedRoom.ToArray();
+                    }
+                }
+            }
+        }
+
+        return addedRoom.ToArray();
+    }
+
+    /***
+
     外側の部屋の座標から接している内側の部屋を抜き取った座標
 
     ***/
-    public Vector3[] FrameChanger(Vector3[] outer, Vector3[] inside) {
+    public Vector3[] FrameChange(Vector3[] outer, Vector3[] inside) {
         List<Vector3> newOuter = new List<Vector3>();
         Vector3 start_coordinates = new Vector3();
         Vector3 end_coordinates = new Vector3();
