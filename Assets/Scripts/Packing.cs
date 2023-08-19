@@ -84,6 +84,22 @@ public class Packing : CreateRoom
 
         //洋室の廊下に続く辺を決める
         Vector3[] western_side = new Vector3[]{new Vector3(-2050, -1850, 0), new Vector3(-2050, 1850, 0)};
+
+        //玄関から洋室へつながる辺の決定
+        List<Vector3[]> hallway_side = new List<Vector3[]>();
+        hallway_side[0] = entrance_side[1];
+
+        if (!CrossJudge(entrance_side[1][0], entrance_side[1][0], western_side[0], western_side[1])) {
+            hallway_side[1] = new Vector3[]{western_side[0], western_side[1]};
+        }
+        else if (!CrossJudge(entrance_side[1][0], entrance_side[1][0], western_side[1], western_side[0])) {
+            hallway_side[1] = new Vector3[]{western_side[1], western_side[0]};
+        }
+
+        //辺に従って領域を切り取り
+        //長い辺を求める
+        //面積の大きい方を求める
+        //並べていく
     }
 
     /***
@@ -306,6 +322,30 @@ public class Packing : CreateRoom
         newOuter.InsertRange(outer_end_index, needInside);
 
         return newOuter.ToArray();
+    }
+
+    /***
+
+    2本の線分の交差判定
+
+    ***/
+    public bool CrossJudge(Vector3 pointA, Vector3 pointB, Vector3 pointC, Vector3 pointD)
+    {
+        double s, t;
+
+        s = (pointA.x - pointB.x) * (pointC.y - pointA.y) - (pointA.y - pointB.y) * (pointC.x - pointA.x);
+        t = (pointA.x - pointB.x) * (pointD.y - pointA.y) - (pointA.y - pointB.y) * (pointD.x - pointA.x);
+        if (s * t > 0) {
+            return false;
+        }
+
+        s = (pointC.x - pointD.x) * (pointA.y - pointC.y) - (pointC.y - pointD.y) * (pointA.x - pointC.x);
+        t = (pointC.x - pointD.x) * (pointB.y - pointC.y) - (pointC.y - pointD.y) * (pointB.x - pointC.x);
+        if (s * t > 0) {
+            return false;
+        }
+
+        return true;
     }
 
     public List<int[]> AllPermutation(params int[] array)
