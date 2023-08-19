@@ -22,10 +22,24 @@ public class Packing : CreateRoom
         //createRoom("mbps", mbps);
 
         //placement();
-
+        
+        /*
+        //FrameSliceテスト
+        List<Vector3[]> test = FrameSlice(range, new Vector3[]{new Vector3(-2050, 1850, 0), new Vector3(1050, -50, 0)}, new Vector3[]{new Vector3(-2050, -1850, 0), new Vector3(1050, -1550, 0)});
+        
+        Debug.Log("A");
+        for (int i = 0; i < test[0].Length; i++) {
+            Debug.Log(test[0][i]);
+        }
+        Debug.Log("B");
+        for (int i = 0; i < test[1].Length; i++) {
+            Debug.Log(test[1][i]);
+        }
+        */
+        
         /*
         //PointAddテスト
-        Vector3 testPoint = new Vector3(0, 1850, 0);
+        Vector3 testPoint = new Vector3(1050, -1550, 0);
         for (int i = 0; i < PointAdd(range, testPoint).Length; i++) {
             Debug.Log(PointAdd(range, testPoint)[i]);
         }
@@ -74,11 +88,114 @@ public class Packing : CreateRoom
 
     /***
 
-    多角形を辺上の2点を通るように切り取った座標
+    多角形を辺上の2点を通るように切り取った座標×2
 
     ***/
-    public Vector3[] FrameSlice(Vector3[] room, Vector3[] points) {
-        return room;
+    public List<Vector3[]> FrameSlice(Vector3[] room, Vector3[] pointsA, Vector3[] pointsB) {
+        //返すリスト
+        List<Vector3[]> sliceRooms = new List<Vector3[]>();
+
+        //全ての点を加えた配列を作成
+        Vector3[] pointAddRoom = room;
+        pointAddRoom = PointAdd(pointAddRoom, pointsA[0]);
+        pointAddRoom = PointAdd(pointAddRoom, pointsA[1]);
+
+        pointAddRoom = PointAdd(pointAddRoom, pointsB[0]);
+        pointAddRoom = PointAdd(pointAddRoom, pointsB[1]);
+
+        for (int i = 0; i < pointAddRoom.Length; i++) {
+            Debug.Log(pointAddRoom[i]);
+        }
+
+        //PointsAで切り取る
+        List<Vector3> sliceRoomA = pointAddRoom.ToList();
+
+        int A0_index =  sliceRoomA.IndexOf(pointsA[0]);
+        int A1_index =  sliceRoomA.IndexOf(pointsA[1]);
+
+        if (A0_index < A1_index) {
+            bool insideFlag = false;
+            for (int i = A0_index + 1; i < A1_index; i++) {
+                if ((sliceRoomA[i] == pointsB[0]) || (sliceRoomA[i] == pointsB[0])) {
+                    insideFlag = true;
+                }
+            }
+
+            //想定している入力じゃない時にエラー起きそう
+            if (insideFlag) {
+                sliceRoomA.RemoveRange(A0_index + 1, A1_index - A0_index - 1);
+            }
+            else {
+                sliceRoomA.RemoveRange(A1_index + 1, sliceRoomA.Count - A1_index - 1);
+                sliceRoomA.RemoveRange(0, A0_index);
+            }
+        } 
+        else {
+            bool insideFlag = false;
+            for (int i = A1_index + 1; i < A0_index; i++) {
+                if ((sliceRoomA[i] == pointsB[0]) || (sliceRoomA[i] == pointsB[0])) {
+                    insideFlag = true;
+                }
+            }
+
+            //想定している入力じゃない時にエラー起きそう
+            if (insideFlag) {
+                sliceRoomA.RemoveRange(A1_index + 1, A0_index - A1_index - 1);
+            }
+            else {
+                sliceRoomA.RemoveRange(A0_index + 1, sliceRoomA.Count - A0_index - 1);
+                sliceRoomA.RemoveRange(0, A1_index);
+            }
+        }
+
+        //PointsBで切り取る
+        List<Vector3> sliceRoomB = pointAddRoom.ToList();
+
+        int B0_index =  sliceRoomB.IndexOf(pointsB[0]);
+        int B1_index =  sliceRoomB.IndexOf(pointsB[1]);
+        //Debug.Log(B0_index);
+        Debug.Log(B1_index);
+
+        if (B0_index < B1_index) {
+            bool insideFlag = false;
+            for (int i = B0_index + 1; i < B1_index; i++) {
+                if ((sliceRoomB[i] == pointsA[0]) || (sliceRoomB[i] == pointsA[0])) {
+                    insideFlag = true;
+                }
+            }
+
+            //想定している入力じゃない時にエラー起きそう
+            if (insideFlag) {
+                sliceRoomB.RemoveRange(B0_index + 1, B1_index - B0_index - 1);
+            }
+            else {
+                sliceRoomB.RemoveRange(B1_index + 1, sliceRoomB.Count - B1_index - 1);
+                sliceRoomB.RemoveRange(0, B0_index);
+            }
+        } 
+        else {
+            bool insideFlag = false;
+            for (int i = B1_index + 1; i < B0_index; i++) {
+                if ((sliceRoomB[i] == pointsA[0]) || (sliceRoomB[i] == pointsA[0])) {
+                    insideFlag = true;
+                }
+            }
+
+            //想定している入力じゃない時にエラー起きそう
+            if (insideFlag) {
+                sliceRoomB.RemoveRange(B1_index + 1, B0_index - B1_index - 1);
+            }
+            else {
+                sliceRoomB.RemoveRange(B0_index + 1, sliceRoomB.Count - B0_index - 1);
+                sliceRoomB.RemoveRange(0, B1_index);
+            }
+        }
+
+        //戻り値を作成
+        sliceRooms.Add(sliceRoomA.ToArray());
+        sliceRooms.Add(sliceRoomB.ToArray());
+
+        return sliceRooms;
     }
 
     /***
@@ -88,6 +205,10 @@ public class Packing : CreateRoom
     ***/
     public Vector3[] PointAdd(Vector3[] room, Vector3 point) {
         List<Vector3> addedRoom = room.ToList();
+
+        if (room.Contains(point)) {
+            return addedRoom.ToArray();
+        }
 
         for (int i = 0; i < room.Length; i++) {
             if ((Mathf.Min(room[i].x, room[(i+1)%room.Length].x) <= point.x) && (point.x <= Mathf.Max(room[i].x, room[(i+1)%room.Length].x))) {
@@ -176,9 +297,8 @@ public class Packing : CreateRoom
             needInside.RemoveRange(inside_start_index, inside_end_index - inside_start_index + 1);
         } 
         else {
-            needInside.RemoveRange(0, inside_end_index + 1);
-            inside_start_index = needInside.IndexOf(start_coordinates);
             needInside.RemoveRange(inside_start_index, needInside.Count - inside_start_index);
+            needInside.RemoveRange(0, inside_end_index + 1);
         }
         needInside.Reverse();
 
