@@ -15,17 +15,16 @@ public class Packing : CreateRoom
         range = new Vector3[]{new Vector3(-2050, 1850, 0), new Vector3(2050, 1850, 0), new Vector3(2050, -50, 0), new Vector3(1050, -50, 0), new Vector3(1050, -1850, 0), new Vector3(-2050, -1850, 0)};
         createRoom("range", range);
 
-        entrance = new Vector3[]{new Vector3(1050, -50, 0), new Vector3(2050, -50, 0), new Vector3(2050, -1550, 0), new Vector3(1050, -1550, 0)};
-        createRoom("entrance", entrance);
+        //entrance = new Vector3[]{new Vector3(1050, -50, 0), new Vector3(2050, -50, 0), new Vector3(2050, -1550, 0), new Vector3(1050, -1550, 0)};
+        //createRoom("entrance", entrance);
 
-        Vector3[] mbps = new Vector3[]{new Vector3(1050, -1550, 0), new Vector3(2050, -1550, 0), new Vector3(2050, -1850, 0), new Vector3(1050, -1850, 0)};
-        createRoom("mbps", mbps);
+        //Vector3[] mbps = new Vector3[]{new Vector3(1050, -1550, 0), new Vector3(2050, -1550, 0), new Vector3(2050, -1850, 0), new Vector3(1050, -1850, 0)};
+        //createRoom("mbps", mbps);
 
+        /*
         int[] roomsIndex = new int[]{1, 2, 3, 4, 5};
 
         Debug.Log("パターン数:" + AllPermutation(roomsIndex).Count);
-
-        /*
         for (int i = 0; i < AllPermutation(roomsIndex).Count; i++) {
             Debug.Log("---");
             for (int j = 0; j < AllPermutation(roomsIndex)[i].Length; j++) {
@@ -35,7 +34,13 @@ public class Packing : CreateRoom
         Debug.Log("---");
         */
 
-        placement();
+        //placement();
+
+        Vector3[] test = new Vector3[]{new Vector3(-2050, 1850, 0), new Vector3(-500, 1850, 0), new Vector3(-500, 1350, 0), new Vector3(-1000, 1350, 0), new Vector3(-1000, 1000, 0), new Vector3(-2050, 1000, 0)};
+        createRoom("test", test);
+        for (int i = 0; i < FrameChanger(range, test).Length; i++) {
+            Debug.Log(FrameChanger(range, test)[i]);
+        }
     }
 
     //部屋パーツ配置
@@ -74,26 +79,45 @@ public class Packing : CreateRoom
             if ((contact_coordinates[0] != zero[0]) && (contact_coordinates[1] != zero[1])) {
                 if ((outer[i].x.CompareTo(outer[(i+1)%outer.Length].x) == contact_coordinates[0].x.CompareTo(contact_coordinates[1].x) && outer[i].x.CompareTo(outer[(i+1)%outer.Length].x) != 0) || (outer[i].y.CompareTo(outer[(i+1)%outer.Length].y) == contact_coordinates[0].y.CompareTo(contact_coordinates[1].y) && outer[i].y.CompareTo(outer[(i+1)%outer.Length].y) != 0)) {
                     if (outer[i] != contact_coordinates[0]) {
-                        newOuter.Add(outer[i]);
+                        if (!newOuter.Contains(outer[i])) {
+                            newOuter.Add(outer[i]);
+                        }
+
                         newOuter.Add(contact_coordinates[0]);
                         start_coordinates = contact_coordinates[0];
                     }
                     if (outer[(i+1)%outer.Length] != contact_coordinates[1]) {
                         newOuter.Add(contact_coordinates[1]);
-                        newOuter.Add(outer[(i+1)%outer.Length]);
                         end_coordinates = contact_coordinates[1];
+
+                        if (!newOuter.Contains(outer[(i+1)%outer.Length])) {
+                            newOuter.Add(outer[(i+1)%outer.Length]);
+                        }
                     }
                 } else {
                     if (outer[i] != contact_coordinates[1]) {
-                        newOuter.Add(outer[i]);
+                        if (!newOuter.Contains(outer[i])) {
+                            newOuter.Add(outer[i]);
+                        }
+
                         newOuter.Add(contact_coordinates[1]);
                         start_coordinates = contact_coordinates[1];
                     }
                     if (outer[(i+1)%outer.Length] != contact_coordinates[0]) {
                         newOuter.Add(contact_coordinates[0]);
-                        newOuter.Add(outer[(i+1)%outer.Length]);
                         end_coordinates = contact_coordinates[0];
+
+                        if (!newOuter.Contains(outer[(i+1)%outer.Length])) {
+                            newOuter.Add(outer[(i+1)%outer.Length]);
+                        }
                     }
+                }
+            } else {
+                if (!newOuter.Contains(outer[i])) {
+                    newOuter.Add(outer[i]);
+                }
+                if (!newOuter.Contains(outer[(i+1)%outer.Length])) {
+                    newOuter.Add(outer[(i+1)%outer.Length]);
                 }
             }
         }
@@ -103,10 +127,13 @@ public class Packing : CreateRoom
         
         int inside_start_index = needInside.IndexOf(start_coordinates);
         int inside_end_index = needInside.IndexOf(end_coordinates);
+
         if (inside_end_index.CompareTo(inside_start_index) == 1) {
             needInside.RemoveRange(inside_start_index, inside_end_index - inside_start_index + 1);
-        } else {
+        } 
+        else {
             needInside.RemoveRange(0, inside_end_index + 1);
+            inside_start_index = needInside.IndexOf(start_coordinates);
             needInside.RemoveRange(inside_start_index, needInside.Count - inside_start_index);
         }
         needInside.Reverse();
