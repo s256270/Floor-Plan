@@ -44,10 +44,10 @@ public class Parts : CreateRoom
 
     //UBの座標
     public Vector3[] ub_coordinates = new Vector3[]{
-        new Vector3(-950, 700, 0),
-        new Vector3(950, 700, 0),
-        new Vector3(950, -700, 0),
-        new Vector3(-950, -700, 0)
+        new Vector3(-900, 700, 0),
+        new Vector3(900, 700, 0),
+        new Vector3(900, -700, 0),
+        new Vector3(-900, -700, 0)
     };
 
     //トイレの座標

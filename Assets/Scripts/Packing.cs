@@ -15,13 +15,20 @@ public class Packing : CreateRoom
         range = new Vector3[]{new Vector3(-2050, 1850, 0), new Vector3(2050, 1850, 0), new Vector3(2050, -50, 0), new Vector3(1050, -50, 0), new Vector3(1050, -1850, 0), new Vector3(-2050, -1850, 0)};
         createRoom("range", range);
 
-        //entrance = new Vector3[]{new Vector3(1050, -50, 0), new Vector3(2050, -50, 0), new Vector3(2050, -1550, 0), new Vector3(1050, -1550, 0)};
-        //createRoom("entrance", entrance);
+        entrance = new Vector3[]{new Vector3(1050, -50, 0), new Vector3(2050, -50, 0), new Vector3(2050, -1550, 0), new Vector3(1050, -1550, 0)};
+        createRoom("entrance", entrance);
 
         //Vector3[] mbps = new Vector3[]{new Vector3(1050, -1550, 0), new Vector3(2050, -1550, 0), new Vector3(2050, -1850, 0), new Vector3(1050, -1850, 0)};
         //createRoom("mbps", mbps);
 
-        //placement();
+        placement();
+        
+        /*
+        //JudgeInscribedテスト
+        Vector3[] test = new Vector3[]{new Vector3(150, 1850, 0), new Vector3(2050, 1850, 0), new Vector3(2050, 450, 0), new Vector3(150, 450, 0)};
+        
+        Debug.Log(JudgeInscribed(range, test));
+        */
         
         /*
         //FrameSliceテスト
@@ -87,19 +94,232 @@ public class Packing : CreateRoom
 
         //玄関から洋室へつながる辺の決定
         List<Vector3[]> hallway_side = new List<Vector3[]>();
-        hallway_side[0] = entrance_side[1];
 
-        if (!CrossJudge(entrance_side[1][0], entrance_side[1][0], western_side[0], western_side[1])) {
-            hallway_side[1] = new Vector3[]{western_side[0], western_side[1]};
+        if (!CrossJudge(entrance_side[1][0], western_side[0], entrance_side[1][1], western_side[1])) {
+            hallway_side.Add(new Vector3[]{entrance_side[1][0], western_side[0]});
+            hallway_side.Add(new Vector3[]{entrance_side[1][1], western_side[1]});
         }
-        else if (!CrossJudge(entrance_side[1][0], entrance_side[1][0], western_side[1], western_side[0])) {
-            hallway_side[1] = new Vector3[]{western_side[1], western_side[0]};
+        else {
+            hallway_side.Add(new Vector3[]{entrance_side[1][0], western_side[1]});
+            hallway_side.Add(new Vector3[]{entrance_side[1][1], western_side[0]});
         }
 
         //辺に従って領域を切り取り
-        //長い辺を求める
+        List<Vector3[]> wetAreas = FrameSlice(range, hallway_side[0], hallway_side[1]);
+
         //面積の大きい方を求める
-        //並べていく
+        if (areaCalculation(wetAreas[0]) < areaCalculation(wetAreas[1])) {
+            wetAreas.Reverse();
+            hallway_side.Reverse();
+        }
+        
+        //水回りパーツの組み合わせ
+        int[] wetAreasIndex = new int[]{1, 2, 3, 4};
+        List<int[]> wetAreasAllPermutation = AllPermutation(wetAreasIndex);
+
+        //これから配置するパターン
+        List<int> wetAreasPermutation = wetAreasAllPermutation[0].ToList();
+
+        //長い辺から順に並べていく
+        int[] longIndex1 = LongIndex(wetAreas[0]);
+        for (int i = 0; i < longIndex1.Length; i++) {
+            Vector3[] current_side = new Vector3[] {wetAreas[0][longIndex1[i]], wetAreas[0][(longIndex1[i]+1)%longIndex1.Length]};
+
+            if ((current_side[0] == hallway_side[0][0] && current_side[1] == hallway_side[0][1]) || (current_side[0] == hallway_side[0][1] && current_side[1] == hallway_side[0][0])) {
+                continue;
+            }
+
+            /*
+            if (false) {
+                break;
+            }
+            */
+
+            for (int j = 0; j < wetAreasPermutation.Count; j++) {
+                Vector3[] current_room = pa.ub_coordinates;
+
+                if (wetAreasPermutation[j] == 1) {
+                    current_room = Rotation(pa.ub_coordinates);
+                    Vector3[] CreateCoordinates = new Vector3[current_room.Length];
+
+                    float gap_x = 0;
+                    float gap_y = 0;
+
+                    if (current_side[0].x == current_side[1].x) {
+                        float max = current_room[0].y;
+                        for (int k = 1; k < current_room.Length; k++) {
+                            if (max < current_room[k].y) {
+                                max = current_room[k].y;
+                            }
+                        }
+
+                        gap_y = Mathf.Max(current_side[0].y, current_side[1].y) - max;
+
+                        for (int k = 0; k < ContactGap(current_room, current_side).Length; k++) {
+                            if (JudgeInscribed(range, CorrectCoordinates(current_room, new Vector3(ContactGap(current_room, current_side)[k], gap_y, 0)))) {
+                                gap_x = ContactGap(current_room, current_side)[k];
+                            }
+                        }
+                    }
+                    else if (current_side[0].y == current_side[0].y) {
+                        float max = current_room[0].x;
+                        for (int k = 1; k < current_room.Length; k++) {
+                            if (max < current_room[k].x) {
+                                max = current_room[k].x;
+                            }
+                        }
+
+                        gap_x = Mathf.Max(current_side[0].x, current_side[1].x) - max;
+
+                        for (int k = 0; k < ContactGap(current_room, current_side).Length; k++) {
+                            if (JudgeInscribed(range, CorrectCoordinates(current_room, new Vector3(gap_x, ContactGap(current_room, current_side)[k], 0)))) {
+                                gap_y = ContactGap(current_room, current_side)[k];
+                            }
+                        }
+                    }
+
+                    CreateCoordinates = CorrectCoordinates(current_room, new Vector3(gap_x, gap_y, 0));
+                    createRoom("UB", CreateCoordinates);
+
+                    Vector3[] contact_coordinates = contact(current_side, CreateCoordinates);
+
+                    if ((contact_coordinates[0] != zero[0]) && (contact_coordinates[1] != zero[1])) {
+                        current_side = SideSubstraction(current_side, contact_coordinates);
+                    }
+                } 
+                else if (wetAreasPermutation[j] == 2) {
+                    current_room = pa.washroom_coordinates;
+                    Vector3[] CreateCoordinates = new Vector3[current_room.Length];
+
+                    float gap_x = 0;
+                    float gap_y = 0;
+
+                    if (current_side[0].x == current_side[1].x) {
+                        float max = current_room[0].y;
+                        for (int k = 1; k < current_room.Length; k++) {
+                            if (max < current_room[k].y) {
+                                max = current_room[k].y;
+                            }
+                        }
+
+                        gap_y = Mathf.Max(current_side[0].y, current_side[1].y) - max;
+
+                        for (int k = 0; k < ContactGap(current_room, current_side).Length; k++) {
+                            if (JudgeInscribed(range, CorrectCoordinates(current_room, new Vector3(ContactGap(current_room, current_side)[k], gap_y, 0)))) {
+                                gap_x = ContactGap(current_room, current_side)[k];
+                            }
+                        }
+                    }
+                    else if (current_side[0].y == current_side[0].y) {
+                        float max = current_room[0].x;
+                        for (int k = 1; k < current_room.Length; k++) {
+                            if (max < current_room[k].x) {
+                                max = current_room[k].x;
+                            }
+                        }
+
+                        gap_x = Mathf.Max(current_side[0].x, current_side[1].x) - max;
+
+                        for (int k = 0; k < ContactGap(current_room, current_side).Length; k++) {
+                            if (JudgeInscribed(range, CorrectCoordinates(current_room, new Vector3(gap_x, ContactGap(current_room, current_side)[k], 0)))) {
+                                gap_y = ContactGap(current_room, current_side)[k];
+                            }
+                        }
+                    }
+
+                    CreateCoordinates = CorrectCoordinates(current_room, new Vector3(gap_x, gap_y, 0));
+                    createRoom("Washroom", CreateCoordinates);
+                }
+                else if (wetAreasPermutation[j] == 3) {
+                    current_room = pa.toilet_coordinates;
+                    Vector3[] CreateCoordinates = new Vector3[current_room.Length];
+
+                    float gap_x = 0;
+                    float gap_y = 0;
+
+                    if (current_side[0].x == current_side[1].x) {
+                        float max = current_room[0].y;
+                        for (int k = 1; k < current_room.Length; k++) {
+                            if (max < current_room[k].y) {
+                                max = current_room[k].y;
+                            }
+                        }
+
+                        gap_y = Mathf.Max(current_side[0].y, current_side[1].y) - max;
+
+                        for (int k = 0; k < ContactGap(current_room, current_side).Length; k++) {
+                            if (JudgeInscribed(range, CorrectCoordinates(current_room, new Vector3(ContactGap(current_room, current_side)[k], gap_y, 0)))) {
+                                gap_x = ContactGap(current_room, current_side)[k];
+                            }
+                        }
+                    }
+                    else if (current_side[0].y == current_side[0].y) {
+                        float max = current_room[0].x;
+                        for (int k = 1; k < current_room.Length; k++) {
+                            if (max < current_room[k].x) {
+                                max = current_room[k].x;
+                            }
+                        }
+
+                        gap_x = Mathf.Max(current_side[0].x, current_side[1].x) - max;
+
+                        for (int k = 0; k < ContactGap(current_room, current_side).Length; k++) {
+                            if (JudgeInscribed(range, CorrectCoordinates(current_room, new Vector3(gap_x, ContactGap(current_room, current_side)[k], 0)))) {
+                                gap_y = ContactGap(current_room, current_side)[k];
+                            }
+                        }
+                    }
+
+                    CreateCoordinates = CorrectCoordinates(current_room, new Vector3(gap_x, gap_y, 0));
+                    createRoom("Toilet", CreateCoordinates);
+                }
+                else if (wetAreasPermutation[j] == 4) {
+                    current_room = pa.kitchen_coordinates;
+                    Vector3[] CreateCoordinates = new Vector3[current_room.Length];
+
+                    float gap_x = 0;
+                    float gap_y = 0;
+
+                    if (current_side[0].x == current_side[1].x) {
+                        float max = current_room[0].y;
+                        for (int k = 1; k < current_room.Length; k++) {
+                            if (max < current_room[k].y) {
+                                max = current_room[k].y;
+                            }
+                        }
+
+                        gap_y = Mathf.Max(current_side[0].y, current_side[1].y) - max;
+
+                        for (int k = 0; k < ContactGap(current_room, current_side).Length; k++) {
+                            if (JudgeInscribed(range, CorrectCoordinates(current_room, new Vector3(ContactGap(current_room, current_side)[k], gap_y, 0)))) {
+                                gap_x = ContactGap(current_room, current_side)[k];
+                            }
+                        }
+                    }
+                    else if (current_side[0].y == current_side[0].y) {
+                        float max = current_room[0].x;
+                        for (int k = 1; k < current_room.Length; k++) {
+                            if (max < current_room[k].x) {
+                                max = current_room[k].x;
+                            }
+                        }
+
+                        gap_x = Mathf.Max(current_side[0].x, current_side[1].x) - max;
+
+                        for (int k = 0; k < ContactGap(current_room, current_side).Length; k++) {
+                            if (JudgeInscribed(range, CorrectCoordinates(current_room, new Vector3(gap_x, ContactGap(current_room, current_side)[k], 0)))) {
+                                gap_y = ContactGap(current_room, current_side)[k];
+                            }
+                        }
+                    }
+
+                    CreateCoordinates = CorrectCoordinates(current_room, new Vector3(gap_x, gap_y, 0));
+                    createRoom("Kitchen", CreateCoordinates);
+                }
+            }
+
+            break;
+        }
     }
 
     /***
@@ -118,10 +338,6 @@ public class Packing : CreateRoom
 
         pointAddRoom = PointAdd(pointAddRoom, pointsB[0]);
         pointAddRoom = PointAdd(pointAddRoom, pointsB[1]);
-
-        for (int i = 0; i < pointAddRoom.Length; i++) {
-            Debug.Log(pointAddRoom[i]);
-        }
 
         //PointsAで切り取る
         List<Vector3> sliceRoomA = pointAddRoom.ToList();
@@ -169,8 +385,6 @@ public class Packing : CreateRoom
 
         int B0_index =  sliceRoomB.IndexOf(pointsB[0]);
         int B1_index =  sliceRoomB.IndexOf(pointsB[1]);
-        //Debug.Log(B0_index);
-        Debug.Log(B1_index);
 
         if (B0_index < B1_index) {
             bool insideFlag = false;
@@ -253,9 +467,9 @@ public class Packing : CreateRoom
 
         //List<Vector3[]> contact_coordinates_list = new List<Vector3[]>();
         //外側の部屋の必要な座標      
-        Vector3[] zero = new Vector3[] {Vector3.zero, Vector3.zero};
         for (int i = 0; i < outer.Length; i++) {
             Vector3[] contact_coordinates = contact(new Vector3[]{outer[i], outer[(i+1)%outer.Length]}, inside);
+            Vector3[] zero = new Vector3[] {Vector3.zero, Vector3.zero};
 
             if ((contact_coordinates[0] != zero[0]) && (contact_coordinates[1] != zero[1])) {
                 if ((outer[i].x.CompareTo(outer[(i+1)%outer.Length].x) == contact_coordinates[0].x.CompareTo(contact_coordinates[1].x) && outer[i].x.CompareTo(outer[(i+1)%outer.Length].x) != 0) || (outer[i].y.CompareTo(outer[(i+1)%outer.Length].y) == contact_coordinates[0].y.CompareTo(contact_coordinates[1].y) && outer[i].y.CompareTo(outer[(i+1)%outer.Length].y) != 0)) {
@@ -348,6 +562,33 @@ public class Packing : CreateRoom
         return true;
     }
 
+
+    /***
+
+    辺が長い順のインデックスの配列を返す
+
+    ***/
+    public int[] LongIndex(Vector3[] room) {
+        int[] result = new int[room.Length];
+
+        List<float> length = new List<float>();
+        for (int i = 0; i < room.Length; i++) {
+            length.Add(Vector3.Distance(room[i], room[(i+1)%room.Length]));
+        }
+
+        for (int i = 0; i < result.Length; i++) {
+            result[i] = length.IndexOf(length.Max());
+            length.RemoveAt(length.IndexOf(length.Max()));
+        }
+
+        return result;
+    }
+
+    /***
+
+    順列の全組み合わせを返す
+
+    ***/
     public List<int[]> AllPermutation(params int[] array)
     {
         var a = new List<int>(array).ToArray();
@@ -387,5 +628,208 @@ public class Packing : CreateRoom
             }
         }
         return res;
+    }
+
+    /***
+
+    座標を全て同じだけずらす
+
+    ***/
+    public Vector3[] CorrectCoordinates(Vector3[] room, Vector3 correctValue) {
+        Vector3[] correctedCoordinates = new Vector3[room.Length];
+
+        for (int i = 0; i < room.Length; i++) {
+            correctedCoordinates[i] = new Vector3(room[i].x + correctValue.x, room[i].y + correctValue.y, 0);
+        }
+
+        return correctedCoordinates;
+    }
+
+    /***
+
+    部屋と辺の距離の配列
+
+    ***/
+    public float[] ContactGap(Vector3[] room, Vector3[] side) {
+        List<float> result = new List<float>();
+
+        for (int i = 0; i < room.Length; i++) {
+            if ((positionalRelation(new Vector3[]{room[i], room[(i+1)%room.Length]}, side)[2] == 1.00f) || (positionalRelation(new Vector3[]{room[i], room[(i+1)%room.Length]}, side)[2] == 2.00f)) {
+                result.Add(positionalRelation(new Vector3[]{room[i], room[(i+1)%room.Length]}, side)[1] - positionalRelation(new Vector3[]{room[i], room[(i+1)%room.Length]}, side)[0]);
+            }
+        }
+
+        return result.ToArray();
+    }
+
+    /***
+
+    直線と直線が平行かどうかを確認し，
+    平行な直線どうしの切片を返すメソッド
+
+    ***/
+    public float[] positionalRelation(Vector3[] sideA, Vector3[] sideB) {
+        float m1, m2, n1, n2;
+
+        //y軸平行の時で直線と部屋が平行
+        if (sideA[0].x == sideA[1].x) {
+            n1 = sideA[0].x;
+            if (sideB[0].x == sideB[1].x) {
+                n2 = sideB[0].x;
+
+                return new float[] {n1, n2, 1.00f};
+            }
+        }
+        //それ以外で直線と部屋が平行
+        else {
+            m1 = (sideA[1].y - sideA[0].y) / (sideA[1].x - sideA[0].x);
+            n1 = (sideA[1].x * sideA[0].y - sideA[0].x * sideA[1].y) / (sideA[1].x - sideA[0].x);
+            if (sideB[0].x != sideB[1].x) {
+                m2 = (sideB[1].y - sideB[0].y) / (sideB[1].x - sideB[0].x);
+                n2 = (sideB[1].x * sideB[0].y - sideB[0].x * sideB[1].y) / (sideB[1].x - sideB[0].x);
+                if (m1 == m2) {
+
+                    return new float[] {n1, n2, 2.00f};
+                }
+            }     
+        }
+
+        //直線と部屋が平行でない
+        return new float[] {0.00f, 0.00f, 0.00f};
+    }
+
+    /***
+
+    重なった2本の線分から重なっていない座標を求める
+
+    ***/
+    public Vector3[] SideSubstraction(Vector3[] sideA, Vector3[] sideB) {
+        Vector3[] result = sideA;
+
+        if (sideA[0] == sideB[0]) {
+            result = new Vector3[] {sideA[1], sideB[1]};
+        }
+        else if (sideA[0] == sideB[1]) {
+            result = new Vector3[] {sideA[1], sideB[0]};
+        }
+        else if (sideA[1] == sideB[0]) {
+            result = new Vector3[] {sideA[0], sideB[1]};
+        }
+        else if (sideA[1] == sideB[1]) {
+            result = new Vector3[] {sideA[0], sideB[0]};
+        }
+
+        return result;
+    }
+
+    /***
+    図形の内接判定
+    ***/
+    public bool JudgeInscribed(Vector3[] outer, Vector3[] inner) {
+        bool flag = false;
+
+        int count1 = 0;
+        for (int i = 0; i < inner.Length; i++) {
+            if (CheckPoint(outer, new Vector3(inner[i].x + 1, inner[i].y + 1, 0))) {
+                count1++;
+            }
+        }
+
+        int count2 = 0;
+        for (int i = 0; i < inner.Length; i++) {
+            if (CheckPoint(outer, new Vector3(inner[i].x + 1, inner[i].y - 1, 0))) {
+                count2++;
+            }
+        }
+
+        int count3 = 0;
+        for (int i = 0; i < inner.Length; i++) {
+            if (CheckPoint(outer, new Vector3(inner[i].x - 1, inner[i].y + 1, 0))) {
+                count3++;
+            }
+        }
+
+        int count4 = 0;
+        for (int i = 0; i < inner.Length; i++) {
+            if (CheckPoint(outer, new Vector3(inner[i].x - 1, inner[i].y - 1, 0))) {
+                count4++;
+            }
+        }
+
+        if ((count1 == inner.Length) || (count2 == inner.Length) || (count3 == inner.Length) || (count4 == inner.Length)) {
+            flag = true;
+        }
+
+        return flag;
+    }
+
+    /***
+
+    座標を原点周りに90°回転させて返す
+
+    ***/
+    public Vector3[] Rotation(Vector3[] room) {
+        Vector3[] rotatedCoordinates = new Vector3[room.Length];
+        for (int i = 0; i < room.Length; i++) {
+            rotatedCoordinates[i].x = - room[(i+1)%room.Length].y;
+            rotatedCoordinates[i].y = room[(i+1)%room.Length].x;
+        }
+
+        return rotatedCoordinates;
+    }
+
+    /// <summary>
+    /// 図形に対する点の内外判定
+    /// </summary> 
+    /// <param name="points">図形の座標配列</param>
+    /// <param name="target">判定する点の座標</param>
+    /// <returns>内分の場合True，外分の場合Flase</returns>
+    public bool CheckPoint(Vector3[] points, Vector3 target) {
+        Vector3 normal = new Vector3(1f, 0f, 0f);
+        //Vector3 normal = Vector3.up;//(0, 1, 0)
+        // XY平面上に写像した状態で計算を行う
+        Quaternion rot = Quaternion.FromToRotation(normal, -Vector3.forward);
+
+        Vector3[] rotPoints = new Vector3[points.Length];
+
+        for (int i = 0; i < rotPoints.Length; i++) {
+            rotPoints[i] = rot * points[i];
+        }
+
+        target = rot * target;
+
+        int wn = 0;
+        float vt = 0;
+
+        for (int i = 0; i < rotPoints.Length; i++) {
+            // 上向きの辺、下向きの辺によって処理を分ける
+
+            int cur = i;
+            int next = (i + 1) % rotPoints.Length;
+
+            // 上向きの辺。点PがY軸方向について、始点と終点の間にある。（ただし、終点は含まない）
+            if ((rotPoints[cur].y <= target.y) && (rotPoints[next].y > target.y)) {
+                // 辺は点Pよりも右側にある。ただし重ならない
+                // 辺が点Pと同じ高さになる位置を特定し、その時のXの値と点PのXの値を比較する
+                vt = (target.y - rotPoints[cur].y) / (rotPoints[next].y - rotPoints[cur].y);
+
+                if (target.x < (rotPoints[cur].x + (vt * (rotPoints[next].x - rotPoints[cur].x)))) {
+                    // 上向きの辺と交差した場合は+1
+                    wn++;
+                }
+            }
+            else if ((rotPoints[cur].y > target.y) && (rotPoints[next].y <= target.y)) {
+                // 辺は点Pよりも右側にある。ただし重ならない
+                // 辺が点Pと同じ高さになる位置を特定し、その時のXの値と点PのXの値を比較する
+                vt = (target.y - rotPoints[cur].y) / (rotPoints[next].y - rotPoints[cur].y);
+
+                if (target.x < (rotPoints[cur].x + (vt * (rotPoints[next].x - rotPoints[cur].x)))) {
+                    // 下向きの辺と交差した場合は-1
+                    wn--;
+                }
+            }
+        }
+
+        return wn != 0;
     }
 }

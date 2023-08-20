@@ -114,6 +114,21 @@ public class CreateRoom : MonoBehaviour
             return new Vector3[] {Vector3.zero, Vector3.zero};
         }
     }
+
+    //部屋の1辺と部屋の1辺が接している座標を返す
+    public Vector3[] ContactSide(Vector3[] sideA, Vector3[] sideB) {
+        //すべてがゼロの座標（接しているかどうかの判定に使用）
+        Vector3[] zero = new Vector3[] {Vector3.zero, Vector3.zero};
+
+        //接している（すべての座標がゼロでない）とき，その座標を返す
+        if ((contact_side_xy(sideA, sideB)[0] != zero[0]) && (contact_side_xy(sideA, sideB)[1] != zero[1])) {
+            return contact_side_xy(sideA, sideB);
+        }
+        //接していない場合，すべてがゼロの座標を返す
+        else {
+            return new Vector3[] {Vector3.zero, Vector3.zero};
+        }
+    }
     
     //x座標もy座標も異なるが部屋が接しているときの座標を返す
     public Vector3[] contact_xy(LineRenderer linerendererOfRoomA, LineRenderer linerendererOfRoomB) {
@@ -304,6 +319,60 @@ public class CreateRoom : MonoBehaviour
         return new Vector3[] {Vector3.zero, Vector3.zero};            
     }
 
+    //x座標もy座標も異なるが部屋が接しているときの座標を返す
+    public Vector3[] contact_side_xy(Vector3[] sideA, Vector3[] sideB) {
+        //4点の座標を格納する変数
+        Vector3 A1, A2, B1, B2;
+
+        //辺Aの点   
+        A1 = sideA[0];
+        A2 = sideA[1];
+
+        //辺Bの点   
+        B1 = sideB[0];
+        B2 = sideB[1];
+
+        //座標をx, yごとに分けるためのリスト
+        List<float> coordinates_x = new List<float>();
+        List<float> coordinates_y = new List<float>();
+
+        //4点が一直線上に並んでいるとき（端から真ん中，真ん中から反対の端の距離の和が端から端の距離と同じとき × 2）
+        if ( (Vector3.Distance(A1, A2) + Vector3.Distance(A2, B1) == Vector3.Distance(A1, B1)) || (Vector3.Distance(B1, A1) + Vector3.Distance(A1, A2) == Vector3.Distance(B1, A2)) || (Vector3.Distance(A2, B1) + Vector3.Distance(B1, A1) == Vector3.Distance(A2, A1)) ) {
+            if ( (Vector3.Distance(A1, A2) + Vector3.Distance(A2, B2) == Vector3.Distance(A1, B2)) || (Vector3.Distance(B2, A1) + Vector3.Distance(A1, A2) == Vector3.Distance(B2, A2)) || (Vector3.Distance(A2, B2) + Vector3.Distance(B2, A1) == Vector3.Distance(A2, A1)) ) {
+                //2つの部屋を通り抜けられるように接しているとき（片方の辺の最小の点がもう片方の辺の最大の点より大きいとき）
+                if (! (((Mathf.Max(A1.x, A2.x) <= Mathf.Min(B1.x, B2.x)) || (Mathf.Min(A1.x, A2.x) >= Mathf.Max(B1.x, B2.x))) && ((Mathf.Max(A1.y, A2.y) <= Mathf.Min(B1.y, B2.y)) || (Mathf.Min(A1.y, A2.y) >= Mathf.Max(B1.y, B2.y)))) ) {
+                    /*** 
+                    xとyを別々にソートしてる
+                    x軸平行，y軸平行のときのみ成立
+                    後で変更する　多分
+                    ***/
+
+                    //x座標を昇順にソート
+                    coordinates_x.Add(A1.x);
+                    coordinates_x.Add(A2.x);
+                    coordinates_x.Add(B1.x);
+                    coordinates_x.Add(B2.x);
+
+                    coordinates_x.Sort();
+
+                    //y座標を昇順にソート
+                    coordinates_y.Add(A1.y);
+                    coordinates_y.Add(A2.y);
+                    coordinates_y.Add(B1.y);
+                    coordinates_y.Add(B2.y);
+
+                    coordinates_y.Sort();
+
+                    //接している辺の共通部分（昇順の真ん中2つ）を返す
+                    return new Vector3[] {new Vector3(coordinates_x[1], coordinates_y[1], 0), new Vector3(coordinates_x[2], coordinates_y[2], 0)};
+                }
+            }
+        }
+
+        //どれにも当てはまらなかったとき，すべてが0の点を返す
+        return new Vector3[] {Vector3.zero, Vector3.zero};            
+    }
+
     //部屋の面積を求めるメソッド
     public float areaCalculation(GameObject room) {
         LineRenderer linerendererOfRoom = room.GetComponent<LineRenderer>();
@@ -326,6 +395,23 @@ public class CreateRoom : MonoBehaviour
                 y_before_x = linerendererOfRoom.GetPosition(i-1).y + room.transform.position.y;
                 y_after_x = linerendererOfRoom.GetPosition(i+1).y + room.transform.position.y;
             }
+
+            area += x * (y_after_x - y_before_x);
+        }
+
+        return Mathf.Abs((area / 2) / 1000000);
+    }
+
+    //部屋の面積を求めるメソッド
+    public float areaCalculation(Vector3[] room) {
+        float area = 0;
+
+        for (int i = 0; i < room.Length; i++) {
+            float x, y_before_x, y_after_x;
+
+            x = room[i].x;
+            y_before_x = room[(i+room.Length-1)%room.Length].y;
+            y_after_x = room[(i+1)%room.Length].y;
 
             area += x * (y_after_x - y_before_x);
         }
