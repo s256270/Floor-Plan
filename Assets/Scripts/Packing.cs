@@ -21,7 +21,29 @@ public class Packing : CreateRoom
         //Vector3[] mbps = new Vector3[]{new Vector3(1050, -1550, 0), new Vector3(2050, -1550, 0), new Vector3(2050, -1850, 0), new Vector3(1050, -1850, 0)};
         //createRoom("mbps", mbps);
 
-        placement();
+        //placement();
+
+        
+        //flagPatternテスト
+        List<int[]> test = flagPatternList(4);
+        for (int i = 0; i < test.Count; i++) {
+            Debug.Log("パターン" + (i+1));
+            for (int j = 0; j < test[i].Length; j++) {
+                Debug.Log(test[i][j]);
+            }
+        }
+
+        /*
+        for (int i = 0; i < test.Count; i++) {
+            Debug.Log("パターン" + (i + 1));
+            for (int j = 0; j < test[i].Length; j++) {
+                Debug.Log(test[i][j]);
+            }
+        }
+        */
+        
+        //Debug.Log(JudgeInscribed(range, test));
+        
         
         /*
         //JudgeInscribedテスト
@@ -118,7 +140,7 @@ public class Packing : CreateRoom
         List<int[]> wetAreasAllPermutation = AllPermutation(wetAreasIndex);
 
         //これから配置するパターン
-        List<int> wetAreasPermutation = wetAreasAllPermutation[0].ToList();
+        List<int> wetAreasPermutation = wetAreasAllPermutation[7].ToList();
 
         int wetAreasPermutationIndex = 0;
 
@@ -913,6 +935,62 @@ public class Packing : CreateRoom
             }
         }
         return res;
+    }
+
+    /***
+
+    2^n通りの0,1の組み合わせを生成
+
+    ***/
+    List<int[]> flagPatternList(int n) {
+        List<int[]> flagPatternList = new List<int[]>();
+
+        //0~2^nについて
+        for (int i = 0; i < Mathf.Pow(2, n); i++) {
+            //iを2進数の文字列に変換
+            string binaryString = Convert.ToString (i, 2);
+
+            //n桁の2進数の文字列に直す
+            string nDigitsBinaryString;
+            if (binaryString.Length != n) {
+                nDigitsBinaryString = new string('0', n - binaryString.Length) + binaryString;
+            } else {
+                nDigitsBinaryString = binaryString;
+            }
+
+            //1文字ずつintに変換し，配列にする
+            int[] flagPattern = new int[n];
+            for (int j = 0; j < n; j++) {
+                flagPattern[j] = int.Parse(nDigitsBinaryString.Substring(j, 1));
+            }
+            
+            //配列をリストに追加
+            flagPatternList.Add(flagPattern);
+        }
+
+        return flagPatternList;
+    }
+
+    void flagPatternMaker(List<int[]> patternList, int[] pattern, int n, int num_decided) {
+
+        if (num_decided == n) {
+            /* n個全ての要素に対して"選ぶ"or"選ばない"が決定ずみ */
+            //flagPatternListMaker(patternList, pattern);
+            patternList.Add(pattern);
+            return;
+        }
+
+        /* num_decided個目の要素が0のパターンを作成 */
+        pattern[num_decided] = 0;
+        flagPatternMaker(patternList, pattern, n, num_decided + 1);
+
+        /* num_decided個目の要素が1のパターンを作成 */
+        pattern[num_decided] = 1;
+        flagPatternMaker(patternList, pattern, n, num_decided + 1);
+    }
+
+    void flagPatternListMaker(List<int[]> patternList, int[] pattern) {
+        patternList.Add(pattern);
     }
 
     /***
