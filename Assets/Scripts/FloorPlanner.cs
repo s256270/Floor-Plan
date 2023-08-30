@@ -15,12 +15,12 @@ public class FloorPlanner : CreateRoom
     void Start()
     {
         //プランを表示
-        //pm.planMake2();
+        pm.planMake2();
 
-        //outerRooms = new GameObject[]{pm.plan[0], pm.plan[1], pm.plan[2], pm.plan[3]};
+        outerRooms = new GameObject[]{pm.plan[0], pm.plan[1], pm.plan[2], pm.plan[3]};
 
         
-        //placement();
+        placement();
 
         /*
         //水回り(仮)
