@@ -7,99 +7,87 @@ using System.Linq;
 public class Packing : CreateRoom
 {
     [SerializeField] Parts pa;
-    Vector3[] range;
+    public Vector3[] range;
     Vector3[] entrance;
+    List<Dictionary<string, Vector3[]>> allPattern = new List<Dictionary<string, Vector3[]>>();
+    int count = 0;
+    int limit = 0;
 
     void Start()
     {
         range = new Vector3[]{new Vector3(-2050, 1850, 0), new Vector3(2050, 1850, 0), new Vector3(2050, -50, 0), new Vector3(1050, -50, 0), new Vector3(1050, -1850, 0), new Vector3(-2050, -1850, 0)};
+        range = new Vector3[]{new Vector3(-2050, 1850, 0), new Vector3(1050, 1850, 0), new Vector3(1050, 350, 0), new Vector3(2050, 350, 0), new Vector3(2050, -1550, 0), new Vector3(1050, -1550, 0), new Vector3(1050, -1850, 0), new Vector3(-2050, -1850, 0)};
+        //range = new Vector3[]{new Vector3(-2050, 1850, 0), new Vector3(2050, 1850, 0), new Vector3(2050, 750, 0), new Vector3(1050, 750, 0), new Vector3(1050, -750, 0), new Vector3(2050, -750, 0), new Vector3(2050, -1550, 0), new Vector3(1050, -1550, 0), new Vector3(1050, -1850, 0), new Vector3(-2050, -1850, 0)};
         createRoom("range", range);
 
         entrance = new Vector3[]{new Vector3(1050, -50, 0), new Vector3(2050, -50, 0), new Vector3(2050, -1550, 0), new Vector3(1050, -1550, 0)};
+        entrance = CorrectCoordinates(entrance, new Vector3(0, 1900, 0));
+        //entrance = CorrectCoordinates(entrance, new Vector3(0, -1100, 0));
+
         createRoom("entrance", entrance);
-
-        //Vector3[] mbps = new Vector3[]{new Vector3(1050, -1550, 0), new Vector3(2050, -1550, 0), new Vector3(2050, -1850, 0), new Vector3(1050, -1850, 0)};
-        //createRoom("mbps", mbps);
-
-        //placement();
-
         
-        //flagPatternテスト
-        List<int[]> test = flagPatternList(4);
-        for (int i = 0; i < test.Count; i++) {
-            Debug.Log("パターン" + (i+1));
-            for (int j = 0; j < test[i].Length; j++) {
-                Debug.Log(test[i][j]);
+        for (int i = 0; i < 16; i++) {
+            for (int j = 0; j < 24; j++) {
+                allPattern.Add(placement(j, i));
             }
         }
 
-        /*
-        for (int i = 0; i < test.Count; i++) {
-            Debug.Log("パターン" + (i + 1));
-            for (int j = 0; j < test[i].Length; j++) {
-                Debug.Log(test[i][j]);
-            }
-        }
-        */
-        
-        //Debug.Log(JudgeInscribed(range, test));
-        
-        
-        /*
-        //JudgeInscribedテスト
-        Vector3[] test = new Vector3[]{new Vector3(150, 1850, 0), new Vector3(2050, 1850, 0), new Vector3(2050, 450, 0), new Vector3(150, 450, 0)};
-        
-        Debug.Log(JudgeInscribed(range, test));
-        */
-        
-        /*
-        //FrameSliceテスト
-        List<Vector3[]> test = FrameSlice(range, new Vector3[]{new Vector3(-2050, 1850, 0), new Vector3(1050, -50, 0)}, new Vector3[]{new Vector3(-2050, -1850, 0), new Vector3(1050, -1550, 0)});
-        
-        Debug.Log("A");
-        for (int i = 0; i < test[0].Length; i++) {
-            Debug.Log(test[0][i]);
-        }
-        Debug.Log("B");
-        for (int i = 0; i < test[1].Length; i++) {
-            Debug.Log(test[1][i]);
-        }
-        */
-        
-        /*
-        //PointAddテスト
-        Vector3 testPoint = new Vector3(1050, -1550, 0);
-        for (int i = 0; i < PointAdd(range, testPoint).Length; i++) {
-            Debug.Log(PointAdd(range, testPoint)[i]);
-        }
-        */
-        
-        /*
-        //FrameChangeテスト
-        Vector3[] test = new Vector3[]{new Vector3(-2050, 1850, 0), new Vector3(-500, 1850, 0), new Vector3(-500, 1350, 0), new Vector3(-1000, 1350, 0), new Vector3(-1000, 1000, 0), new Vector3(-2050, 1000, 0)};
-        createRoom("test", test);
-        for (int i = 0; i < FrameChange(range, test).Length; i++) {
-            Debug.Log(FrameChange(range, test)[i]);
-        }
-        */
+        limit = allPattern.Count;
 
         /*
-        //AllPermutationテスト
-        int[] roomsIndex = new int[]{1, 2, 3, 4, 5};
-
-        Debug.Log("パターン数:" + AllPermutation(roomsIndex).Count);
-        for (int i = 0; i < AllPermutation(roomsIndex).Count; i++) {
-            Debug.Log("---");
-            for (int j = 0; j < AllPermutation(roomsIndex)[i].Length; j++) {
-                Debug.Log(AllPermutation(roomsIndex)[i][j]);
-            }
+        Dictionary<string, Vector3[]> wetAreaRooms = placement(0, 0);
+        foreach (string roomName in wetAreaRooms.Keys) {
+            createRoom(roomName, wetAreaRooms[roomName]);
         }
-        Debug.Log("---");
         */
     }
 
+    void Update()
+    {
+        
+        if (Input.GetKeyDown(KeyCode.Return)) {
+            if (count < limit) {
+                Debug.Log((count+1) + "パターン目");
+                if (GameObject.Find("UB")) {
+                    Destroy(GameObject.Find("UB"));
+                }
+                if (GameObject.Find("Washroom")) {
+                    Destroy(GameObject.Find("Washroom"));
+                }
+                if (GameObject.Find("Toilet")) {
+                    Destroy(GameObject.Find("Toilet"));
+                }
+                if (GameObject.Find("Kitchen")) {
+                    Destroy(GameObject.Find("Kitchen"));
+                }
+
+                Dictionary<string, Vector3[]> currentPattern = allPattern[count];
+                foreach (string roomName in currentPattern.Keys) {
+                    if (roomName == "UB") {
+                        createRoom(roomName, currentPattern[roomName], Color.cyan);
+                    }
+                    if (roomName == "Washroom") {
+                        createRoom(roomName, currentPattern[roomName], Color.magenta);
+                    }
+                    if (roomName == "Toilet") {
+                        createRoom(roomName, currentPattern[roomName], Color.green);
+                    }
+                    if (roomName == "Kitchen") {
+                        createRoom(roomName, currentPattern[roomName], Color.gray);
+                    }
+                }
+                count++;
+            } else {
+                Debug.Log("終了");
+            }
+        }
+        
+    }
+
     //部屋パーツ配置
-    public void placement() {
+    public Dictionary<string, Vector3[]> placement(int wetAreasPatternIndex, int rotationPatternIndex) {
+        var result = new Dictionary<string, Vector3[]>();
+
         //玄関の廊下に続く辺を決める
         List<Vector3[]> entrance_side = new List<Vector3[]>();
         Vector3[] zero = new Vector3[] {Vector3.zero, Vector3.zero};
@@ -117,13 +105,15 @@ public class Packing : CreateRoom
         //玄関から洋室へつながる辺の決定
         List<Vector3[]> hallway_side = new List<Vector3[]>();
 
-        if (!CrossJudge(entrance_side[1][0], western_side[0], entrance_side[1][1], western_side[1])) {
-            hallway_side.Add(new Vector3[]{entrance_side[1][0], western_side[0]});
-            hallway_side.Add(new Vector3[]{entrance_side[1][1], western_side[1]});
+        int entranceSideIndex = 1;
+
+        if (!CrossJudge(entrance_side[entranceSideIndex][0], western_side[0], entrance_side[entranceSideIndex][1], western_side[1])) {
+            hallway_side.Add(new Vector3[]{entrance_side[entranceSideIndex][0], western_side[0]});
+            hallway_side.Add(new Vector3[]{entrance_side[entranceSideIndex][1], western_side[1]});
         }
         else {
-            hallway_side.Add(new Vector3[]{entrance_side[1][0], western_side[1]});
-            hallway_side.Add(new Vector3[]{entrance_side[1][1], western_side[0]});
+            hallway_side.Add(new Vector3[]{entrance_side[entranceSideIndex][0], western_side[1]});
+            hallway_side.Add(new Vector3[]{entrance_side[entranceSideIndex][1], western_side[0]});
         }
 
         //辺に従って領域を切り取り
@@ -136,148 +126,92 @@ public class Packing : CreateRoom
         }
         
         //水回りパーツの組み合わせ
-        int[] wetAreasIndex = new int[]{1, 2, 3, 4};
+        int[] wetAreasIndex = new int[]{0, 1, 2, 3};
         List<int[]> wetAreasAllPermutation = AllPermutation(wetAreasIndex);
 
         //これから配置するパターン
-        List<int> wetAreasPermutation = wetAreasAllPermutation[7].ToList();
-
-        int wetAreasPermutationIndex = 0;
+        List<int> wetAreasPermutation = wetAreasAllPermutation[wetAreasPatternIndex].ToList();
 
         //長い辺から順に並べていく
         int[] longIndex1 = LongIndex(wetAreas[0]);
         for (int i = 0; i < longIndex1.Length; i++) {
+            if (result.ContainsKey("UB") && result.ContainsKey("Washroom") && result.ContainsKey("Toilet") && result.ContainsKey("Kitchen")) {
+                break;
+            }
+
             Vector3[] current_side = new Vector3[] {wetAreas[0][longIndex1[i]], wetAreas[0][(longIndex1[i]+1)%longIndex1.Length]};
+            int[] rotationPattern = flagPatternList(wetAreasIndex.Length)[rotationPatternIndex];
 
             if ((current_side[0] == hallway_side[0][0] && current_side[1] == hallway_side[0][1]) || (current_side[0] == hallway_side[0][1] && current_side[1] == hallway_side[0][0])) {
-                continue;
+                if (longIndex1.Length > 2) {
+                    continue;
+                }
             }
 
             for (int j = 0; j < wetAreasPermutation.Count; j++) {
                 bool break_flag = true;
                 Vector3[] current_room = pa.ub_coordinates;
+                string current_room_name = "None";
 
-                if (wetAreasPermutation[j] == 1) {
-                    current_room = Rotation(new Vector3[]{new Vector3(-900, 700, 0), new Vector3(900, 700, 0), new Vector3(900, -700, 0), new Vector3(-900, -700, 0)});
-                    Vector3[] CreateCoordinates = new Vector3[current_room.Length];
-
-                    float gap_x = 0;
-                    float gap_y = 0;
-
-                    if (current_side[0].x == current_side[1].x) {
-                        float max = current_room[0].y;
-                        for (int k = 1; k < current_room.Length; k++) {
-                            if (max < current_room[k].y) {
-                                max = current_room[k].y;
-                            }
-                        }
-
-                        gap_y = Mathf.Max(current_side[0].y, current_side[1].y) - max;
-
-                        for (int k = 0; k < ContactGap(current_room, current_side).Length; k++) {
-                            if (JudgeInscribed(range, CorrectCoordinates(current_room, new Vector3(ContactGap(current_room, current_side)[k], gap_y, 0)))) {
-                                gap_x = ContactGap(current_room, current_side)[k];
-                                break_flag = false;
-                            }
-                        }
-                    }
-                    else if (current_side[0].y == current_side[0].y) {
-                        float max = current_room[0].x;
-                        for (int k = 1; k < current_room.Length; k++) {
-                            if (max < current_room[k].x) {
-                                max = current_room[k].x;
-                            }
-                        }
-
-                        gap_x = Mathf.Max(current_side[0].x, current_side[1].x) - max;
-
-                        for (int k = 0; k < ContactGap(current_room, current_side).Length; k++) {
-                            if (JudgeInscribed(range, CorrectCoordinates(current_room, new Vector3(gap_x, ContactGap(current_room, current_side)[k], 0)))) {
-                                gap_y = ContactGap(current_room, current_side)[k];
-                                break_flag = false;
-                            }
-                        }
+                if (wetAreasPermutation[j] == 0) {
+                    if (result.ContainsKey("UB")) {
+                        continue;
                     }
 
-                    if (break_flag) {
-                        break;
+                    if (rotationPattern[wetAreasPermutation[j]] == 0) {
+                        current_room = pa.ub_coordinates;
+                    } else {
+                        current_room = Rotation(pa.ub_coordinates);
                     }
+                    current_room_name = "UB";
 
-                    CreateCoordinates = CorrectCoordinates(current_room, new Vector3(gap_x, gap_y, 0));
-                    createRoom("UB", CreateCoordinates);
-
-                    wetAreasPermutationIndex = j+1;
-
-                    Vector3[] contact_coordinates = contact(current_side, CreateCoordinates);
-
-                    if ((contact_coordinates[0] != zero[0]) && (contact_coordinates[1] != zero[1])) {
-                        current_side = SideSubstraction(current_side, contact_coordinates);
-                    }
                 } 
+                else if (wetAreasPermutation[j] == 1) {
+                    if (result.ContainsKey("Washroom")) {
+                        continue;
+                    }
+
+                    if (rotationPattern[wetAreasPermutation[j]] == 0) {
+                        current_room = pa.washroom_coordinates;
+                    } else {
+                        current_room = Rotation(pa.washroom_coordinates);
+                    }
+                    current_room_name = "Washroom";
+                    
+                }
                 else if (wetAreasPermutation[j] == 2) {
-                    current_room = pa.washroom_coordinates;
-                    Vector3[] CreateCoordinates = new Vector3[current_room.Length];
-
-                    float gap_x = 0;
-                    float gap_y = 0;
-
-                    if (current_side[0].x == current_side[1].x) {
-                        float max = current_room[0].y;
-                        for (int k = 1; k < current_room.Length; k++) {
-                            if (max < current_room[k].y) {
-                                max = current_room[k].y;
-                            }
-                        }
-
-                        gap_y = Mathf.Max(current_side[0].y, current_side[1].y) - max;
-
-                        for (int k = 0; k < ContactGap(current_room, current_side).Length; k++) {
-                            if (JudgeInscribed(range, CorrectCoordinates(current_room, new Vector3(ContactGap(current_room, current_side)[k], gap_y, 0)))) {
-                                gap_x = ContactGap(current_room, current_side)[k];
-                                break_flag = false;
-                            }
-                        }
+                    if (result.ContainsKey("Toilet")) {
+                        continue;
                     }
-                    else if (current_side[0].y == current_side[0].y) {
-                        float max = current_room[0].x;
-                        for (int k = 1; k < current_room.Length; k++) {
-                            if (max < current_room[k].x) {
-                                max = current_room[k].x;
-                            }
-                        }
-
-                        gap_x = Mathf.Max(current_side[0].x, current_side[1].x) - max;
-
-                        for (int k = 0; k < ContactGap(current_room, current_side).Length; k++) {
-                            if (JudgeInscribed(range, CorrectCoordinates(current_room, new Vector3(gap_x, ContactGap(current_room, current_side)[k], 0)))) {
-                                gap_y = ContactGap(current_room, current_side)[k];
-                                break_flag = false;
-                            }
-                        }
+                    
+                    if (rotationPattern[wetAreasPermutation[j]] == 0) {
+                        current_room = pa.toilet_coordinates;
+                    } else {
+                        current_room = Rotation(pa.toilet_coordinates);
                     }
-
-                    if (break_flag) {
-                        break;
-                    }
-
-                    CreateCoordinates = CorrectCoordinates(current_room, new Vector3(gap_x, gap_y, 0));
-                    createRoom("Washroom", CreateCoordinates);
-
-                    wetAreasPermutationIndex = j+1;
-
-                    Vector3[] contact_coordinates = contact(current_side, CreateCoordinates);
-
-                    if ((contact_coordinates[0] != zero[0]) && (contact_coordinates[1] != zero[1])) {
-                        current_side = SideSubstraction(current_side, contact_coordinates);
-                    }
+                    current_room_name = "Toilet";
+                    
                 }
                 else if (wetAreasPermutation[j] == 3) {
-                    current_room = pa.toilet_coordinates;
-                    Vector3[] CreateCoordinates = new Vector3[current_room.Length];
+                    if (result.ContainsKey("Kitchen")) {
+                        continue;
+                    }
+                    
+                    if (rotationPattern[wetAreasPermutation[j]] == 0) {
+                        current_room = pa.kitchen_coordinates;
+                    } else {
+                        current_room = Rotation(pa.kitchen_coordinates);
+                    }              
+                    current_room_name = "Kitchen";
+                    
+                }
 
-                    float gap_x = 0;
-                    float gap_y = 0;
+                Vector3[] CreateCoordinates = new Vector3[current_room.Length];
 
+                float gap_x = 0;
+                float gap_y = 0;
+
+                if (current_side[0] != current_side[1]) {
                     if (current_side[0].x == current_side[1].x) {
                         float max = current_room[0].y;
                         for (int k = 1; k < current_room.Length; k++) {
@@ -312,79 +246,21 @@ public class Packing : CreateRoom
                             }
                         }
                     }
-
-                    if (break_flag) {
-                        break;
-                    }
-
-                    CreateCoordinates = CorrectCoordinates(current_room, new Vector3(gap_x, gap_y, 0));
-                    createRoom("Toilet", CreateCoordinates);
-
-                    wetAreasPermutationIndex = j+1;
-
-                    Vector3[] contact_coordinates = contact(current_side, CreateCoordinates);
-
-                    if ((contact_coordinates[0] != zero[0]) && (contact_coordinates[1] != zero[1])) {
-                        current_side = SideSubstraction(current_side, contact_coordinates);
-                    }
                 }
-                else if (wetAreasPermutation[j] == 4) {                
-                    current_room = pa.kitchen_coordinates;
-                    Vector3[] CreateCoordinates = new Vector3[current_room.Length];
 
-                    float gap_x = 0;
-                    float gap_y = 0;
-
-                    if (current_side[0].x == current_side[1].x) {
-                        float max = current_room[0].y;
-                        for (int k = 1; k < current_room.Length; k++) {
-                            if (max < current_room[k].y) {
-                                max = current_room[k].y;
-                            }
-                        }
-
-                        gap_y = Mathf.Max(current_side[0].y, current_side[1].y) - max;
-
-                        for (int k = 0; k < ContactGap(current_room, current_side).Length; k++) {
-                            if (JudgeInscribed(range, CorrectCoordinates(current_room, new Vector3(ContactGap(current_room, current_side)[k], gap_y, 0)))) {
-                                gap_x = ContactGap(current_room, current_side)[k];
-                                break_flag = false;
-                            }
-                        }
-                    }
-                    else if (current_side[0].y == current_side[0].y) {
-                        float max = current_room[0].x;
-                        for (int k = 1; k < current_room.Length; k++) {
-                            if (max < current_room[k].x) {
-                                max = current_room[k].x;
-                            }
-                        }
-
-                        gap_x = Mathf.Max(current_side[0].x, current_side[1].x) - max;
-
-                        for (int k = 0; k < ContactGap(current_room, current_side).Length; k++) {
-                            if (JudgeInscribed(range, CorrectCoordinates(current_room, new Vector3(gap_x, ContactGap(current_room, current_side)[k], 0)))) {
-                                gap_y = ContactGap(current_room, current_side)[k];
-                                break_flag = false;
-                            }
-                        }
-                    }
-
-                    if (break_flag) {
-                        break;
-                    }
-
-                    CreateCoordinates = CorrectCoordinates(current_room, new Vector3(gap_x, gap_y, 0));
-                    createRoom("Kitchen", CreateCoordinates);
-
-                    wetAreasPermutationIndex = j+1;
-
-                    Vector3[] contact_coordinates = contact(current_side, CreateCoordinates);
-
-                    if ((contact_coordinates[0] != zero[0]) && (contact_coordinates[1] != zero[1])) {
-                        current_side = SideSubstraction(current_side, contact_coordinates);
-                    }
+                if (break_flag) {
+                    break;
                 }
+
+                CreateCoordinates = CorrectCoordinates(current_room, new Vector3(gap_x, gap_y, 0));
+                result.Add(current_room_name, CreateCoordinates);
+
+                Vector3[] contact_coordinates = contact(current_side, CreateCoordinates);
+
+                if ((contact_coordinates[0] != zero[0]) && (contact_coordinates[1] != zero[1])) {
+                    current_side = SideSubstraction(current_side, contact_coordinates);
+                }
+
             }
 
             break;
@@ -393,240 +269,135 @@ public class Packing : CreateRoom
         //長い辺から順に並べていく
         int[] longIndex2 = LongIndex(wetAreas[1]);
         for (int i = 0; i < longIndex2.Length; i++) {
-            Vector3[] current_side = new Vector3[] {wetAreas[1][longIndex2[i]], wetAreas[1][(longIndex2[i]+1)%longIndex2.Length]};
-
-            if ((current_side[0] == hallway_side[0][0] && current_side[1] == hallway_side[0][1]) || (current_side[0] == hallway_side[0][1] && current_side[1] == hallway_side[0][0])) {
-                continue;
+            if (result.ContainsKey("UB") && result.ContainsKey("Washroom") && result.ContainsKey("Toilet") && result.ContainsKey("Kitchen")) {
+                break;
             }
 
-            for (int j = wetAreasPermutationIndex; j < wetAreasPermutation.Count; j++) {
+            Vector3[] current_side = new Vector3[] {wetAreas[1][longIndex2[i]], wetAreas[1][(longIndex2[i]+1)%longIndex2.Length]};
+            int[] rotationPattern = flagPatternList(wetAreasIndex.Length)[rotationPatternIndex];
+
+            if ((current_side[0] == hallway_side[1][0] && current_side[1] == hallway_side[1][1]) || (current_side[0] == hallway_side[1][1] && current_side[1] == hallway_side[1][0])) {
+                if (longIndex2.Length > 2) {
+                    continue;
+                }
+            }
+
+            for (int j = 0; j < wetAreasPermutation.Count; j++) {
                 bool break_flag = true;
                 Vector3[] current_room = pa.ub_coordinates;
+                string current_room_name = "None";
 
-                if (wetAreasPermutation[j] == 1) {
-                    current_room = Rotation(new Vector3[]{new Vector3(-900, 700, 0), new Vector3(900, 700, 0), new Vector3(900, -700, 0), new Vector3(-900, -700, 0)});
-                    Vector3[] CreateCoordinates = new Vector3[current_room.Length];
-
-                    float gap_x = 0;
-                    float gap_y = 0;
-
-                    if (current_side[0].x == current_side[1].x) {
-                        float max = current_room[0].y;
-                        for (int k = 1; k < current_room.Length; k++) {
-                            if (max < current_room[k].y) {
-                                max = current_room[k].y;
-                            }
-                        }
-
-                        gap_y = Mathf.Max(current_side[0].y, current_side[1].y) - max;
-
-                        for (int k = 0; k < ContactGap(current_room, current_side).Length; k++) {
-                            if (JudgeInscribed(range, CorrectCoordinates(current_room, new Vector3(ContactGap(current_room, current_side)[k], gap_y, 0)))) {
-                                gap_x = ContactGap(current_room, current_side)[k];
-                                break_flag = false;
-                            }
-                        }
+                if (wetAreasPermutation[j] == 0) {
+                    if (result.ContainsKey("UB")) {
+                        continue;
                     }
-                    else if (current_side[0].y == current_side[0].y) {
-                        float max = current_room[0].x;
-                        for (int k = 1; k < current_room.Length; k++) {
-                            if (max < current_room[k].x) {
-                                max = current_room[k].x;
-                            }
-                        }
-
-                        gap_x = Mathf.Max(current_side[0].x, current_side[1].x) - max;
-
-                        for (int k = 0; k < ContactGap(current_room, current_side).Length; k++) {
-                            if (JudgeInscribed(range, CorrectCoordinates(current_room, new Vector3(gap_x, ContactGap(current_room, current_side)[k], 0)))) {
-                                gap_y = ContactGap(current_room, current_side)[k];
-                                break_flag = false;
-                            }
-                        }
+                    
+                    if (rotationPattern[wetAreasPermutation[j]] == 0) {
+                        current_room = pa.ub_coordinates;
+                    } else {
+                        current_room = Rotation(pa.ub_coordinates);
                     }
-
-                    if (break_flag) {
-                        break;
-                    }
-
-                    CreateCoordinates = CorrectCoordinates(current_room, new Vector3(gap_x, gap_y, 0));
-                    createRoom("UB", CreateCoordinates);
-
-                    Vector3[] contact_coordinates = contact(current_side, CreateCoordinates);
-
-                    if ((contact_coordinates[0] != zero[0]) && (contact_coordinates[1] != zero[1])) {
-                        current_side = SideSubstraction(current_side, contact_coordinates);
-                    }
+                    current_room_name = "UB";
+                    
                 } 
+                else if (wetAreasPermutation[j] == 1) {
+                    if (result.ContainsKey("Washroom")) {
+                        continue;
+                    }
+                    
+                    if (rotationPattern[wetAreasPermutation[j]] == 0) {
+                        current_room = pa.washroom_coordinates;
+                    } else {
+                        current_room = Rotation(pa.washroom_coordinates);
+                    }
+                    current_room_name = "Washroom";
+                    
+                }
                 else if (wetAreasPermutation[j] == 2) {
-                    current_room = pa.washroom_coordinates;
-                    Vector3[] CreateCoordinates = new Vector3[current_room.Length];
-
-                    float gap_x = 0;
-                    float gap_y = 0;
-
-                    if (current_side[0].x == current_side[1].x) {
-                        float max = current_room[0].y;
-                        for (int k = 1; k < current_room.Length; k++) {
-                            if (max < current_room[k].y) {
-                                max = current_room[k].y;
-                            }
-                        }
-
-                        gap_y = Mathf.Max(current_side[0].y, current_side[1].y) - max;
-
-                        for (int k = 0; k < ContactGap(current_room, current_side).Length; k++) {
-                            if (JudgeInscribed(range, CorrectCoordinates(current_room, new Vector3(ContactGap(current_room, current_side)[k], gap_y, 0)))) {
-                                gap_x = ContactGap(current_room, current_side)[k];
-                                break_flag = false;
-                            }
-                        }
+                    if (result.ContainsKey("Toilet")) {
+                        continue;
                     }
-                    else if (current_side[0].y == current_side[0].y) {
-                        float max = current_room[0].x;
-                        for (int k = 1; k < current_room.Length; k++) {
-                            if (max < current_room[k].x) {
-                                max = current_room[k].x;
-                            }
-                        }
-
-                        gap_x = Mathf.Max(current_side[0].x, current_side[1].x) - max;
-
-                        for (int k = 0; k < ContactGap(current_room, current_side).Length; k++) {
-                            if (JudgeInscribed(range, CorrectCoordinates(current_room, new Vector3(gap_x, ContactGap(current_room, current_side)[k], 0)))) {
-                                gap_y = ContactGap(current_room, current_side)[k];
-                                break_flag = false;
-                            }
-                        }
+                    
+                    if (rotationPattern[wetAreasPermutation[j]] == 0) {
+                        current_room = pa.toilet_coordinates;
+                    } else {
+                        current_room = Rotation(pa.toilet_coordinates);
                     }
-
-                    if (break_flag) {
-                        break;
-                    }
-
-                    CreateCoordinates = CorrectCoordinates(current_room, new Vector3(gap_x, gap_y, 0));
-                    createRoom("Washroom", CreateCoordinates);
-
-                    Vector3[] contact_coordinates = contact(current_side, CreateCoordinates);
-
-                    if ((contact_coordinates[0] != zero[0]) && (contact_coordinates[1] != zero[1])) {
-                        current_side = SideSubstraction(current_side, contact_coordinates);
-                    }
+                    current_room_name = "Toilet";
+                    
                 }
                 else if (wetAreasPermutation[j] == 3) {
-                    current_room = pa.toilet_coordinates;
-                    Vector3[] CreateCoordinates = new Vector3[current_room.Length];
-
-                    float gap_x = 0;
-                    float gap_y = 0;
-
-                    if (current_side[0].x == current_side[1].x) {
-                        float max = current_room[0].y;
-                        for (int k = 1; k < current_room.Length; k++) {
-                            if (max < current_room[k].y) {
-                                max = current_room[k].y;
-                            }
-                        }
-
-                        gap_y = Mathf.Max(current_side[0].y, current_side[1].y) - max;
-
-                        for (int k = 0; k < ContactGap(current_room, current_side).Length; k++) {
-                            if (JudgeInscribed(range, CorrectCoordinates(current_room, new Vector3(ContactGap(current_room, current_side)[k], gap_y, 0)))) {
-                                gap_x = ContactGap(current_room, current_side)[k];
-                                break_flag = false;
-                            }
-                        }
+                    if (result.ContainsKey("Kitchen")) {
+                        continue;
                     }
-                    else if (current_side[0].y == current_side[0].y) {
-                        float max = current_room[0].x;
-                        for (int k = 1; k < current_room.Length; k++) {
-                            if (max < current_room[k].x) {
-                                max = current_room[k].x;
-                            }
-                        }
+                    
+                    if (rotationPattern[wetAreasPermutation[j]] == 0) {
+                        current_room = pa.kitchen_coordinates;
+                    } else {
+                        current_room = Rotation(pa.kitchen_coordinates);
+                    }
+                    current_room_name = "Kitchen";
+                    
+                }
 
-                        gap_x = Mathf.Max(current_side[0].x, current_side[1].x) - max;
+                Vector3[] CreateCoordinates = new Vector3[current_room.Length];
 
-                        for (int k = 0; k < ContactGap(current_room, current_side).Length; k++) {
-                            if (JudgeInscribed(range, CorrectCoordinates(current_room, new Vector3(gap_x, ContactGap(current_room, current_side)[k], 0)))) {
-                                gap_y = ContactGap(current_room, current_side)[k];
-                                break_flag = false;
-                            }
+                float gap_x = 0;
+                float gap_y = 0;
+
+                if (current_side[0].x == current_side[1].x) {
+                    float max = current_room[0].y;
+                    for (int k = 1; k < current_room.Length; k++) {
+                        if (max < current_room[k].y) {
+                            max = current_room[k].y;
                         }
                     }
 
-                    if (break_flag) {
-                        break;
-                    }
+                    gap_y = Mathf.Max(current_side[0].y, current_side[1].y) - max;
 
-                    CreateCoordinates = CorrectCoordinates(current_room, new Vector3(gap_x, gap_y, 0));
-                    createRoom("Toilet", CreateCoordinates);
-
-                    Vector3[] contact_coordinates = contact(current_side, CreateCoordinates);
-
-                    if ((contact_coordinates[0] != zero[0]) && (contact_coordinates[1] != zero[1])) {
-                        current_side = SideSubstraction(current_side, contact_coordinates);
+                    for (int k = 0; k < ContactGap(current_room, current_side).Length; k++) {
+                        if (JudgeInscribed(range, CorrectCoordinates(current_room, new Vector3(ContactGap(current_room, current_side)[k], gap_y, 0)))) {
+                            gap_x = ContactGap(current_room, current_side)[k];
+                            break_flag = false;
+                        }
                     }
                 }
-                else if (wetAreasPermutation[j] == 4) {             
-                    current_room = pa.kitchen_coordinates;
-                    Vector3[] CreateCoordinates = new Vector3[current_room.Length];
-
-                    float gap_x = 0;
-                    float gap_y = 0;
-
-                    if (current_side[0].x == current_side[1].x) {
-                        float max = current_room[0].y;
-                        for (int k = 1; k < current_room.Length; k++) {
-                            if (max < current_room[k].y) {
-                                max = current_room[k].y;
-                            }
-                        }
-
-                        gap_y = Mathf.Max(current_side[0].y, current_side[1].y) - max;
-
-                        for (int k = 0; k < ContactGap(current_room, current_side).Length; k++) {
-                            if (JudgeInscribed(range, CorrectCoordinates(current_room, new Vector3(ContactGap(current_room, current_side)[k], gap_y, 0)))) {
-                                gap_x = ContactGap(current_room, current_side)[k];
-                                break_flag = false;
-                            }
-                        }
-                    }
-                    else if (current_side[0].y == current_side[0].y) {
-                        float max = current_room[0].x;
-                        for (int k = 1; k < current_room.Length; k++) {
-                            if (max < current_room[k].x) {
-                                max = current_room[k].x;
-                            }
-                        }
-
-                        gap_x = Mathf.Max(current_side[0].x, current_side[1].x) - max;
-
-                        for (int k = 0; k < ContactGap(current_room, current_side).Length; k++) {
-                            if (JudgeInscribed(range, CorrectCoordinates(current_room, new Vector3(gap_x, ContactGap(current_room, current_side)[k], 0)))) {
-                                gap_y = ContactGap(current_room, current_side)[k];
-                                break_flag = false;
-                            }
+                else if (current_side[0].y == current_side[0].y) {
+                    float max = current_room[0].x;
+                    for (int k = 1; k < current_room.Length; k++) {
+                        if (max < current_room[k].x) {
+                            max = current_room[k].x;
                         }
                     }
 
-                    if (break_flag) {
-                        break;
+                    gap_x = Mathf.Max(current_side[0].x, current_side[1].x) - max;
+
+                    for (int k = 0; k < ContactGap(current_room, current_side).Length; k++) {
+                        if (JudgeInscribed(range, CorrectCoordinates(current_room, new Vector3(gap_x, ContactGap(current_room, current_side)[k], 0)))) {
+                            gap_y = ContactGap(current_room, current_side)[k];
+                            break_flag = false;
+                        }
                     }
+                }
 
-                    CreateCoordinates = CorrectCoordinates(current_room, new Vector3(gap_x, gap_y, 0));
-                    createRoom("Kitchen", CreateCoordinates);
+                if (break_flag) {
+                    break;
+                }
 
-                    Vector3[] contact_coordinates = contact(current_side, CreateCoordinates);
+                CreateCoordinates = CorrectCoordinates(current_room, new Vector3(gap_x, gap_y, 0));
+                result.Add(current_room_name, CreateCoordinates);
 
-                    if ((contact_coordinates[0] != zero[0]) && (contact_coordinates[1] != zero[1])) {
-                        current_side = SideSubstraction(current_side, contact_coordinates);
-                    }
+                Vector3[] contact_coordinates = contact(current_side, CreateCoordinates);
+
+                if ((contact_coordinates[0] != zero[0]) && (contact_coordinates[1] != zero[1])) {
+                    current_side = SideSubstraction(current_side, contact_coordinates);
                 }
             }
 
             //break;
         }
+
+        return result;
     }
 
     /***
@@ -741,6 +512,7 @@ public class Packing : CreateRoom
 
     ***/
     public Vector3[] PointAdd(Vector3[] room, Vector3 point) {
+        //返すリスト
         List<Vector3> addedRoom = room.ToList();
 
         if (room.Contains(point)) {
@@ -942,7 +714,7 @@ public class Packing : CreateRoom
     2^n通りの0,1の組み合わせを生成
 
     ***/
-    List<int[]> flagPatternList(int n) {
+    public List<int[]> flagPatternList(int n) {
         List<int[]> flagPatternList = new List<int[]>();
 
         //0~2^nについて
@@ -969,28 +741,6 @@ public class Packing : CreateRoom
         }
 
         return flagPatternList;
-    }
-
-    void flagPatternMaker(List<int[]> patternList, int[] pattern, int n, int num_decided) {
-
-        if (num_decided == n) {
-            /* n個全ての要素に対して"選ぶ"or"選ばない"が決定ずみ */
-            //flagPatternListMaker(patternList, pattern);
-            patternList.Add(pattern);
-            return;
-        }
-
-        /* num_decided個目の要素が0のパターンを作成 */
-        pattern[num_decided] = 0;
-        flagPatternMaker(patternList, pattern, n, num_decided + 1);
-
-        /* num_decided個目の要素が1のパターンを作成 */
-        pattern[num_decided] = 1;
-        flagPatternMaker(patternList, pattern, n, num_decided + 1);
-    }
-
-    void flagPatternListMaker(List<int[]> patternList, int[] pattern) {
-        patternList.Add(pattern);
     }
 
     /***
