@@ -33,7 +33,7 @@ public class Packing : CreateRoom
         createRoom("entrance", entrance);
         createRoom("mbps", mbps);
         
-        /*
+        
         for (int i = 0; i < 16; i++) {
             for (int j = 0; j < 24; j++) {
                 allPattern.Add(placement(j, i));
@@ -41,18 +41,20 @@ public class Packing : CreateRoom
         }
 
         limit = allPattern.Count;
-        */
+        Debug.Log("総パターン数：" + limit);
         
+        
+        /*
         Dictionary<string, Vector3[]> wetAreaRooms = placement(0, 0);
         foreach (string roomName in wetAreaRooms.Keys) {
             createRoom(roomName, wetAreaRooms[roomName]);
         }
-        
+        */
     }
 
     void Update()
     {
-        /*
+        
         if (Input.GetKeyDown(KeyCode.Return)) {
             if (count < limit) {
                 Debug.Log((count+1) + "パターン目");
@@ -89,11 +91,12 @@ public class Packing : CreateRoom
                 Debug.Log("終了");
             }
         }
-        */
+        
     }
 
     //部屋パーツ配置
     public Dictionary<string, Vector3[]> placement(int wetAreasPatternIndex, int rotationPatternIndex) {
+        //var result = new List<Dictionary<string, Vector3[]>>();
         var result = new Dictionary<string, Vector3[]>();
 
         //水回り範囲の決定
@@ -103,11 +106,10 @@ public class Packing : CreateRoom
 
         //玄関の廊下に続く辺を決める
         List<Vector3[]> entrance_side = new List<Vector3[]>();
-        Vector3[] zero = new Vector3[] {Vector3.zero, Vector3.zero};
         for (int i = 0; i < entrance.Length; i++) {
             Vector3[] entrance_contact = contact(new Vector3[]{entrance[i], entrance[(i+1)%entrance.Length]}, range);
 
-            if ((entrance_contact[0] != zero[0]) && (entrance_contact[1] != zero[1])) {
+            if (!ZeroJudge(entrance_contact)) {
                 entrance_side.Add(entrance_contact);
             }
         }
@@ -278,10 +280,9 @@ public class Packing : CreateRoom
 
                 Vector3[] contact_coordinates = contact(current_side, CreateCoordinates);
 
-                if ((contact_coordinates[0] != zero[0]) && (contact_coordinates[1] != zero[1])) {
+                if (!ZeroJudge(contact_coordinates)) {
                     current_side = SideSubstraction(current_side, contact_coordinates);
                 }
-
             }
 
             break;
@@ -410,7 +411,7 @@ public class Packing : CreateRoom
 
                 Vector3[] contact_coordinates = contact(current_side, CreateCoordinates);
 
-                if ((contact_coordinates[0] != zero[0]) && (contact_coordinates[1] != zero[1])) {
+                if (!ZeroJudge(contact_coordinates)) {
                     current_side = SideSubstraction(current_side, contact_coordinates);
                 }
             }
