@@ -76,7 +76,7 @@ public class FloorPlanner : CreateRoom
 
         placeEntrance();
 
-        //placeWestern();
+        placeWestern();
     }
     
     /***

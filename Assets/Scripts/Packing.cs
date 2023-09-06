@@ -7,25 +7,33 @@ using System.Linq;
 public class Packing : CreateRoom
 {
     [SerializeField] Parts pa;
-    public Vector3[] range;
+    public Vector3[] dwelling;
+    Vector3[] balcony;
     Vector3[] entrance;
+    Vector3[] mbps;
     List<Dictionary<string, Vector3[]>> allPattern = new List<Dictionary<string, Vector3[]>>();
     int count = 0;
     int limit = 0;
 
     void Start()
     {
-        range = new Vector3[]{new Vector3(-2050, 1850, 0), new Vector3(2050, 1850, 0), new Vector3(2050, -50, 0), new Vector3(1050, -50, 0), new Vector3(1050, -1850, 0), new Vector3(-2050, -1850, 0)};
-        range = new Vector3[]{new Vector3(-2050, 1850, 0), new Vector3(1050, 1850, 0), new Vector3(1050, 350, 0), new Vector3(2050, 350, 0), new Vector3(2050, -1550, 0), new Vector3(1050, -1550, 0), new Vector3(1050, -1850, 0), new Vector3(-2050, -1850, 0)};
+        //range = new Vector3[]{new Vector3(-2050, 1850, 0), new Vector3(2050, 1850, 0), new Vector3(2050, -50, 0), new Vector3(1050, -50, 0), new Vector3(1050, -1850, 0), new Vector3(-2050, -1850, 0)};
+        dwelling = new Vector3[]{new Vector3(-3400, 1900, 0), new Vector3(4400, 1900, 0), new Vector3(4400, -1900, 0), new Vector3(-3400, -1900, 0)};
+        balcony = new Vector3[]{new Vector3(-4400, 1100, 0), new Vector3(-3400, 1100, 0), new Vector3(-3400, -1900, 0), new Vector3(-4400, -1900, 0)};
+        createRoom("dwelling", dwelling);
+        createRoom("balcony", balcony);
+        //range = new Vector3[]{new Vector3(-2050, 1850, 0), new Vector3(1050, 1850, 0), new Vector3(1050, 350, 0), new Vector3(2050, 350, 0), new Vector3(2050, -1550, 0), new Vector3(1050, -1550, 0), new Vector3(1050, -1850, 0), new Vector3(-2050, -1850, 0)};
         //range = new Vector3[]{new Vector3(-2050, 1850, 0), new Vector3(2050, 1850, 0), new Vector3(2050, 750, 0), new Vector3(1050, 750, 0), new Vector3(1050, -750, 0), new Vector3(2050, -750, 0), new Vector3(2050, -1550, 0), new Vector3(1050, -1550, 0), new Vector3(1050, -1850, 0), new Vector3(-2050, -1850, 0)};
-        createRoom("range", range);
 
-        entrance = new Vector3[]{new Vector3(1050, -50, 0), new Vector3(2050, -50, 0), new Vector3(2050, -1550, 0), new Vector3(1050, -1550, 0)};
-        entrance = CorrectCoordinates(entrance, new Vector3(0, 1900, 0));
+        entrance = new Vector3[]{new Vector3(3400, -50, 0), new Vector3(4400, -50, 0), new Vector3(4400, -1550, 0), new Vector3(3400, -1550, 0)};
+        mbps = new Vector3[]{new Vector3(3400, -1550, 0), new Vector3(4400, -1550, 0), new Vector3(4400, -1900, 0), new Vector3(3400, -1900, 0)};
+        //entrance = CorrectCoordinates(entrance, new Vector3(0, 1900, 0));
         //entrance = CorrectCoordinates(entrance, new Vector3(0, -1100, 0));
 
         createRoom("entrance", entrance);
+        createRoom("mbps", mbps);
         
+        /*
         for (int i = 0; i < 16; i++) {
             for (int j = 0; j < 24; j++) {
                 allPattern.Add(placement(j, i));
@@ -33,18 +41,18 @@ public class Packing : CreateRoom
         }
 
         limit = allPattern.Count;
-
-        /*
+        */
+        
         Dictionary<string, Vector3[]> wetAreaRooms = placement(0, 0);
         foreach (string roomName in wetAreaRooms.Keys) {
             createRoom(roomName, wetAreaRooms[roomName]);
         }
-        */
+        
     }
 
     void Update()
     {
-        
+        /*
         if (Input.GetKeyDown(KeyCode.Return)) {
             if (count < limit) {
                 Debug.Log((count+1) + "パターン目");
@@ -81,12 +89,17 @@ public class Packing : CreateRoom
                 Debug.Log("終了");
             }
         }
-        
+        */
     }
 
     //部屋パーツ配置
     public Dictionary<string, Vector3[]> placement(int wetAreasPatternIndex, int rotationPatternIndex) {
         var result = new Dictionary<string, Vector3[]>();
+
+        //水回り範囲の決定
+        Vector3[] range;
+        range = FrameChange(dwelling, entrance);
+        range = FrameChange(dwelling, mbps);
 
         //玄関の廊下に続く辺を決める
         List<Vector3[]> entrance_side = new List<Vector3[]>();
@@ -100,20 +113,28 @@ public class Packing : CreateRoom
         }
 
         //洋室の廊下に続く辺を決める
-        Vector3[] western_side = new Vector3[]{new Vector3(-2050, -1850, 0), new Vector3(-2050, 1850, 0)};
+        List<Vector3[]> western_side = new List<Vector3[]>();
+        for (int i = 0; i < balcony.Length; i++) {
+            Vector3[] balcony_contact = contact(new Vector3[]{balcony[i], balcony[(i+1)%balcony.Length]}, range);
+            if (!ZeroJudge(balcony_contact)) {
+                western_side.Add(balcony_contact);
+            }
+        }
+        //western_side = new Vector3[]{new Vector3(-3400, -1900, 0), new Vector3(-3400, 1900, 0)};
 
         //玄関から洋室へつながる辺の決定
         List<Vector3[]> hallway_side = new List<Vector3[]>();
 
         int entranceSideIndex = 1;
+        int westernSideIndex = 0;
 
-        if (!CrossJudge(entrance_side[entranceSideIndex][0], western_side[0], entrance_side[entranceSideIndex][1], western_side[1])) {
-            hallway_side.Add(new Vector3[]{entrance_side[entranceSideIndex][0], western_side[0]});
-            hallway_side.Add(new Vector3[]{entrance_side[entranceSideIndex][1], western_side[1]});
+        if (!CrossJudge(entrance_side[entranceSideIndex][0], western_side[westernSideIndex][0], entrance_side[entranceSideIndex][1], western_side[westernSideIndex][1])) {
+            hallway_side.Add(new Vector3[]{entrance_side[entranceSideIndex][0], western_side[westernSideIndex][0]});
+            hallway_side.Add(new Vector3[]{entrance_side[entranceSideIndex][1], western_side[westernSideIndex][1]});
         }
         else {
-            hallway_side.Add(new Vector3[]{entrance_side[entranceSideIndex][0], western_side[1]});
-            hallway_side.Add(new Vector3[]{entrance_side[entranceSideIndex][1], western_side[0]});
+            hallway_side.Add(new Vector3[]{entrance_side[entranceSideIndex][0], western_side[westernSideIndex][1]});
+            hallway_side.Add(new Vector3[]{entrance_side[entranceSideIndex][1], western_side[westernSideIndex][0]});
         }
 
         //辺に従って領域を切り取り
@@ -394,7 +415,7 @@ public class Packing : CreateRoom
                 }
             }
 
-            //break;
+            break;
         }
 
         return result;

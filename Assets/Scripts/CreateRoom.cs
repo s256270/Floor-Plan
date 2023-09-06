@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 /* 部屋などの出力をするクラス */
 public class CreateRoom : MonoBehaviour
@@ -370,7 +371,24 @@ public class CreateRoom : MonoBehaviour
         }
 
         //どれにも当てはまらなかったとき，すべてが0の点を返す
+        //ここなにもデータ入れずに返せばいいのでは？
+        //いつか修正する
         return new Vector3[] {Vector3.zero, Vector3.zero};            
+    }
+
+    /***
+
+    全座標が0かどうかを判定
+
+    ***/
+    public bool ZeroJudge(Vector3[] room) {
+        bool flag = false;
+        
+        if (room.All(i => i == Vector3.zero)) {
+            flag =true;
+        }
+
+        return flag;
     }
 
     //部屋の面積を求めるメソッド
