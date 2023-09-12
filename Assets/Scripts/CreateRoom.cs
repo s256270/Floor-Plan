@@ -63,6 +63,15 @@ public class CreateRoom : MonoBehaviour
         //ループ(終点と始点を繋ぐ)させる
         lineRenderer.loop = true;
     }
+
+    //テキストの生成
+    /*
+    public void createText(string test) {
+        //空のゲームオブジェクトを生成
+         = new GameObject(name);
+
+    }
+    */
     
     //部屋と部屋が接している座標を返す
     public Vector3[] contact(GameObject roomA, GameObject roomB) {
