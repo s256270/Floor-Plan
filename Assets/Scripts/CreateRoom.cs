@@ -2,20 +2,28 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using TMPro;
 
 /* 部屋などの出力をするクラス */
 public class CreateRoom : MonoBehaviour
 {
-    private GameObject room; //部屋のオブジェクト
+    [SerializeField] private GameObject roomNamePrefab; //部屋名のプレハブ
+
+    private GameObject room; //部屋と部屋名をまとめるのオブジェクト
+    private GameObject roomObject; //部屋のオブジェクト
+    private GameObject roomName; //部屋名のオブジェクト
     public LineRenderer lineRenderer; //linerendererコンポーネント
 
     //部屋を描画する
     public void createRoom(string name, Vector3[] positions) {
-        //空のゲームオブジェクトを生成
+        //親となるゲームオブジェクトを生成
         room = new GameObject(name);
 
+        //部屋のゲームオブジェクトを生成
+        roomObject = new GameObject(name + "Position");
+
         // LineRendererコンポーネントをゲームオブジェクトにアタッチする
-        lineRenderer = room.AddComponent<LineRenderer>();
+        lineRenderer = roomObject.AddComponent<LineRenderer>();
 
         // 点の数を指定する
         lineRenderer.positionCount = positions.Length;
@@ -23,10 +31,10 @@ public class CreateRoom : MonoBehaviour
         //座標を指定
         lineRenderer.SetPositions(positions);
 
-        //始点、終点の幅を変更
+        //幅を設定
         lineRenderer.startWidth = 100;
 
-        //色の変更
+        //色の設定
         lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
 
         //ローカル座標を使用
@@ -34,44 +42,78 @@ public class CreateRoom : MonoBehaviour
 
         //ループ(終点と始点を繋ぐ)させる
         lineRenderer.loop = true;
+
+        //部屋を親にまとめる
+        roomObject.transform.SetParent(room.transform);
+
+        /*
+        if (nameChange(name) != "") {
+            //テキストを生成
+            roomName = Instantiate(roomNamePrefab, new Vector3(0, 0, 0), Quaternion.identity);
+
+            //テキストの座標を求める
+            Vector3 textPosition = new Vector3(0, 0, 0);
+            for (int i = 0; i < positions.Length; i++) {
+                textPosition.x += positions[i].x;
+                textPosition.y += positions[i].y;
+            }
+            textPosition.x /= positions.Length;
+            textPosition.y /= positions.Length;
+
+            //テキストの座標を設定
+            roomName.transform.GetChild(0).GetComponent<TextMeshProUGUI>().rectTransform.localPosition = textPosition;
+
+            //テキストのフォントサイズを設定
+            roomName.transform.GetChild(0).GetComponent<TextMeshProUGUI>().fontSize = 200;
+
+            //部屋名を変更
+            roomName.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = nameChange(name);
+
+            //部屋名を親にまとめる
+            roomName.transform.SetParent(room.transform);
+        }
+        */
     }
 
     public void createRoom(string name, Vector3[] positions, UnityEngine.Color color) {
-        //空のゲームオブジェクトを生成
-        room = new GameObject(name);
-
-        // LineRendererコンポーネントをゲームオブジェクトにアタッチする
-        lineRenderer = room.AddComponent<LineRenderer>();
-
-        // 点の数を指定する
-        lineRenderer.positionCount = positions.Length;
-
-        //座標を指定
-        lineRenderer.SetPositions(positions);
-
-        //始点、終点の幅を変更
-        lineRenderer.startWidth = 100;
+        createRoom(name, positions);
 
         //色の変更
-        lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
         lineRenderer.startColor = color;
         lineRenderer.endColor = color;
-
-        //ローカル座標を使用
-        lineRenderer.useWorldSpace = false;
-
-        //ループ(終点と始点を繋ぐ)させる
-        lineRenderer.loop = true;
     }
 
-    //テキストの生成
-    /*
-    public void createText(string test) {
-        //空のゲームオブジェクトを生成
-         = new GameObject(name);
+    //部屋の英名に対応した日本語名を返す
+    public string nameChange(string enName) {
+        string jpName = "";
 
+        if (enName == "entrance") {
+            jpName = "玄関";
+        }
+        else if (enName == "mbps") {
+            jpName = "MBPS";
+        }
+        else if (enName == "western") {
+            jpName = "洋室";
+        }
+        else if (enName == "UB") {
+            jpName = "ユニットバス";
+        }
+        else if (enName == "Washroom") {
+            jpName = "洗面室";
+        }
+        else if (enName == "Toilet") {
+            jpName = "トイレ";
+        }
+        else if (enName == "Kitchen") {
+            jpName = "キッチン";
+        }
+        else if (enName == "balcony") {
+            jpName = "バルコニー";
+        }
+
+        return jpName;
     }
-    */
     
     //部屋と部屋が接している座標を返す
     public Vector3[] contact(GameObject roomA, GameObject roomB) {
