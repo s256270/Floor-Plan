@@ -2,12 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PackingTest : MonoBehaviour
+public class PackingTest : CreateRoom
 {
     [SerializeField] Packing pack;
+    [SerializeField] CreateRoom cr;
 
     void Start()
     {
+        /*
+        //CheckPointテスト
+        Vector3[] polygon = new Vector3[]{new Vector3(-2000, 1900, 0), new Vector3(1000, 1900, 0), new Vector3(1000, 0, 0), new Vector3(-2000, 0, 0)};
+        Vector3 point = new Vector3(-2000, 1900, 0);
+        createRoom("polygon", polygon);
+        Debug.Log(pack.CheckPoint(polygon, point));
+        */
+
         /*
         //flagPatternテスト
         List<int[]> test = pack.flagPatternList(4);
