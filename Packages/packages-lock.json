@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.needle.compilation-visualizer": {
+      "version": "https://github.com/needle-tools/compilation-visualizer.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "73615c1f6029801d00553e2912714c769941f624"
+    },
     "com.unity.2d.animation": {
       "version": "7.0.9",
       "depth": 1,

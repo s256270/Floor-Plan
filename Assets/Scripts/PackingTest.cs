@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class PackingTest : CreateRoom
 {
@@ -9,6 +10,45 @@ public class PackingTest : CreateRoom
 
     void Start()
     {
+        /*
+        //要らない座標を取り除けるかテスト
+        Vector3[] polygon = new Vector3[]{new Vector3(-3400, 1900, 0), new Vector3(-2300, 1900, 0), new Vector3(-2300, 1200, 0), new Vector3(100, 1200, 0), new Vector3(100, 500, 0), new Vector3(1000, 500, 0), new Vector3(2800, 500, 0), new Vector3(2800, 300, 0), new Vector3(4400, 300, 0), new Vector3(4400, -50, 0), new Vector3(3400, -50, 0), new Vector3(3400, -1900, 0), new Vector3(-3400, -1900, 0)};
+
+        List<Vector3> polygonList = polygon.ToList();
+
+        for (int i = 0; i < polygonList.Count; i++) {
+            //調べる辺
+            Vector3[] sideA = new Vector3[]{polygonList[(i+1)%polygonList.Count], polygonList[i]};
+            Vector3[] sideB = new Vector3[]{polygonList[(i+1)%polygonList.Count], polygonList[(i+2)%polygonList.Count]};
+
+            //座標配列で連続する2辺の内積によって調べる
+            Debug.Log(Vector3.Dot(sideA[1] - sideA[0], sideB[1] - sideB[0]));
+            if (Vector3.Dot(sideA[1] - sideA[0], sideB[1] - sideB[0]) == -Vector3.Distance(sideA[1], sideA[0]) * Vector3.Distance(sideB[1], sideB[0])) {
+                //座標配列から削除
+                polygonList.Remove(sideA[0]);
+                i = -1;
+            }
+        }
+
+        createRoom("polygon", polygonList.ToArray(), Color.red);
+        */
+
+
+
+        /*
+        //CrossJudgeテスト
+        Vector3[] lineA = new Vector3[]{new Vector3(-2000, 1900, 0), new Vector3(1000, 1900, 0)};
+        Vector3[] lineB = new Vector3[]{new Vector3(1000, 1000, 0), new Vector3(1000, 2000, 0)};
+        Debug.Log(pack.CrossJudge(lineA, lineB));
+        */
+
+        //OnLineSegmentテスト
+        /*
+        Vector3[] lineSegment = new Vector3[]{new Vector3(-1000, 00, 0), new Vector3(1000, 0, 0)};
+        Vector3 point = new Vector3(1000, 0, 0);
+        Debug.Log(pack.OnLineSegment(lineSegment, point));
+        */
+
         /*
         //CheckPointテスト
         Vector3[] polygon = new Vector3[]{new Vector3(-2000, 1900, 0), new Vector3(1000, 1900, 0), new Vector3(1000, 0, 0), new Vector3(-2000, 0, 0)};
@@ -29,10 +69,13 @@ public class PackingTest : CreateRoom
         */
                 
         /*
-        //JudgeInscribedテスト
-        Vector3[] test = new Vector3[]{new Vector3(150, 1850, 0), new Vector3(2050, 1850, 0), new Vector3(2050, 450, 0), new Vector3(150, 450, 0)};
+        //JudgeInsideテスト
+        Vector3[] range = new Vector3[]{new Vector3(-3400, 1900, 0), new Vector3(4400, 1900, 0), new Vector3(4400, -50, 0), new Vector3(3400, -50, 0), new Vector3(3400, -1900, 0), new Vector3(-3400, -1900, 0)};
+        Vector3[] kitchen = new Vector3[]{new Vector3(3700, 2350, 0), new Vector3(4400, 2350, 0), new Vector3(4400, -50, 0), new Vector3(3700, -50, 0)};
+        createRoom("range", range, Color.red);
+        createRoom("kitchen", kitchen, Color.gray);
         
-        Debug.Log(pack.JudgeInscribed(range, test));
+        Debug.Log(pack.JudgeInside(range, kitchen));
         */
         
         /*

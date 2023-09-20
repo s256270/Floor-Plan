@@ -7,20 +7,19 @@ using TMPro;
 /* 部屋などの出力をするクラス */
 public class CreateRoom : MonoBehaviour
 {
-    [SerializeField] private GameObject roomNamePrefab; //部屋名のプレハブ
+    //[SerializeField] private GameObject roomNamePrefab; //部屋名のプレハブ
 
-    private GameObject room; //部屋と部屋名をまとめるのオブジェクト
-    private GameObject roomObject; //部屋のオブジェクト
-    private GameObject roomName; //部屋名のオブジェクト
+    //private GameObject room; //部屋と部屋名をまとめるのオブジェクト
+    //private GameObject roomObject; //部屋のオブジェクト
     public LineRenderer lineRenderer; //linerendererコンポーネント
 
     //部屋を描画する
-    public void createRoom(string name, Vector3[] positions) {
+    public GameObject createRoom(string name, Vector3[] positions) {
         //親となるゲームオブジェクトを生成
-        room = new GameObject(name);
+        GameObject room = new GameObject(name);
 
         //部屋のゲームオブジェクトを生成
-        roomObject = new GameObject(name + "Position");
+        GameObject roomObject = new GameObject(name + "Position");
 
         // LineRendererコンポーネントをゲームオブジェクトにアタッチする
         lineRenderer = roomObject.AddComponent<LineRenderer>();
@@ -32,7 +31,7 @@ public class CreateRoom : MonoBehaviour
         lineRenderer.SetPositions(positions);
 
         //幅を設定
-        lineRenderer.startWidth = 100;
+        lineRenderer.startWidth = 50;
 
         //色の設定
         lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
@@ -45,6 +44,8 @@ public class CreateRoom : MonoBehaviour
 
         //部屋を親にまとめる
         roomObject.transform.SetParent(room.transform);
+
+        return room;
 
         /*
         if (nameChange(name) != "") {
