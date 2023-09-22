@@ -114,7 +114,8 @@ public class Packing : CreateRoom
             List<int[]> rotationAllPattern = flagPatternList(wetAreasAllPermutation[i].Length);
             for (int j = 0; j < rotationAllPattern.Count; j++) {
                 //Debug.Log("j: " + j);
-                
+
+                /* 洋室あり */ 
                 List<Dictionary<string, Vector3[]>> wetAreasResult = placement(wetAreasAllPermutation[i], rotationAllPattern[j]);
                 var westernResult = new List<Dictionary<string, Vector3[]>>();
                 for (int k = 0; k < wetAreasResult.Count; k++) {
@@ -125,6 +126,7 @@ public class Packing : CreateRoom
 
                 result.AddRange(westernResult);
                 
+                /* 洋室なし */
                 //result.AddRange(placement(wetAreasAllPermutation[i], rotationAllPattern[j]));
             }
         }
@@ -139,7 +141,8 @@ public class Packing : CreateRoom
         List<int[]> wetAreasAllPermutation = AllPermutation(wetAreasKinds);
         List<int[]> rotationAllPattern = flagPatternList(wetAreasAllPermutation[wetAreasAllPermutationIndex].Length);
         
-        
+        /* 洋室あり */
+        /*
         List<Dictionary<string, Vector3[]>> wetAreasResult = placement(wetAreasAllPermutation[wetAreasAllPermutationIndex], rotationAllPattern[rotationAllPatternIndex]);
         var westernResult = new List<Dictionary<string, Vector3[]>>();
         for (int i = 0; i < wetAreasResult.Count; i++) {
@@ -148,8 +151,10 @@ public class Packing : CreateRoom
         }
 
         result.AddRange(westernResult);
+        */
         
-        //result.AddRange(placement(wetAreasAllPermutation[wetAreasAllPermutationIndex], rotationAllPattern[rotationAllPatternIndex]));
+        /* 洋室なし */
+        result.AddRange(placement(wetAreasAllPermutation[wetAreasAllPermutationIndex], rotationAllPattern[rotationAllPatternIndex]));
 
         return result;
     }
@@ -487,7 +492,9 @@ public class Packing : CreateRoom
                             bool outside_flag = true;
                             foreach (Vector3[] value in result.Values) {
                                 if (!JudgeOutside(value, CorrectCoordinates(current_room, new Vector3(gap_x, gap_y, 0)))) {
-                                    outside_flag = false;
+                                    if (!JudgeOutside(CorrectCoordinates(current_room, new Vector3(gap_x, gap_y, 0)), value)) {
+                                        outside_flag = false;
+                                    }
                                 }
                             }
 
@@ -528,7 +535,9 @@ public class Packing : CreateRoom
                             bool outside_flag = true;
                             foreach (Vector3[] value in result.Values) {
                                 if (!JudgeOutside(value, CorrectCoordinates(current_room, new Vector3(gap_x, gap_y, 0)))) {
-                                    outside_flag = false;
+                                    if (!JudgeOutside(CorrectCoordinates(current_room, new Vector3(gap_x, gap_y, 0)), value)) {
+                                        outside_flag = false;
+                                    }
                                 }
                             }
 
@@ -786,6 +795,161 @@ public class Packing : CreateRoom
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// 水回りと洋室を配置した住戸に対して評価指標を用いて評価
+    /// </summary> 
+    /// <param name="allPattern">全パターンのリスト</param>
+    /// <returns>評価の高いもののリストを返す</returns>
+    public List<Dictionary<string, Vector3[]>> Evaluation(List<Dictionary<string, Vector3[]>> allPattern) {
+        //評価指標によって絞ったパターンのリスト
+        var selectedPattern = new List<Dictionary<string, Vector3[]>>();
+
+        //評価指標のリスト
+        var westernSizeRatioList = new Dictionary<int, float>(); //全パターンのリストと対応付けるためのインデックスと洋室の大きさの割合の辞書
+        var hallwayLengthRatioList = new Dictionary<int, float>(); //全パターンのリストと対応付けるためのインデックスと廊下の長さの割合の辞書
+
+        /* 評価指標のリストを作成 */
+        //全パターンについてひとつずつ評価
+        for (int i = 0; i < allPattern.Count; i++) {
+
+            //廊下の座標
+            Vector3[] hallway = range;
+
+            foreach (string roomName in allPattern[i].Keys) {
+                /* 洋室の大きさの割合を算出 */
+                if (roomName == "Western") {
+                    //洋室の面積
+                    float westernSize = areaCalculation(allPattern[i][roomName]);
+                    //洋室の面積の割合
+                    float westernSizeRatio = westernSize / areaCalculation(dwelling);
+                    //洋室の面積の割合のリストに追加
+                    westernSizeRatioList.Add(i, westernSizeRatio);
+                }
+
+                //廊下の座標を作成
+                hallway = FrameChange(hallway, allPattern[i][roomName]);
+            }
+
+            /* 廊下の長さの割合を算出 */
+            //廊下の長さ
+            float hallwayLength = 0.0f;
+            //住戸の長さ
+            float dwellingLength = 0.0f;
+
+            //バルコニーと住戸が接する辺を求める
+            bool parallelX = false;
+            bool parallelY = false;
+            for (int j = 0; j < balcony.Length; j++) {
+                var balconyWesternContact = contact(new Vector3[]{balcony[j], balcony[(j+1)%balcony.Length]}, range);
+                    if (!ZeroJudge(balconyWesternContact)) {
+                        //接する辺がx軸平行の場合
+                        if (balconyWesternContact[0].y == balconyWesternContact[1].y) {
+                            parallelX = true;
+                        }
+                        //接する辺がy軸平行の場合
+                        else if (balconyWesternContact[0].x == balconyWesternContact[1].x) {
+                            parallelY = true;
+                        }
+                    }
+            }
+
+            //x軸平行の場合
+            if (parallelX) {
+                //住戸の座標の内，x座標が最大・最小のものを求める
+                float dwellingMax = dwelling[0].x;
+                float dwellingMin = dwelling[0].x;
+                for (int j = 1; j < dwelling.Length; j++) {
+                    if (dwellingMax < dwelling[j].x) {
+                        dwellingMax = dwelling[j].x;
+                    }
+
+                    if (dwelling[j].x < dwellingMin) {
+                        dwellingMin = dwelling[j].x;
+                    }
+                }
+
+                //住戸の長さを算出
+                dwellingLength = dwellingMax - dwellingMin;
+
+                //廊下の座標の内，x座標が最大・最小のものを求める
+                float hallwayMax = hallway[0].x;
+                float hallwayMin = hallway[0].x;
+                for (int j = 1; j < hallway.Length; j++) {
+                    if (hallwayMax < hallway[j].x) {
+                        hallwayMax = hallway[j].x;
+                    }
+
+                    if (hallway[j].x < hallwayMin) {
+                        hallwayMin = hallway[j].x;
+                    }
+                }
+
+                //廊下の長さを算出
+                hallwayLength = hallwayMax - hallwayMin;
+            }
+            else if (parallelY) {
+                //住戸の座標の内，y座標が最大・最小のものを求める
+                float dwellingMax = dwelling[0].y;
+                float dwellingMin = dwelling[0].y;
+                for (int j = 1; j < dwelling.Length; j++) {
+                    if (dwellingMax < dwelling[j].y) {
+                        dwellingMax = dwelling[j].y;
+                    }
+
+                    if (dwelling[j].y < dwellingMin) {
+                        dwellingMin = dwelling[j].y;
+                    }
+                }
+
+                //住戸の長さを算出
+                dwellingLength = dwellingMax - dwellingMin;
+
+                //廊下の座標の内，y座標が最大・最小のものを求める
+                float hallwayMax = hallway[0].y;
+                float hallwayMin = hallway[0].y;
+                for (int j = 1; j < hallway.Length; j++) {
+                    if (hallwayMax < hallway[j].y) {
+                        hallwayMax = hallway[j].y;
+                    }
+
+                    if (hallway[j].y < hallwayMin) {
+                        hallwayMin = hallway[j].y;
+                    }
+                }
+
+                //廊下の長さを算出
+                hallwayLength = hallwayMax - hallwayMin;
+
+            }
+
+            //廊下の長さの割合
+            float hallwayLengthRatio = hallwayLength / dwellingLength;
+            //廊下の長さの割合のリストに追加
+            hallwayLengthRatioList.Add(i, hallwayLengthRatio);
+        }
+
+        //評価指標の辞書を評価指標の降順にソート
+        var westernSizeRatioListSort = westernSizeRatioList.OrderBy((x) => x.Value);
+        var hallwayLengthRatioListSort = hallwayLengthRatioList.OrderBy((x) => x.Value);
+
+        // ↓↓↓ここから先の手法は要検討
+
+        //評価指標の辞書のインデックスに合わせて全パターンのリストをソート
+        var allPatternSort = new List<Dictionary<string, Vector3[]>>();
+        foreach (KeyValuePair<int, float> kvp in westernSizeRatioListSort) {
+            allPatternSort.Add(allPattern[kvp.Key]);
+        }
+        
+
+        /* 評価指標のリストをもとにパターンを絞る */
+        //全パターンのリストのうち，前から30個を選択
+        for (int i = 0; i < 30; i++) {
+            selectedPattern.Add(allPatternSort[i]);
+        }
+
+        return selectedPattern;
     }
 
     /***
