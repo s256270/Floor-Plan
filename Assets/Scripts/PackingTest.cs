@@ -11,6 +11,37 @@ public class PackingTest : CreateRoom
     void Start()
     {
         /*
+        //SequenceEqualテスト
+        Dictionary<string, Vector3[]> resultA = new Dictionary<string, Vector3[]>(){{"UB", new Vector3[]{new Vector3(-900, 700, 0), new Vector3(900, 700, 0), new Vector3(900, -700, 0), new Vector3(-900, -700, 0)}}, {"Washroom", new Vector3[]{new Vector3(-800, 800, 0), new Vector3(800, 800, 0), new Vector3(800, -800, 0), new Vector3(-800, -800, 0)}}, {"Toilet", new Vector3[]{new Vector3(-800, 800, 0), new Vector3(800, 800, 0), new Vector3(800, -800, 0), new Vector3(-800, -800, 0)}}, {"Kitchen", new Vector3[]{new Vector3(-800, 800, 0), new Vector3(800, 800, 0), new Vector3(800, -800, 0), new Vector3(-800, -800, 0)}}};
+        Dictionary<string, Vector3[]> resultB = new Dictionary<string, Vector3[]>(){{"UB", new Vector3[]{new Vector3(-900, 700, 0), new Vector3(900, 700, 0), new Vector3(900, -700, 0), new Vector3(-900, -700, 0)}}, {"Washroom", new Vector3[]{new Vector3(-800, 800, 0), new Vector3(800, 800, 0), new Vector3(800, -800, 0), new Vector3(-800, -800, 0)}}, {"Toilet", new Vector3[]{new Vector3(-800, 800, 0), new Vector3(800, 800, 0), new Vector3(800, -800, 0), new Vector3(-800, -800, 0)}}, {"Kitchen", new Vector3[]{new Vector3(-800, 800, 0), new Vector3(800, 800, 0), new Vector3(800, -800, 0), new Vector3(-800, -800, 0)}}};
+        Debug.Log(resultA.SequenceEqual(resultB));
+        Debug.Log(resultA["UB"] == resultB["UB"]);
+        Debug.Log(resultA["UB"][0] == resultB["UB"][0]);
+        Debug.Log(pack.DictionaryEquals(resultA, resultB));
+        */
+
+        /*
+        //FrameChangeテスト
+        Vector3[] range = new Vector3[]{new Vector3(-3400, 1900, 0), new Vector3(100, 1900, 0), new Vector3(100, 500, 0), new Vector3(1000, 500, 0), new Vector3(1000, 300, 0), new Vector3(2600, 300, 0), new Vector3(2600, 500, 0), new Vector3(4400, 500, 0), new Vector3(4400, -50, 0), new Vector3(3400, -50, 0), new Vector3(3400, -1200, 0), new Vector3(1000, -1200, 0), new Vector3(1000, -1900, 0), new Vector3(-3400, -1900, 0)};
+        createRoom("range", range, Color.red);
+        
+        Vector3[] western = new Vector3[]{new Vector3(-3400, 1900, 0), new Vector3(100, 1900, 0), new Vector3(100, 500, 0), new Vector3(210, 500, 0), new Vector3(210, -1900, 0), new Vector3(-3400, -1900, 0)};
+        createRoom("western", western, Color.gray);
+
+        createRoom("hallway", pack.FrameChange(range, western));
+        */
+
+        /*
+        //SideSubstractionテスト
+        Vector3[] range = new Vector3[]{new Vector3(-3400, 1900, 0), new Vector3(4400, 1900, 0), new Vector3(4400, -50, 0), new Vector3(3400, -50, 0), new Vector3(3400, -1900, 0), new Vector3(-3400, -1900, 0)};
+        for (int i = 0; i < range.Length; i++) {
+            Debug.Log("i: " + i);
+            pack.SideSubstraction(new Vector3[]{new Vector3(-2300, 1900, 0), new Vector3(100, 1900, 0)}, new Vector3[]{range[i], range[(i+1)%range.Length]});
+        }
+        */
+        
+
+        /*
         //要らない座標を取り除けるかテスト
         Vector3[] polygon = new Vector3[]{new Vector3(-3400, 1900, 0), new Vector3(-2300, 1900, 0), new Vector3(-2300, 1200, 0), new Vector3(100, 1200, 0), new Vector3(100, 500, 0), new Vector3(1000, 500, 0), new Vector3(2800, 500, 0), new Vector3(2800, 300, 0), new Vector3(4400, 300, 0), new Vector3(4400, -50, 0), new Vector3(3400, -50, 0), new Vector3(3400, -1900, 0), new Vector3(-3400, -1900, 0)};
 

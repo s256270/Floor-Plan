@@ -19,7 +19,7 @@ public class CreateRoom : MonoBehaviour
         GameObject room = new GameObject(name);
 
         //部屋のゲームオブジェクトを生成
-        GameObject roomObject = new GameObject(name + "Position");
+        GameObject roomObject = new GameObject(name /*+ "Position"*/);
 
         // LineRendererコンポーネントをゲームオブジェクトにアタッチする
         lineRenderer = roomObject.AddComponent<LineRenderer>();
@@ -45,6 +45,7 @@ public class CreateRoom : MonoBehaviour
         //部屋を親にまとめる
         roomObject.transform.SetParent(room.transform);
 
+        //return roomObject;
         return room;
 
         /*

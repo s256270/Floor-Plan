@@ -7,18 +7,18 @@ public class Parts : CreateRoom
     //玄関の座標
     [HideInInspector]
     public Vector3[] entrance_coordinate_x = new Vector3[]{
-        new Vector3(-600, 350, 0),
-        new Vector3(600, 350, 0),
-        new Vector3(600, -350, 0),
-        new Vector3(-600, -350, 0)
+        new Vector3(-750, 500, 0),
+        new Vector3(750, 500, 0),
+        new Vector3(750, -500, 0),
+        new Vector3(-750, -500, 0)
     };
 
     [HideInInspector]
     public Vector3[] entrance_coordinate_y = new Vector3[]{
-        new Vector3(-350, 600, 0),
-        new Vector3(350, 600, 0),
-        new Vector3(350, -600, 0),
-        new Vector3(-350, -600, 0)
+        new Vector3(-500, 750, 0),
+        new Vector3(500, 750, 0),
+        new Vector3(500, -750, 0),
+        new Vector3(-500, -750, 0)
     };
 
     //MBPSの座標

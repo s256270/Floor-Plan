@@ -44,11 +44,12 @@ public class Packing : CreateRoom
         if (true) {
             //リストの作成
             allPattern = PlacementListCreate(new int[]{0, 1, 2, 3});
+            allPattern = Evaluation(allPattern);
         } else {
             //初めの方だけリストの作成
             allPattern = PlacementListCreate(new int[]{0, 1, 2, 3}, 0, 0);
         }
-
+        
         
         limit = allPattern.Count;
         Debug.Log("総パターン数：" + limit);
@@ -80,19 +81,24 @@ public class Packing : CreateRoom
 
                 foreach (string roomName in currentPattern.Keys) {
                     if (roomName == "UB") {
-                        createRoom(roomName, currentPattern[roomName], Color.cyan);
+                        createRoom(roomName, currentPattern[roomName]);
+                        //createRoom(roomName, currentPattern[roomName], Color.cyan);
                     }
                     if (roomName == "Washroom") {
-                        createRoom(roomName, currentPattern[roomName], Color.magenta);
+                        createRoom(roomName, currentPattern[roomName]);
+                        //createRoom(roomName, currentPattern[roomName], Color.magenta);
                     }
                     if (roomName == "Toilet") {
-                        createRoom(roomName, currentPattern[roomName], Color.green);
+                        createRoom(roomName, currentPattern[roomName]);
+                        //createRoom(roomName, currentPattern[roomName], Color.green);
                     }
                     if (roomName == "Kitchen") {
-                        createRoom(roomName, currentPattern[roomName], Color.gray);
+                        createRoom(roomName, currentPattern[roomName]);
+                        //createRoom(roomName, currentPattern[roomName], Color.gray);
                     }
                     if (roomName == "Western") {
-                        createRoom(roomName, currentPattern[roomName], Color.yellow);
+                        createRoom(roomName, currentPattern[roomName]);
+                        //createRoom(roomName, currentPattern[roomName], Color.yellow);
                     }
                 }
                 count++;
@@ -114,6 +120,9 @@ public class Packing : CreateRoom
             List<int[]> rotationAllPattern = flagPatternList(wetAreasAllPermutation[i].Length);
             for (int j = 0; j < rotationAllPattern.Count; j++) {
                 //Debug.Log("j: " + j);
+                if (rotationAllPattern[j][3] == 1 || rotationAllPattern[j][1] == 1) {
+                    continue;
+                }
 
                 /* 洋室あり */ 
                 List<Dictionary<string, Vector3[]>> wetAreasResult = placement(wetAreasAllPermutation[i], rotationAllPattern[j]);
@@ -145,7 +154,7 @@ public class Packing : CreateRoom
         /*
         List<Dictionary<string, Vector3[]>> wetAreasResult = placement(wetAreasAllPermutation[wetAreasAllPermutationIndex], rotationAllPattern[rotationAllPatternIndex]);
         var westernResult = new List<Dictionary<string, Vector3[]>>();
-        for (int i = 0; i < wetAreasResult.Count; i++) {
+        for (int i = 1; i < wetAreasResult.Count; i++) {
             //Debug.Log("i: " + i);
             westernResult.AddRange(CreateWestern(wetAreasResult[i]));
         }
@@ -258,7 +267,7 @@ public class Packing : CreateRoom
                     for (int k = 0; k < currentPattern.Count; k++) {
                         Vector3[] contact_coordinates = contact(current_side, currentPattern.Values.ElementAt(k));
                         if (!ZeroJudge(contact_coordinates)) {
-                            current_side = SideSubstraction(current_side, contact_coordinates);
+                            current_side = SideSubstraction(current_side, contact_coordinates)[0];
                         }
                     }
                 }
@@ -277,7 +286,7 @@ public class Packing : CreateRoom
 
                 //重複がある場合は追加しない
                 for (int l = 0; l < result.Count; l++) {
-                    if (result[l].SequenceEqual(placementResult)) {
+                    if (DictionaryEquals(result[l], placementResult)) {
                         break;
                     }
                     if (l == result.Count - 1) {
@@ -291,7 +300,7 @@ public class Packing : CreateRoom
                     string[] keysToRemove = differentKeys[^k..];
                     placementResult = RemoveDictionaryElement(placementResult, keysToRemove);
                     for (int l = 0; l < result.Count; l++) {
-                        if (result[l].SequenceEqual(placementResult)) {
+                        if (DictionaryEquals(result[l], placementResult)) {
                             break;
                         }
                         if (l == result.Count - 1) {
@@ -331,7 +340,7 @@ public class Packing : CreateRoom
                     for (int k = 0; k < currentPattern.Count; k++) {
                         Vector3[] contact_coordinates = contact(current_side, currentPattern.Values.ElementAt(k));
                         if (!ZeroJudge(contact_coordinates)) {
-                            current_side = SideSubstraction(current_side, contact_coordinates);
+                            current_side = SideSubstraction(current_side, contact_coordinates)[0];
                         }
                     }
                 }
@@ -346,7 +355,7 @@ public class Packing : CreateRoom
 
                 //重複がある場合は追加しない
                 for (int l = 0; l < result.Count; l++) {
-                    if (result[l].SequenceEqual(placementResult)) {
+                    if (DictionaryEquals(result[l], placementResult)) {
                         break;
                     }
                     if (l == result.Count - 1) {
@@ -361,7 +370,7 @@ public class Packing : CreateRoom
                     placementResult = RemoveDictionaryElement(placementResult, keysToRemove);
                     //重複がある場合は追加しない
                     for (int l = 0; l < result.Count; l++) {
-                        if (result[l].SequenceEqual(placementResult)) {
+                        if (DictionaryEquals(result[l], placementResult)) {
                             break;
                         }
                         if (l == result.Count - 1) {
@@ -381,6 +390,20 @@ public class Packing : CreateRoom
                 i--;
             }
         }
+
+        //玄関が封鎖されているものを除く
+        for (int i = 0; i < result.Count; i++) {
+            foreach (Vector3[] value in result[i].Values) {
+                Vector3[] contact_entrance = contact(entrance_side[entranceSideIndex], value);
+                if (!ZeroJudge(contact_entrance)) {
+                    if (Vector3.Distance(contact_entrance[0], contact_entrance[1]) > 600f) {
+                        result.RemoveAt(i);
+                        i--;
+                    }
+                }
+            }
+        } 
+
         
         //洗面室とユニットバスが隣り合っていないものを除く
         for (int i = 0; i < result.Count; i++) {
@@ -492,9 +515,10 @@ public class Packing : CreateRoom
                             bool outside_flag = true;
                             foreach (Vector3[] value in result.Values) {
                                 if (!JudgeOutside(value, CorrectCoordinates(current_room, new Vector3(gap_x, gap_y, 0)))) {
-                                    if (!JudgeOutside(CorrectCoordinates(current_room, new Vector3(gap_x, gap_y, 0)), value)) {
-                                        outside_flag = false;
-                                    }
+                                    outside_flag = false;
+                                }
+                                if (!JudgeOutside(CorrectCoordinates(current_room, new Vector3(gap_x, gap_y, 0)), value)) {
+                                    outside_flag = false;
                                 }
                             }
 
@@ -535,9 +559,10 @@ public class Packing : CreateRoom
                             bool outside_flag = true;
                             foreach (Vector3[] value in result.Values) {
                                 if (!JudgeOutside(value, CorrectCoordinates(current_room, new Vector3(gap_x, gap_y, 0)))) {
-                                    if (!JudgeOutside(CorrectCoordinates(current_room, new Vector3(gap_x, gap_y, 0)), value)) {
-                                        outside_flag = false;
-                                    }
+                                    outside_flag = false;
+                                }
+                                if (!JudgeOutside(CorrectCoordinates(current_room, new Vector3(gap_x, gap_y, 0)), value)) {
+                                    outside_flag = false;
                                 }
                             }
 
@@ -575,7 +600,7 @@ public class Packing : CreateRoom
             Vector3[] contact_coordinates = contact(current_side, CreateCoordinates);
 
             if (!ZeroJudge(contact_coordinates)) {
-                current_side = SideSubstraction(current_side, contact_coordinates);
+                current_side = SideSubstraction(current_side, contact_coordinates)[0];
             }
         }
 
@@ -762,19 +787,41 @@ public class Packing : CreateRoom
                         rangeAddedIntersection = rangeAddedIntersectionList.ToArray();
                     }
 
-                    /* 洋室の面積が妥当なものを追加 */
-                    //洋室の面積
-                    float westernArea = areaCalculation(rangeAddedIntersection);
+                    /* 洋室の面積が最大のものを追加 */
 
-                    //洋室の面積が一定より大きくなったら終了
-                    if (LivingRoomRange(areaCalculation(dwelling), "1K")[1] < westernArea) {
+                    //洋室を現在のパターンに追加
+                    var currentWetAreasPattern = new Dictionary<string, Vector3[]>(dictionary);
+                    currentWetAreasPattern.Add("Western", rangeAddedIntersection);
+                    
+                    bool westernDicisionFlag = false;
+                    //洋室の面積が他の部屋の入口を封鎖しないもので，最大のものを追加
+                    foreach (string key in currentWetAreasPattern.Keys) {
+                        //調べる部屋がユニットバスの場合
+                        if (key == "UB" || key == "Western") {
+                            //スキップ
+                            continue;
+                        }
+
+                        //部屋の入口を封鎖しないか調べる
+                        if (!SecureNecessarySide(key, currentWetAreasPattern)) {
+                            //洋室の面積が最大のもの以外を削除する
+                            if (result.Count > 0) {
+                                result.RemoveRange(0, result.Count - 1);
+                            }
+
+                            westernDicisionFlag = true;
+
+                            break;
+                        }
+                    }
+
+                    //洋室の面積が最大のものが見つかったら終了
+                    if (westernDicisionFlag) {
                         break;
                     }
 
-                    //洋室の面積が妥当なものを追加
-                    if (LivingRoomRange(areaCalculation(dwelling), "1K")[0] <= westernArea && westernArea <= LivingRoomRange(areaCalculation(dwelling), "1K")[1]) {
-                        western.Add(rangeAddedIntersection);
-                    }
+                    //洋室を追加したものをリストに追加
+                    result.Add(currentWetAreasPattern);
                 }
             }
             else {
@@ -787,14 +834,89 @@ public class Packing : CreateRoom
 
         }
 
-        //洋室を配置したリストを作成
-        for (int i = 0; i < western.Count; i++) {
-            var currentWetAreasPattern = new Dictionary<string, Vector3[]>(dictionary);
-            currentWetAreasPattern.Add("Western", western[i]);
-            result.Add(currentWetAreasPattern);
+        return result;
+    }
+
+    /// <summary>
+    /// 部屋の開けておなかなければならない辺が空いているかどうかを判定
+    /// </summary> 
+    /// <param name="checkRoom">調べる部屋</param>
+    /// <param name="surroundingRooms">周りの部屋</param>
+    /// <returns>評価の高いもののリストを返す</returns>
+    public bool SecureNecessarySide(string checkRoom, Dictionary<string, Vector3[]> surroundingRooms) {
+        //判定結果
+        bool flag = true;
+
+        /* 調べる部屋を1辺ずつに分割 */
+        List<Vector3[]> checkRoomSides = new List<Vector3[]>(); //調べる部屋の辺のリスト
+        Vector3[] checkRoomCoordinates = surroundingRooms[checkRoom]; //調べる部屋の座標
+        //調べる部屋の辺のリストを作成
+        for (int i = 0; i < checkRoomCoordinates.Length; i++) {
+            checkRoomSides.Add(new Vector3[]{checkRoomCoordinates[i], checkRoomCoordinates[(i+1)%checkRoomCoordinates.Length]});
         }
 
-        return result;
+        //水回り範囲との共通部分を調べる
+        for (int i = 0; i < range.Length; i++) {
+            int checkRoomSidesLength = checkRoomSides.Count;
+            for (int j = 0; j < checkRoomSidesLength; j++) {
+                //水回り範囲との共通部分を除く
+                checkRoomSides[j] = SideSubstraction(checkRoomSides[j], new Vector3[]{range[i], range[(i+1)%range.Length]})[0];
+                if (SideSubstraction(checkRoomSides[j], new Vector3[]{range[i], range[(i+1)%range.Length]}).Count == 2) {
+                    checkRoomSides.Add(SideSubstraction(checkRoomSides[j], new Vector3[]{range[i], range[(i+1)%range.Length]})[1]);
+                }
+            }
+        }
+
+        //周りの部屋について調べる
+        foreach (string key in surroundingRooms.Keys) {
+            //調べる部屋と周りの部屋が同じ場合
+            if (key == checkRoom) {
+                //スキップ
+                continue;
+            }
+
+            //周りの部屋との共通部分につい調べる
+            for (int i = 0; i < surroundingRooms[key].Length; i++) {
+                int checkRoomSidesLength = checkRoomSides.Count;
+                for (int j = 0; j < checkRoomSidesLength; j++) {
+                    //水回り範囲との共通部分を除く
+                    checkRoomSides[j] = SideSubstraction(checkRoomSides[j], new Vector3[]{surroundingRooms[key][i], surroundingRooms[key][(i+1)%surroundingRooms[key].Length]})[0];
+                    if (SideSubstraction(checkRoomSides[j], new Vector3[]{surroundingRooms[key][i], surroundingRooms[key][(i+1)%surroundingRooms[key].Length]}).Count == 2) {
+                        checkRoomSides.Add(SideSubstraction(checkRoomSides[j], new Vector3[]{surroundingRooms[key][i], surroundingRooms[key][(i+1)%surroundingRooms[key].Length]})[1]);
+                    }
+                }
+            }
+        }
+
+        /* 残った辺が必要な長さがあるかを調べる */
+        //調べる部屋の辺の一番長いものを求める
+        float checkRoomSideMax = Vector3.Distance(checkRoomSides[0][0], checkRoomSides[0][1]);
+        for (int i = 0; i < checkRoomSides.Count; i++) {
+            if (checkRoomSideMax < Vector3.Distance(checkRoomSides[i][0], checkRoomSides[i][1])) {
+                checkRoomSideMax = Vector3.Distance(checkRoomSides[i][0], checkRoomSides[i][1]);
+            }
+        }
+
+        if (checkRoom == "Washroom") {
+            //洗面室の場合
+            if (checkRoomSideMax < 900.0f) {
+                flag = false;
+            }
+        }
+        else if (checkRoom == "Toilet") {
+            //トイレの場合
+            if (checkRoomSideMax < 800.0f) {
+                flag = false;
+            }
+        }
+        else if (checkRoom == "Kitchen") {
+            //キッチンの場合
+            if (checkRoomSideMax < 2400.0f) {
+                flag = false;
+            }
+        }
+
+        return flag;
     }
 
     /// <summary>
@@ -808,31 +930,111 @@ public class Packing : CreateRoom
 
         //評価指標のリスト
         var westernSizeRatioList = new Dictionary<int, float>(); //全パターンのリストと対応付けるためのインデックスと洋室の大きさの割合の辞書
-        var hallwayLengthRatioList = new Dictionary<int, float>(); //全パターンのリストと対応付けるためのインデックスと廊下の長さの割合の辞書
+        var westernShapeRatioList = new Dictionary<int, float>(); //全パターンのリストと対応付けるためのインデックスと洋室の形状の割合の辞書
+        //var hallwayLengthRatioList = new Dictionary<int, float>(); //全パターンのリストと対応付けるためのインデックスと廊下の長さの割合の辞書
+
+        //重複を除く
+        for (int i = 0; i < allPattern.Count; i++) {
+            for (int j = i + 1; j < allPattern.Count; j++) {
+                if (DictionaryEquals(allPattern[i], allPattern[j])) {
+                    allPattern.RemoveAt(j);
+                    j--;
+                }
+            }
+        }
+
+        Debug.Log("allPattern.Count: " + allPattern.Count);
+
+        Vector3[] hallway = range;
 
         /* 評価指標のリストを作成 */
         //全パターンについてひとつずつ評価
         for (int i = 0; i < allPattern.Count; i++) {
+            //Debug.Log("i: " + i);
 
             //廊下の座標
-            Vector3[] hallway = range;
+            hallway = range;
 
+            //リストを整える
             foreach (string roomName in allPattern[i].Keys) {
-                /* 洋室の大きさの割合を算出 */
-                if (roomName == "Western") {
-                    //洋室の面積
-                    float westernSize = areaCalculation(allPattern[i][roomName]);
-                    //洋室の面積の割合
-                    float westernSizeRatio = westernSize / areaCalculation(dwelling);
-                    //洋室の面積の割合のリストに追加
-                    westernSizeRatioList.Add(i, westernSizeRatio);
-                }
-
-                //廊下の座標を作成
-                hallway = FrameChange(hallway, allPattern[i][roomName]);
+                hallway = FrameChange(NumberClean(hallway), NumberClean(allPattern[i][roomName]));
             }
 
+            /*
+            //廊下の幅の最小値を算出
+            float hallwayLengthMin = Vector3.Distance(hallway[0], hallway[1]);
+            for (int j = 0; j < hallway.Length - 1; j++) {
+                for (int k = j + 1; k < hallway.Length; k++) {
+                    if (Vector3.Distance(hallway[j], hallway[k]) == 0) {
+                        Debug.Log("                                    0");
+                    }
+                    if (Vector3.Distance(hallway[j], hallway[k]) < hallwayLengthMin) {
+                        hallwayLengthMin = Vector3.Distance(hallway[j], hallway[k]);
+                    }
+                }
+            }
+
+            //廊下の幅の最小値が700より小さい場合
+            if (hallwayLengthMin < 700.0f) {
+                //allPatternから削除
+                allPattern.RemoveAt(i);
+                i--;
+                continue;
+            }
+            */
+        }
+
+        for (int i = 0; i < allPattern.Count; i++) {
+            //洋室の座標
+            Vector3[] westernCoordinates = allPattern[i]["Western"];
+
+            /* 洋室の面積の割合を算出 */
+            //洋室の面積
+            float westernSize = areaCalculation(westernCoordinates);
+            //住戸の面積
+            float dwellingSize = areaCalculation(dwelling);
+            //洋室の面積の割合
+            float westernSizeRatio = westernSize / dwellingSize;
+            //洋室の面積の割合のリストに追加
+            westernSizeRatioList.Add(i, westernSizeRatio);
+
+
+            /* 洋室の形状を割合として算出 */
+            //洋室の座標のx座標の最大値・最小値
+            float westernMaxX = westernCoordinates[0].x;
+            float westernMinX = westernCoordinates[0].x;
+
+            //洋室の座標のy座標の最大値・最小値
+            float westernMaxY = westernCoordinates[0].y;
+            float westernMinY = westernCoordinates[0].y;
+
+            for (int j = 0; j < westernCoordinates.Length; j++) {
+                if (westernMaxX < westernCoordinates[j].x) {
+                    westernMaxX = westernCoordinates[j].x;
+                }
+
+                if (westernCoordinates[j].x < westernMinX) {
+                    westernMinX = westernCoordinates[j].x;
+                }
+
+                if (westernMaxY < westernCoordinates[j].y) {
+                    westernMaxY = westernCoordinates[j].y;
+                }
+
+                if (westernCoordinates[j].y < westernMinY) {
+                    westernMinY = westernCoordinates[j].y;
+                }
+            }
+
+            //洋室の形状の割合
+            float westernShapeRatio =  westernSize / ((westernMaxX - westernMinX) * (westernMaxY - westernMinY));
+            //洋室の形状の割合のリストに追加
+            westernShapeRatioList.Add(i, westernShapeRatio);
+            
+
+
             /* 廊下の長さの割合を算出 */
+            /*
             //廊下の長さ
             float hallwayLength = 0.0f;
             //住戸の長さ
@@ -843,16 +1045,16 @@ public class Packing : CreateRoom
             bool parallelY = false;
             for (int j = 0; j < balcony.Length; j++) {
                 var balconyWesternContact = contact(new Vector3[]{balcony[j], balcony[(j+1)%balcony.Length]}, range);
-                    if (!ZeroJudge(balconyWesternContact)) {
-                        //接する辺がx軸平行の場合
-                        if (balconyWesternContact[0].y == balconyWesternContact[1].y) {
-                            parallelX = true;
-                        }
-                        //接する辺がy軸平行の場合
-                        else if (balconyWesternContact[0].x == balconyWesternContact[1].x) {
-                            parallelY = true;
-                        }
+                if (!ZeroJudge(balconyWesternContact)) {
+                    //接する辺がx軸平行の場合
+                    if (balconyWesternContact[0].y == balconyWesternContact[1].y) {
+                        parallelX = true;
                     }
+                    //接する辺がy軸平行の場合
+                    else if (balconyWesternContact[0].x == balconyWesternContact[1].x) {
+                        parallelY = true;
+                    }
+                }
             }
 
             //x軸平行の場合
@@ -928,11 +1130,20 @@ public class Packing : CreateRoom
             float hallwayLengthRatio = hallwayLength / dwellingLength;
             //廊下の長さの割合のリストに追加
             hallwayLengthRatioList.Add(i, hallwayLengthRatio);
+            */
+        }
+
+        Debug.Log("allPattern.Count: " + allPattern.Count);
+
+        //洋室の面積の割合に洋室の形状の割合を掛ける
+        var westernSizeShapeRatioList = new Dictionary<int, float>();
+        foreach (KeyValuePair<int, float> kvp in westernSizeRatioList) {
+            westernSizeShapeRatioList.Add(kvp.Key, kvp.Value * westernShapeRatioList[kvp.Key]);
         }
 
         //評価指標の辞書を評価指標の降順にソート
-        var westernSizeRatioListSort = westernSizeRatioList.OrderBy((x) => x.Value);
-        var hallwayLengthRatioListSort = hallwayLengthRatioList.OrderBy((x) => x.Value);
+        var westernSizeRatioListSort = westernSizeRatioList.OrderByDescending((x) => x.Value);
+        
 
         // ↓↓↓ここから先の手法は要検討
 
@@ -944,12 +1155,55 @@ public class Packing : CreateRoom
         
 
         /* 評価指標のリストをもとにパターンを絞る */
-        //全パターンのリストのうち，前から30個を選択
-        for (int i = 0; i < 30; i++) {
+        //全パターンのリストのうち，前から20個を選択
+        for (int i = 0; i < 20; i++) {
             selectedPattern.Add(allPatternSort[i]);
         }
 
         return selectedPattern;
+    }
+
+    /// <summary>
+    /// 2つの辞書が等しいかどうかを判定
+    /// </summary> 
+    /// <param name="dictionaryA">辞書A</param>
+    /// <param name="dictionaryB">辞書B</param>
+    /// <returns>2つの辞書が等しいときtrue, そうでないときfalse</returns>
+    public bool DictionaryEquals(Dictionary<string, Vector3[]> dictionaryA, Dictionary<string, Vector3[]> dictionaryB) {
+        //判定結果
+        bool flag = false;
+
+        //辞書の要素数が異なる場合
+        if (dictionaryA.Count != dictionaryB.Count) {
+            return flag;
+        }
+
+        //辞書のキーが異なる場合
+        foreach (string key in dictionaryA.Keys) {
+            if (!dictionaryB.ContainsKey(key)) {
+                return flag;
+            }
+        }
+
+        //辞書の値の長さ異なる場合
+        foreach (string key in dictionaryA.Keys) {
+            if (dictionaryA[key].Length != dictionaryB[key].Length) {
+                return flag;
+            }
+        }
+
+        //辞書の値が異なる場合
+        foreach (string key in dictionaryA.Keys) {
+            for (int i = 0; i < dictionaryA[key].Length; i++) {
+                if (dictionaryA[key][i] != dictionaryB[key][i]) {
+                    return flag;
+                }
+            }
+        }
+
+        flag = true;
+
+        return flag;
     }
 
     /***
@@ -1275,8 +1529,10 @@ public class Packing : CreateRoom
         }
 
         /* 外側の頂点と内側の頂点をくっつける */
-        int outside_end_index = newOuter.IndexOf(end_coordinates);
-        newOuter.InsertRange(outside_end_index, needInside);
+        if (needInside.Count != 0) {
+            int outside_end_index = newOuter.IndexOf(end_coordinates);
+            newOuter.InsertRange(outside_end_index, needInside);
+        }
 
         /* 要らない座標（頂点を含まない辺上にある座標）を除く */
         for (int i = 0; i < newOuter.Count; i++) {
@@ -1294,6 +1550,18 @@ public class Packing : CreateRoom
 
 
         return newOuter.ToArray();
+    }
+
+    public Vector3[] NumberClean (Vector3[] coodinates) {
+        //返すリスト
+        Vector3[] cleanCoodinates = new Vector3[coodinates.Length];
+
+        for (int i = 0; i < coodinates.Length; i++) {
+            cleanCoodinates[i].x = (float) Math.Truncate(coodinates[i].x );
+            cleanCoodinates[i].y = (float) Math.Truncate(coodinates[i].y );
+        }
+
+        return cleanCoodinates;
     }
 
     /***
@@ -1490,25 +1758,43 @@ public class Packing : CreateRoom
         return new float[] {0.00f, 0.00f, 0.00f};
     }
 
-    /***
+    /// <summary>
+    /// 辺Aから辺Aと辺Bの重なっている部分を除いた辺を返す
+    /// </summary> 
+    /// <param name="sideA">辺Aの座標</param>
+    /// <param name="sideB">辺Bの座標</param>
+    /// <returns>辺Aから辺Aと辺Bの重なっている部分を除いた辺の座標</returns>
+    public List<Vector3[]> SideSubstraction(Vector3[] sideA, Vector3[] sideB) {
+        List<Vector3[]> result = new List<Vector3[]>();
 
-    重なった2本の線分から重なっていない座標を求める
+        //辺Aと辺Bの重なっている部分
+        Vector3[] overlap = ContactSide(sideA, sideB);
 
-    ***/
-    public Vector3[] SideSubstraction(Vector3[] sideA, Vector3[] sideB) {
-        Vector3[] result = sideA;
+        //重なっている部分がある場合
+        if (!ZeroJudge(overlap)) {
+            //辺Aと重なっている部分の座標の順が逆の場合
+            if (Vector3.Dot(sideA[1] - sideA[0], overlap[1] - overlap[0]) < 0) {
+                //重なっている部分の座標を入れ替え
+                Array.Reverse(overlap);
+            }
 
-        if (sideA[0] == sideB[0]) {
-            result = new Vector3[] {sideA[1], sideB[1]};
+            /* 重なっている部分を除いた辺の座標を返す */
+            if (sideA[0] == overlap[0] && sideA[1] == overlap[1]) {
+                result.Add(new Vector3[] {Vector3.zero, Vector3.zero});
+            }
+            else if (sideA[0] == overlap[0]) {
+                result.Add(new Vector3[] {overlap[1], sideA[1]});
+            }
+            else if (sideA[1] == overlap[1]) {
+                result.Add(new Vector3[] {sideA[0], overlap[0]});
+            }
+            else {
+                result.Add(new Vector3[] {sideA[0], overlap[0]});
+                result.Add(new Vector3[] {overlap[1], sideA[1]});
+            }
         }
-        else if (sideA[0] == sideB[1]) {
-            result = new Vector3[] {sideA[1], sideB[0]};
-        }
-        else if (sideA[1] == sideB[0]) {
-            result = new Vector3[] {sideA[0], sideB[1]};
-        }
-        else if (sideA[1] == sideB[1]) {
-            result = new Vector3[] {sideA[0], sideB[0]};
+        else {
+            result.Add(sideA);
         }
 
         return result;

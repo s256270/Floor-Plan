@@ -14,10 +14,21 @@ public class FloorPlanner : CreateRoom
 
     void Start()
     {
-        //outerRooms = new GameObject[]{pm.plan[0], pm.plan[1], pm.plan[2], pm.plan[3]};
+        //プラン図を表示
+        /*
+        for (int i = 0; i < pm.plan.Count; i++) {
+            foreach (string key in pm.plan[i].Keys) {
+                createRoom(key, pm.plan[i][key]);
+            }
+        }
+        */
+
+        pm.planMake2();
+
+        outerRooms = new GameObject[]{pm.plan2[0], pm.plan2[1], pm.plan2[2], pm.plan2[3]};
 
         
-        //placement();
+        placement();
 
         /*
         //水回り(仮)
@@ -73,7 +84,7 @@ public class FloorPlanner : CreateRoom
 
         placeEntrance();
 
-        placeWestern();
+        //placeWestern();
     }
     
     /***
@@ -689,15 +700,6 @@ public class FloorPlanner : CreateRoom
             createRoom("WesternOf" + outerRooms[i].name, western);
             //createRoom("WesternOf" + outerRooms[i].name, western, Color.yellow);
         }
-    }
-
-    /***
-
-    リビング・ダイニング(未完成)
-    
-    ***/
-    public void placeLd(GameObject outerRoom) {
-        
     }
 
     /***

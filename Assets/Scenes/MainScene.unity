@@ -167,8 +167,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ab1da3963848a94397fce9df62d6e9f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pm: {fileID: 1103580612}
-  fp: {fileID: 0}
+  fpd: {fileID: 0}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -297,7 +296,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76e7d34fd4552f948b90a5478251167c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  roomNamePrefab: {fileID: 0}
   lineRenderer: {fileID: 0}
   pm: {fileID: 1103580612}
   pa: {fileID: 1838514748}
@@ -330,8 +328,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd3a80385ee0fc2439f8ecf2f545a867, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  roomNamePrefab: {fileID: 0}
   lineRenderer: {fileID: 0}
+  plan2: []
 --- !u!4 &1103580613
 Transform:
   m_ObjectHideFlags: 0
@@ -391,6 +389,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4481d9aad810784a8c2f12e8332e4f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  pm: {fileID: 0}
+  fp: {fileID: 0}
+  cr: {fileID: 0}
 --- !u!1 &1227615353
 GameObject:
   m_ObjectHideFlags: 0
@@ -456,18 +457,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac2b54f2cbb70aa4c80f2270fa359731, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  roomNamePrefab: {fileID: 0}
   lineRenderer: {fileID: 0}
   entrance_coordinate_x:
-  - {x: -600, y: 350, z: 0}
-  - {x: 600, y: 350, z: 0}
-  - {x: 600, y: -350, z: 0}
-  - {x: -600, y: -350, z: 0}
+  - {x: -750, y: 500, z: 0}
+  - {x: 750, y: 500, z: 0}
+  - {x: 750, y: -500, z: 0}
+  - {x: -750, y: -500, z: 0}
   entrance_coordinate_y:
-  - {x: -350, y: 600, z: 0}
-  - {x: 350, y: 600, z: 0}
-  - {x: 350, y: -600, z: 0}
-  - {x: -350, y: -600, z: 0}
+  - {x: -500, y: 750, z: 0}
+  - {x: 500, y: 750, z: 0}
+  - {x: 500, y: -750, z: 0}
+  - {x: -500, y: -750, z: 0}
   mbps_coordinate:
   - {x: -175, y: 500, z: 0}
   - {x: 175, y: 500, z: 0}

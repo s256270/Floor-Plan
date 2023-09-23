@@ -9,6 +9,6 @@ public class Main : MonoBehaviour
     void Start()
     {
         //間取図を表示
-        fpd.Display();
+        //fpd.Display();
     }
 }
