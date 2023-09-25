@@ -167,7 +167,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e22699bc130275743a4017ec54e7a8e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  roomNamePrefab: {fileID: 7307623743479807550, guid: 6c82e72c28bb4db408f7199d41ebafed, type: 3}
   lineRenderer: {fileID: 0}
   pa: {fileID: 1838514748}
 --- !u!1 &90122265
@@ -214,7 +213,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34b8da82accf819458a067e471eacdc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  lineRenderer: {fileID: 0}
   pack: {fileID: 80770710}
+  cr: {fileID: 0}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -396,7 +397,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac2b54f2cbb70aa4c80f2270fa359731, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  roomNamePrefab: {fileID: 0}
   lineRenderer: {fileID: 0}
   entrance_coordinate_x:
   - {x: -600, y: 350, z: 0}

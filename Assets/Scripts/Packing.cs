@@ -19,44 +19,97 @@ public class Packing : CreateRoom
 
     void Start()
     {   
-        //住戸作成
-        dwelling = new Vector3[]{new Vector3(-3400, 1900, 0), new Vector3(4400, 1900, 0), new Vector3(4400, -1900, 0), new Vector3(-3400, -1900, 0)};
-        createRoom("dwelling", dwelling);
+        for (int i = 0; i < 2; i++) {
+            //Debug.Log("最初のi: " + i);
+            //住戸作成
+            dwelling = new Vector3[]{new Vector3(-3400, 1900, 0), new Vector3(4400, 1900, 0), new Vector3(4400, -1900, 0), new Vector3(-3400, -1900, 0)};
+            createRoom("dwelling", dwelling);
 
-        //バルコニー作成
-        balcony = new Vector3[]{new Vector3(-4400, 1100, 0), new Vector3(-3400, 1100, 0), new Vector3(-3400, -1900, 0), new Vector3(-4400, -1900, 0)};
-        createRoom("balcony", balcony);
-        
-        //玄関作成
-        entrance = new Vector3[]{new Vector3(3400, -50, 0), new Vector3(4400, -50, 0), new Vector3(4400, -1550, 0), new Vector3(3400, -1550, 0)};
-        createRoom("entrance", entrance);
-        //MBPS作成
-        mbps = new Vector3[]{new Vector3(3400, -1550, 0), new Vector3(4400, -1550, 0), new Vector3(4400, -1900, 0), new Vector3(3400, -1900, 0)};
-        createRoom("mbps", mbps);
+            //バルコニー作成
+            balcony = new Vector3[]{new Vector3(-4400, 1100, 0), new Vector3(-3400, 1100, 0), new Vector3(-3400, -1900, 0), new Vector3(-4400, -1900, 0)};
+            createRoom("balcony", balcony);
+            
+            if (i == 0) {
+                //玄関作成
+                entrance = new Vector3[]{new Vector3(3400, -50, 0), new Vector3(4400, -50, 0), new Vector3(4400, -1550, 0), new Vector3(3400, -1550, 0)};
+                //createRoom("entrance", entrance);
+            } else if (i == 1) {
+                Destroy(GameObject.Find("entrance"));
+                //玄関作成
+                entrance = new Vector3[]{new Vector3(3400, 1900, 0), new Vector3(4400, 1900, 0), new Vector3(4400, 400, 0), new Vector3(3400, 400, 0)};
+                //createRoom("entrance", entrance);
+            }
+            //MBPS作成
+            mbps = new Vector3[]{new Vector3(3400, -1550, 0), new Vector3(4400, -1550, 0), new Vector3(4400, -1900, 0), new Vector3(3400, -1900, 0)};
+            //createRoom("mbps", mbps);
 
-        //水回り範囲の決定
-        //住戸から玄関を除いた範囲
-        range = FrameChange(dwelling, entrance);
-        //さらにMBPSを除いた範囲
-        range = FrameChange(range, mbps);
-        
-        
-        if (true) {
-            //リストの作成
-            allPattern = PlacementListCreate(new int[]{0, 1, 2, 3});
-            allPattern = Evaluation(allPattern);
-        } else {
-            //初めの方だけリストの作成
-            allPattern = PlacementListCreate(new int[]{0, 1, 2, 3}, 0, 0);
+            //水回り範囲の決定
+            range = dwelling;
+            //住戸から玄関を除いた範囲
+            range = FrameChange(dwelling, entrance);
+            //さらにMBPSを除いた範囲
+            range = FrameChange(range, mbps);
+            
+            if (true) {
+                //リストの作成
+                allPattern.AddRange(PlacementListCreate(new int[]{0, 1, 2, 3}));
+            } else {
+                //初めの方だけリストの作成
+                allPattern = PlacementListCreate(new int[]{0, 1, 2, 3}, 0, 0);
+            }
+
+            //玄関とMBPSを追加
+            for (int j = 0; j < allPattern.Count; j++) {
+                if (!allPattern[j].ContainsKey("Entrance")) {
+                    allPattern[j].Add("Entrance", entrance);
+                }
+                if (!allPattern[j].ContainsKey("Mbps")) {
+                    allPattern[j].Add("Mbps", mbps);
+                }
+            }
         }
-        
+
+        allPattern = Evaluation(allPattern);
         
         limit = allPattern.Count;
         Debug.Log("総パターン数：" + limit);
+
+        /*
+        //全パターンを一度に表示
+        //カメラサイズ13000がちょうどいい（普段は2600）
+        GameObject.Find("Main Camera").GetComponent<Camera>().orthographicSize = 13000;
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 4; j++) {
+                foreach (string roomName in allPattern[i + j * 5].Keys) {
+                    if (j == 0) {
+                        createRoom(roomName, CorrectCoordinates(allPattern[i + j * 5][roomName], new Vector3(10000f * (i - 2), 3800 * 2.25f, 0)));
+                        createRoom("dwelling", CorrectCoordinates(dwelling, new Vector3(10000f * (i - 2), 3800 * 2.25f, 0)));
+                        createRoom("balcony", CorrectCoordinates(balcony, new Vector3(10000f * (i - 2), 3800 * 2.25f, 0)));
+                    }
+                    else if (j == 1) {
+                        createRoom(roomName, CorrectCoordinates(allPattern[i + j * 5][roomName], new Vector3(10000f * (i - 2), 3800 * 0.75f, 0)));
+                        createRoom("dwelling", CorrectCoordinates(dwelling, new Vector3(10000f * (i - 2), 3800 * 0.75f, 0)));
+                        createRoom("balcony", CorrectCoordinates(balcony, new Vector3(10000f * (i - 2), 3800 * 0.75f, 0)));
+                    }
+                    else if (j == 2) {
+                        createRoom(roomName, CorrectCoordinates(allPattern[i + j * 5][roomName], new Vector3(10000f * (i - 2), 3800 * -0.75f, 0)));
+                        createRoom("dwelling", CorrectCoordinates(dwelling, new Vector3(10000f * (i - 2), 3800 * -0.75f, 0)));
+                        createRoom("balcony", CorrectCoordinates(balcony, new Vector3(10000f * (i - 2), 3800 * -0.75f, 0)));
+                    }
+                    else if (j == 3) {
+                        createRoom(roomName, CorrectCoordinates(allPattern[i + j * 5][roomName], new Vector3(10000f * (i - 2), 3800 * -2.25f, 0)));
+                        createRoom("dwelling", CorrectCoordinates(dwelling, new Vector3(10000f * (i - 2), 3800 * -2.25f, 0)));
+                        createRoom("balcony", CorrectCoordinates(balcony, new Vector3(10000f * (i - 2), 3800 * -2.25f, 0)));
+                    }
+                }
+            }
+        }
+        */
     }
 
     void Update()
     {
+        
         if (Input.GetKeyDown(KeyCode.Return)) {
             if (count < limit) {
                 Debug.Log((count+1) + "パターン目");
@@ -72,6 +125,9 @@ public class Packing : CreateRoom
                 }
                 if (GameObject.Find("Kitchen")) {
                     Destroy(GameObject.Find("Kitchen"));
+                }
+                if (GameObject.Find("Entrance")) {
+                    Destroy(GameObject.Find("Entrance"));
                 }
                 if (GameObject.Find("Western")) {
                     Destroy(GameObject.Find("Western"));
@@ -97,6 +153,11 @@ public class Packing : CreateRoom
                         //createRoom(roomName, currentPattern[roomName], Color.gray);
                     }
                     if (roomName == "Western") {
+                        Debug.Log("面積の割合： " + ((areaCalculation(currentPattern[roomName]) / areaCalculation(dwelling)) * 100) + "%");
+                        createRoom(roomName, currentPattern[roomName]);
+                        //createRoom(roomName, currentPattern[roomName], Color.yellow);
+                    }
+                    if (roomName == "Entrance") {
                         createRoom(roomName, currentPattern[roomName]);
                         //createRoom(roomName, currentPattern[roomName], Color.yellow);
                     }
@@ -106,6 +167,7 @@ public class Packing : CreateRoom
                 Debug.Log("終了");
             }
         }
+        
     }
 
     //リストの作成
@@ -124,7 +186,7 @@ public class Packing : CreateRoom
                     continue;
                 }
 
-                /* 洋室あり */ 
+                /* 洋室あり */
                 List<Dictionary<string, Vector3[]>> wetAreasResult = placement(wetAreasAllPermutation[i], rotationAllPattern[j]);
                 var westernResult = new List<Dictionary<string, Vector3[]>>();
                 for (int k = 0; k < wetAreasResult.Count; k++) {
@@ -299,6 +361,7 @@ public class Packing : CreateRoom
                 for (int k = 1; k < differentKeys.Length + 1; k++) {
                     string[] keysToRemove = differentKeys[^k..];
                     placementResult = RemoveDictionaryElement(placementResult, keysToRemove);
+                    //重複がある場合は追加しない
                     for (int l = 0; l < result.Count; l++) {
                         if (DictionaryEquals(result[l], placementResult)) {
                             break;
@@ -933,17 +996,6 @@ public class Packing : CreateRoom
         var westernShapeRatioList = new Dictionary<int, float>(); //全パターンのリストと対応付けるためのインデックスと洋室の形状の割合の辞書
         //var hallwayLengthRatioList = new Dictionary<int, float>(); //全パターンのリストと対応付けるためのインデックスと廊下の長さの割合の辞書
 
-        //重複を除く
-        for (int i = 0; i < allPattern.Count; i++) {
-            for (int j = i + 1; j < allPattern.Count; j++) {
-                if (DictionaryEquals(allPattern[i], allPattern[j])) {
-                    allPattern.RemoveAt(j);
-                    j--;
-                }
-            }
-        }
-
-        Debug.Log("allPattern.Count: " + allPattern.Count);
 
         Vector3[] hallway = range;
 
@@ -953,7 +1005,7 @@ public class Packing : CreateRoom
             //Debug.Log("i: " + i);
 
             //廊下の座標
-            hallway = range;
+            hallway = dwelling;
 
             //リストを整える
             foreach (string roomName in allPattern[i].Keys) {
@@ -1135,10 +1187,13 @@ public class Packing : CreateRoom
 
         Debug.Log("allPattern.Count: " + allPattern.Count);
 
+        /* 得点の算出 */
         //洋室の面積の割合に洋室の形状の割合を掛ける
         var westernSizeShapeRatioList = new Dictionary<int, float>();
+        float coefficient = 1.0f;
         foreach (KeyValuePair<int, float> kvp in westernSizeRatioList) {
             westernSizeShapeRatioList.Add(kvp.Key, kvp.Value * westernShapeRatioList[kvp.Key]);
+            //westernSizeShapeRatioList.Add(kvp.Key, kvp.Value - coefficient * westernShapeRatioList[kvp.Key]);
         }
 
         //評価指標の辞書を評価指標の降順にソート
@@ -1156,7 +1211,7 @@ public class Packing : CreateRoom
 
         /* 評価指標のリストをもとにパターンを絞る */
         //全パターンのリストのうち，前から20個を選択
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 20/*allPatternSort.Count*/; i++) {
             selectedPattern.Add(allPatternSort[i]);
         }
 
