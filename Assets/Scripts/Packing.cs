@@ -604,7 +604,7 @@ public class Packing : CreateRoom
                         }
                     }
                 }
-                else if (current_side[0].y == current_side[0].y) {
+                else if (current_side[0].y == current_side[1].y) {
                     float max = current_room[0].x;
                     for (int k = 1; k < current_room.Length; k++) {
                         if (max < current_room[k].x) {

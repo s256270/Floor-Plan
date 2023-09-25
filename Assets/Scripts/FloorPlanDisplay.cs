@@ -4,30 +4,29 @@ using UnityEngine;
 
 public class FloorPlanDisplay : MonoBehaviour
 {
-    [SerializeField] PlanMaker pm;
+    [SerializeField] PlanReader pr;
     [SerializeField] FloorPlanner fp;
     [SerializeField] CreateRoom cr;
-
-    GameObject floorPlan; //間取図のオブジェクト
     
     //間取図を表示
     public void Display() {
-        floorPlan = new GameObject("FloorPlan");
-        
         /*
-        //プラン図を表示
-        for (int i = 0; i < pm.plan.Count; i++) {
-            int loopCounter = 0;
-            foreach (KeyValuePair<string, Vector3[]> room in pm.plan[i]) {
-                string objectName = "";
-                //ここだけで作りたい人生だった  
-                if (loopCounter == 0) {
-                    a = new GameObject(room.Key);
-                }
-                GameObject b = cr.createRoom(room.Key, room.Value);
-                b.transform.SetParent(a.transform);
+        
+        //間取図オブジェクトを作成
+        GameObject floorPlan = new GameObject("FloorPlan");
+        
+
+        foreach (KeyValuePair<string, Dictionary<string, Vector3[]>> space in pr.plan) {
+            //大まかなスペースごとのオブジェクトを作成
+            GameObject spaceObject = new GameObject(space.Key);
+            //間取図オブジェクトの子オブジェクトにする
+            spaceObject.transform.SetParent(floorPlan.transform);
+
+            foreach (KeyValuePair<string, Vector3[]> spaceElements in space.Value) {
+                GameObject spaceElementsObject = cr.createRoom(spaceElements.Key, spaceElements.Value);
+                spaceElementsObject.transform.SetParent(spaceObject.transform);
             }
-            a.transform.SetParent(floorPlan.transform);
+            
         }
         */
     }

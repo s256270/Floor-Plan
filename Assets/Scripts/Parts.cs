@@ -23,7 +23,7 @@ public class Parts : CreateRoom
 
     //MBPSの座標
     [HideInInspector]
-    public Vector3[] mbps_coordinate = new Vector3[]{
+    public Vector3[] twoDwellingMbpsCoordinates = new Vector3[]{
         new Vector3(-175, 500, 0),
         new Vector3(175, 500, 0),
         new Vector3(175, -500, 0),
@@ -31,7 +31,7 @@ public class Parts : CreateRoom
     };
 
     [HideInInspector]
-    public Vector3[] mbps_coordinate2 = new Vector3[]{
+    public Vector3[] oneDwellingMbpsCoordinates = new Vector3[]{
         new Vector3(-350, 350, 0),
         new Vector3(350, 350, 0),
         new Vector3(350, -350, 0),
