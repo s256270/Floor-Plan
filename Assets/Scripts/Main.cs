@@ -21,11 +21,6 @@ public class Main : MonoBehaviour
 
         allPattern.AddRange(fp.Placement());
 
-        Debug.Log(DictionaryEquals(allPattern[0]["Dwelling1"], allPattern[2]["Dwelling1"]));
-        Debug.Log(DictionaryEquals(allPattern[0]["Dwelling2"], allPattern[2]["Dwelling2"]));
-        Debug.Log(DictionaryEquals(allPattern[0]["Dwelling3"], allPattern[2]["Dwelling3"]));
-        Debug.Log(DictionaryEquals(allPattern[0]["Dwelling4"], allPattern[2]["Dwelling4"]));
-
         //重複を削除
         allPattern = RemoveDuplicates(allPattern);
 
