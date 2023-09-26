@@ -1250,7 +1250,11 @@ public class Packing : CreateRoom
         //辞書の値が異なる場合
         foreach (string key in dictionaryA.Keys) {
             for (int i = 0; i < dictionaryA[key].Length; i++) {
-                if (dictionaryA[key][i] != dictionaryB[key][i]) {
+                if (dictionaryA[key][i].x != dictionaryB[key][i].x) {
+                    return flag;
+                }
+
+                if (dictionaryA[key][i].y != dictionaryB[key][i].y) {
                     return flag;
                 }
             }
@@ -1612,8 +1616,8 @@ public class Packing : CreateRoom
         Vector3[] cleanCoodinates = new Vector3[coodinates.Length];
 
         for (int i = 0; i < coodinates.Length; i++) {
-            cleanCoodinates[i].x = (float) Math.Truncate(coodinates[i].x );
-            cleanCoodinates[i].y = (float) Math.Truncate(coodinates[i].y );
+            cleanCoodinates[i].x = (float) Math.Truncate(coodinates[i].x);
+            cleanCoodinates[i].y = (float) Math.Truncate(coodinates[i].y);
         }
 
         return cleanCoodinates;

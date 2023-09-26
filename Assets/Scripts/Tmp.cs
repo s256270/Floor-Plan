@@ -239,4 +239,20 @@ public class Demo : MonoBehaviour
         plan.Add(GameObject.Find("Bicycle Parking"));
     }
     */
+
+    /*
+    //配置結果確認用
+    public void Check(Dictionary<string, Dictionary<string, Vector3[]>> pattern) {
+        foreach (KeyValuePair<string, Dictionary<string, Vector3[]>> space in pattern) {
+            Debug.Log(space.Key + "の要素");
+            foreach (KeyValuePair<string, Vector3[]> spaceElements in space.Value) {
+                Debug.Log("スペース名: " + spaceElements.Key);
+
+                for (int i = 0; i < spaceElements.Value.Length; i++) {
+                    Debug.Log("座標" + i + ": " + spaceElements.Value[i]);
+                }
+            }
+        }
+    }
+    */
 }

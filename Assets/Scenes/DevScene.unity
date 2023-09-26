@@ -167,7 +167,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ab1da3963848a94397fce9df62d6e9f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fpd: {fileID: 1144593005}
+  pr: {fileID: 1103580612}
+  fp: {fileID: 780180544}
+  cr: {fileID: 643341035}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -282,7 +284,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1227615354}
-  m_RootOrder: 6
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &643341035
 MonoBehaviour:
@@ -327,7 +329,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1227615354}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &780180544
 MonoBehaviour:
@@ -342,8 +344,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lineRenderer: {fileID: 0}
-  pr: {fileID: 0}
+  pr: {fileID: 1103580612}
   pa: {fileID: 1838514748}
+  cm: {fileID: 1154823184}
+  ce: {fileID: 1903703920}
 --- !u!1 &1103580611
 GameObject:
   m_ObjectHideFlags: 0
@@ -386,9 +390,9 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1227615354}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1144593003
+--- !u!1 &1139609500
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -396,45 +400,29 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1144593004}
-  - component: {fileID: 1144593005}
+  - component: {fileID: 1139609501}
   m_Layer: 0
-  m_Name: FloorPlanDisPlay
+  m_Name: CreateWetareas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1144593004
+--- !u!4 &1139609501
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1144593003}
+  m_GameObject: {fileID: 1139609500}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 3625.8916, y: 724.8197, z: -90.70911}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1227615354}
-  m_RootOrder: 1
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1144593005
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1144593003}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e4481d9aad810784a8c2f12e8332e4f1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  pr: {fileID: 1103580612}
-  fp: {fileID: 0}
-  cr: {fileID: 643341035}
 --- !u!1 &1154823182
 GameObject:
   m_ObjectHideFlags: 0
@@ -465,7 +453,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1227615354}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1154823184
 MonoBehaviour:
@@ -479,6 +467,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15f2a54c247419144ac191615bfd88ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  lineRenderer: {fileID: 0}
+  pr: {fileID: 1103580612}
+  pa: {fileID: 1838514748}
+  cm: {fileID: 1154823184}
+  ce: {fileID: 1903703920}
 --- !u!1 &1227615353
 GameObject:
   m_ObjectHideFlags: 0
@@ -508,10 +501,11 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 452271978}
-  - {fileID: 1144593004}
   - {fileID: 1103580613}
   - {fileID: 780180543}
   - {fileID: 1154823183}
+  - {fileID: 1903703919}
+  - {fileID: 1139609501}
   - {fileID: 1838514749}
   - {fileID: 643341034}
   m_Father: {fileID: 0}
@@ -547,22 +541,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lineRenderer: {fileID: 0}
-  entrance_coordinate_x:
+  entranceCoordinates:
   - {x: -750, y: 500, z: 0}
   - {x: 750, y: 500, z: 0}
   - {x: 750, y: -500, z: 0}
   - {x: -750, y: -500, z: 0}
-  entrance_coordinate_y:
-  - {x: -500, y: 750, z: 0}
-  - {x: 500, y: 750, z: 0}
-  - {x: 500, y: -750, z: 0}
-  - {x: -500, y: -750, z: 0}
-  mbps_coordinate:
+  twoDwellingMbpsCoordinates:
   - {x: -175, y: 500, z: 0}
   - {x: 175, y: 500, z: 0}
   - {x: 175, y: -500, z: 0}
   - {x: -175, y: -500, z: 0}
-  mbps_coordinate2:
+  oneDwellingMbpsCoordinates:
   - {x: -350, y: 350, z: 0}
   - {x: 350, y: 350, z: 0}
   - {x: 350, y: -350, z: 0}
@@ -600,5 +589,54 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1227615354}
-  m_RootOrder: 5
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1903703918
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1903703919}
+  - component: {fileID: 1903703920}
+  m_Layer: 0
+  m_Name: CreateEntrance
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1903703919
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1903703918}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 3625.8916, y: 724.8197, z: -90.70911}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1227615354}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1903703920
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1903703918}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a04948b36410924cb658bbbb89e9cb4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lineRenderer: {fileID: 0}
+  pr: {fileID: 1103580612}
+  pa: {fileID: 1838514748}
+  cm: {fileID: 1154823184}
+  ce: {fileID: 1903703920}

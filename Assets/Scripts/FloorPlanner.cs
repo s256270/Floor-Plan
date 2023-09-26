@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,11 +6,12 @@ using UnityEngine;
 public class FloorPlanner : CreateRoom
 {
     [SerializeField] public PlanReader pr;
-    [SerializeField] CreateMbps cm;
     [SerializeField] public Parts pa;
+    [SerializeField] CreateMbps cm;
+    [SerializeField] CreateEntrance ce;
     
-    public List<Dictionary<string, Dictionary<string, Vector3[]>>> allPattern;
-    public Dictionary<string, Dictionary<string, Vector3[]>> plan;
+    public List<Dictionary<string, Dictionary<string, Vector3[]>>> allPattern = new List<Dictionary<string, Dictionary<string, Vector3[]>>>();
+    public Dictionary<string, Dictionary<string, Vector3[]>> plan = new Dictionary<string, Dictionary<string, Vector3[]>>();
     
     /// <summary>
     /// プランを入力すると部屋の配置を行い，間取図を作成する
@@ -17,210 +19,17 @@ public class FloorPlanner : CreateRoom
     /// <param name="plan">プラン図</param>
     /// <returns>間取図（それぞれの部屋名と座標がセットのリスト）</returns>
     public List<Dictionary<string, Dictionary<string, Vector3[]>>> Placement() {
-        plan = new Dictionary<string, Dictionary<string, Vector3[]>>(pr.plan);
+        //plan = new Dictionary<string, Dictionary<string, Vector3[]>>(pr.plan);
 
-        cm.PlaceMbps();
+        //全パターンの配置結果にMBPSを配置
+        allPattern = cm.PlaceMbps();
 
-        //PlaceEntrance();
+        //全パターンの配置結果に玄関を配置
+        allPattern = ce.PlaceEntrance(allPattern);
+
+        
 
         return allPattern;
-    }
-
-    /***
-
-    MBPSの配置
-
-    ***/
-    public void placeMbps() {
-        //MbPSが生成されているかを判別する配列
-        int[] mbpsExist = new int[outerRooms.Length];
-
-        /*2部屋にまたがるMBPSの配置開始 */
-        placeMbpsInTwoRoomsRoop(mbpsExist);
-
-        /*1部屋のみのMBPSの配置開始 */
-        placeMbpsInOneRoom(mbpsExist);
-        
-    }
-
-    public void placeMbpsInOneRoom(int[] mbpsExist) {
-        //階段室の1辺の座標
-        Vector3[] stairs_coordinate = coordinatesOfRoom(GameObject.Find("Stairs"));
-
-        for (int i = 0; i < mbpsExist.Length; i++) {
-            if (mbpsExist[i] != 1) {
-                //MBPSをくっつける階段室の辺を求める
-                Vector3 s1 = new Vector3(0, 0, 0);
-                Vector3 s2 = new Vector3(0, 0, 0);
-
-                for (int j = 0; j < stairs_coordinate.Length; j++) {
-                    Vector3[] contact_coodinates = contact(new Vector3[]{stairs_coordinate[j], stairs_coordinate[(j+1)%stairs_coordinate.Length]}, outerRooms[i]);
-                    Vector3[] zero = new Vector3[] {Vector3.zero, Vector3.zero};
-                    
-                    if ((contact_coodinates[0] != zero[0]) && (contact_coodinates[1] != zero[1])) {
-                        s1 = contact_coodinates[0];
-                        s2 = contact_coodinates[1];
-                    }
-                }
-       
-                for (int j = 0; j < pa.mbps_coordinate2.Length; j++) {
-                    if (positionalRelation(new Vector3[]{s1, s2}, new Vector3[]{pa.mbps_coordinate2[j], pa.mbps_coordinate2[(j+1)%pa.mbps_coordinate2.Length]})[2] == 1.00f) {
-                        float gap_x = positionalRelation(new Vector3[]{s1, s2}, new Vector3[]{pa.mbps_coordinate2[j], pa.mbps_coordinate2[(j+1)%pa.mbps_coordinate2.Length]})[0] - positionalRelation(new Vector3[]{s1, s2}, new Vector3[]{pa.mbps_coordinate2[j], pa.mbps_coordinate2[(j+1)%pa.mbps_coordinate2.Length]})[1];
-                        float gap_y = contact(new Vector3[]{s1, s2}, outerRooms[i])[0].y + pa.mbps_coordinate2[0].y;
-
-                        int need_count = 0;
-                        int act_count = 0;
-                        for (int k = 0; k < pa.mbps_coordinate2.Length; k++) {
-                            if ((pa.mbps_coordinate2[k] != pa.mbps_coordinate2[j]) && (pa.mbps_coordinate2[k] != pa.mbps_coordinate2[(j+1)%pa.mbps_coordinate2.Length])) {
-                                need_count++;
-                                if (CheckPoint(outerRooms[i], new Vector3(pa.mbps_coordinate2[k].x + gap_x, pa.mbps_coordinate2[k].y + gap_y, 0))) {
-                                    act_count++;
-                                } 
-                            }
-                        }
-
-                        if (need_count == act_count) {
-                            createRoom("MbpsOf" + outerRooms[i].name, pa.mbps_coordinate2);
-                            //createRoom("MbpsOf" + outerRooms[i].name, pa.mbps_coordinate2, Color.red);
-
-                            Vector3 mbps_pos = GameObject.Find("MbpsOf" + outerRooms[i].name).transform.position;
-
-                            mbps_pos.x += gap_x;
-                            mbps_pos.y += gap_y;
-                            
-                            GameObject.Find("MbpsOf" + outerRooms[i].name).transform.position = mbps_pos;
-
-                            mbpsExist[i] = 1;
-                        }                
-                    }
-                    else if (positionalRelation(new Vector3[]{s1, s2}, new Vector3[]{pa.mbps_coordinate2[j], pa.mbps_coordinate2[(j+1)%pa.mbps_coordinate2.Length]})[2] == 2.00f) {
-                        
-                    }
-                }
-            }
-        }
-    }
-
-    /***
-
-    玄関
-
-    ***/
-    public void placeEntrance() {
-        //階段室の1辺の座標
-        Vector3[] stairs_coordinate = coordinatesOfRoom(GameObject.Find("Stairs"));
-
-        for (int i = 0; i < outerRooms.Length; i++) {
-            //玄関をくっつける階段室の辺を求める
-            Vector3 s1 = new Vector3(0, 0, 0);
-            Vector3 s2 = new Vector3(0, 0, 0);
-
-            for (int j = 0; j < stairs_coordinate.Length; j++) {
-                Vector3[] contact_coodinates = contact(new Vector3[]{stairs_coordinate[j], stairs_coordinate[(j+1)%stairs_coordinate.Length]}, outerRooms[i]);
-                Vector3[] zero = new Vector3[] {Vector3.zero, Vector3.zero};
-                
-                if ((contact_coodinates[0] != zero[0]) && (contact_coodinates[1] != zero[1])) {
-                    s1 = contact_coodinates[0];
-                    s2 = contact_coodinates[1];
-                }
-            }
-
-            //MBPSの座標
-            Vector3[] mbps_coordinate = coordinatesOfRoom(GameObject.Find("MbpsOf" + outerRooms[i].name));
-
-            for (int j = 0; j < stairs_coordinate.Length; j++) {
-                Vector3[] contact_coodinates = contact(new Vector3[]{stairs_coordinate[j], stairs_coordinate[(j+1)%stairs_coordinate.Length]}, mbps_coordinate);
-                Vector3[] zero = new Vector3[] {Vector3.zero, Vector3.zero};
-                
-                if ((contact_coodinates[0] != zero[0]) && (contact_coodinates[1] != zero[1])) {
-                    if ((s1.x != contact_coodinates[0].x) || (s1.y != contact_coodinates[0].y)) {
-                        s2 = contact_coodinates[0];
-                    } else if ((s2.x != contact_coodinates[1].x) || (s2.y != contact_coodinates[1].y)) {
-                        s1 = contact_coodinates[1];
-                    }
-                }
-            }
-
-            for (int j = 0; j < pa.entrance_coordinate_x.Length; j++) {
-                //y軸平行
-                if (positionalRelation(new Vector3[]{s1, s2}, new Vector3[]{pa.entrance_coordinate_y[j], pa.entrance_coordinate_y[(j+1)%pa.entrance_coordinate_y.Length]})[2] == 1.00f) {
-                    float gap_x = positionalRelation(new Vector3[]{s1, s2}, new Vector3[]{pa.entrance_coordinate_y[j], pa.entrance_coordinate_y[(j+1)%pa.entrance_coordinate_y.Length]})[0] - positionalRelation(new Vector3[]{s1, s2}, new Vector3[]{pa.entrance_coordinate_y[j], pa.entrance_coordinate_y[(j+1)%pa.entrance_coordinate_y.Length]})[1];
-                    float gap_y = contact(new Vector3[]{s1, s2}, outerRooms[i])[0].y + Mathf.Abs(pa.entrance_coordinate_y[0].y);
-
-                    int need_count = 0;
-                    int act_count = 0;
-                    for (int k = 0; k < pa.entrance_coordinate_y.Length; k++) {
-                        if ((pa.entrance_coordinate_y[k] != pa.entrance_coordinate_y[j]) && (pa.entrance_coordinate_y[k] != pa.entrance_coordinate_y[(j+1)%pa.entrance_coordinate_y.Length])) {
-                            need_count++;
-                            if (CheckPoint(outerRooms[i], new Vector3(pa.entrance_coordinate_y[k].x + gap_x, pa.entrance_coordinate_y[k].y + gap_y, 0))) {
-                                act_count++;
-                            } 
-                        }
-                    }
-
-                    if (need_count == act_count) {
-                        createRoom("EntranceOf" + outerRooms[i].name, pa.entrance_coordinate_y);
-                        //createRoom("EntranceOf" + outerRooms[i].name, pa.entrance_coordinate_y, Color.blue);
-
-                        Vector3 entrance_pos = GameObject.Find("EntranceOf" + outerRooms[i].name).transform.position;
-
-                        entrance_pos.x += gap_x;
-                        entrance_pos.y += gap_y;
-                        
-                        GameObject.Find("EntranceOf" + outerRooms[i].name).transform.position = entrance_pos;
-                    }
-                }
-                //x軸平行
-                else if (positionalRelation(new Vector3[]{s1, s2}, new Vector3[]{pa.entrance_coordinate_x[j], pa.entrance_coordinate_x[(j+1)%pa.entrance_coordinate_x.Length]})[2] == 2.00f) {
-                    float gap_x = 0;
-                    float gap_x_A = s1.x + Mathf.Abs(pa.entrance_coordinate_x[0].x) + 1;
-                    float gap_x_B = s1.x - Mathf.Abs(pa.entrance_coordinate_x[0].x) - 1;
-                    float gap_y = positionalRelation(new Vector3[]{s1, s2}, new Vector3[]{pa.entrance_coordinate_x[j], pa.entrance_coordinate_x[(j+1)%pa.entrance_coordinate_x.Length]})[0] - positionalRelation(new Vector3[]{s1, s2}, new Vector3[]{pa.entrance_coordinate_x[j], pa.entrance_coordinate_x[(j+1)%pa.entrance_coordinate_x.Length]})[1];
-
-                    int need_count = 0;
-                    int act_count_A = 0;
-                    int act_count_B = 0;
-                    for (int k = 0; k < pa.entrance_coordinate_x.Length; k++) {
-                        if ((pa.entrance_coordinate_x[k] != pa.entrance_coordinate_x[j]) && (pa.entrance_coordinate_x[k] != pa.entrance_coordinate_x[(j+1)%pa.entrance_coordinate_x.Length])) {
-                            need_count++;
-                            if (CheckPoint(outerRooms[i], new Vector3(pa.entrance_coordinate_x[k].x + gap_x_A, pa.entrance_coordinate_x[k].y + gap_y, 0))) {
-                                act_count_A++;
-                            } 
-                            if (CheckPoint(outerRooms[i], new Vector3(pa.entrance_coordinate_x[k].x + gap_x_B, pa.entrance_coordinate_x[k].y + gap_y, 0))) {
-                                act_count_B++;
-                            }
-                        }
-                    }
-
-                    if (need_count == act_count_A) {
-                        gap_x = gap_x_A - 1;
-
-                        createRoom("EntranceOf" + outerRooms[i].name, pa.entrance_coordinate_x);
-                        //createRoom("EntranceOf" + outerRooms[i].name, pa.entrance_coordinate_x, Color.blue);
-
-                        Vector3 entrance_pos = GameObject.Find("EntranceOf" + outerRooms[i].name).transform.position;
-
-                        entrance_pos.x += gap_x;
-                        entrance_pos.y += gap_y;
-                        
-                        GameObject.Find("EntranceOf" + outerRooms[i].name).transform.position = entrance_pos;
-                    }
-                    if (need_count == act_count_B) {
-                        gap_x = gap_x_B + 1;
-
-                        createRoom("EntranceOf" + outerRooms[i].name, pa.entrance_coordinate_x);
-                        //createRoom("EntranceOf" + outerRooms[i].name, pa.entrance_coordinate_x, Color.blue);
-
-                        Vector3 entrance_pos = GameObject.Find("EntranceOf" + outerRooms[i].name).transform.position;
-
-                        entrance_pos.x += gap_x;
-                        entrance_pos.y += gap_y;
-                        
-                        GameObject.Find("EntranceOf" + outerRooms[i].name).transform.position = entrance_pos;
-                    }
-                }
-            }
-        }
     }
 
     /// <summary>
@@ -314,6 +123,48 @@ public class FloorPlanner : CreateRoom
     }
 
     /// <summary>
+    /// 辺Aから辺Aと辺Bの重なっている部分を除いた辺を返す
+    /// </summary> 
+    /// <param name="sideA">辺Aの座標</param>
+    /// <param name="sideB">辺Bの座標</param>
+    /// <returns>辺Aから辺Aと辺Bの重なっている部分を除いた辺の座標</returns>
+    public List<Vector3[]> SideSubstraction(Vector3[] sideA, Vector3[] sideB) {
+        List<Vector3[]> result = new List<Vector3[]>();
+
+        //辺Aと辺Bの重なっている部分
+        Vector3[] overlap = ContactSide(sideA, sideB);
+
+        //重なっている部分がある場合
+        if (!ZeroJudge(overlap)) {
+            //辺Aと重なっている部分の座標の順が逆の場合
+            if (Vector3.Dot(sideA[1] - sideA[0], overlap[1] - overlap[0]) < 0) {
+                //重なっている部分の座標を入れ替え
+                Array.Reverse(overlap);
+            }
+
+            /* 重なっている部分を除いた辺の座標を返す */
+            if (sideA[0] == overlap[0] && sideA[1] == overlap[1]) {
+                result.Add(new Vector3[] {Vector3.zero, Vector3.zero});
+            }
+            else if (sideA[0] == overlap[0]) {
+                result.Add(new Vector3[] {overlap[1], sideA[1]});
+            }
+            else if (sideA[1] == overlap[1]) {
+                result.Add(new Vector3[] {sideA[0], overlap[0]});
+            }
+            else {
+                result.Add(new Vector3[] {sideA[0], overlap[0]});
+                result.Add(new Vector3[] {overlap[1], sideA[1]});
+            }
+        }
+        else {
+            result.Add(sideA);
+        }
+
+        return result;
+    }
+
+    /// <summary>
     /// 多角形が別の多角形の内部（辺上も可）にあるかどうかの判定
     /// </summary> 
     /// <param name="outer">外側にあってほしい多角形の座標配列</param>
@@ -398,6 +249,24 @@ public class FloorPlanner : CreateRoom
     }
 
     /// <summary>
+    /// ある点がある線分上にあるかどうかの判定
+    /// </summary> 
+    /// <param name="side">線分の端点の座標配列</param>
+    /// <param name="point">判定する点の座標</param>
+    /// <returns>点が線分上にある場合True，ない場合Flase</returns>
+    public bool OnLineSegment(Vector3[] side, Vector3 point) {
+        if ((side[0].x <= point.x && point.x <= side[1].x) || (side[1].x <= point.x && point.x <= side[0].x)) {
+            if ((side[0].y <= point.y && point.y <= side[1].y) || (side[1].y <= point.y && point.y <= side[0].y)) {
+                if ((point.y * (side[0].x - side[1].x)) + (side[0].y * (side[1].x - point.x)) + (side[1].y * (point.x - side[0].x)) == 0) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
     /// 図形に対する点の内外判定
     /// </summary> 
     /// <param name="points">図形の座標配列</param>
@@ -450,5 +319,68 @@ public class FloorPlanner : CreateRoom
         }
 
         return wn != 0;
+    }
+
+    /// <summary>
+    /// 上書きを防ぐための複製
+    /// </summary> 
+    /// <param name="originalDictionary">複製したい辞書</param>
+    /// <returns>複製したい辞書に影響を与えない同じ内容の辞書を返す</returns>
+    public Dictionary<string, Dictionary<string, Vector3[]>> DuplicateDictionary(Dictionary<string, Dictionary<string, Vector3[]>> originalDictionary) {
+        var result = new Dictionary<string, Dictionary<string, Vector3[]>>();
+
+        foreach (KeyValuePair<string, Dictionary<string, Vector3[]>> space in originalDictionary) {
+            var spaceResult = new Dictionary<string, Vector3[]>();
+
+            foreach (KeyValuePair<string, Vector3[]> spaceElements in space.Value) {
+                spaceResult.Add(spaceElements.Key, spaceElements.Value);
+            }
+
+            result.Add(space.Key, spaceResult);
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// 上書きを防ぐための複製
+    /// </summary> 
+    /// <param name="originalList">複製したいリスト</param>
+    /// <returns>複製したいリストに影響を与えない同じ内容のリストを返す</returns>
+    public List<Dictionary<string, Dictionary<string, Vector3[]>>> DuplicateList(List<Dictionary<string, Dictionary<string, Vector3[]>>> originalList) {
+        var result = new List<Dictionary<string, Dictionary<string, Vector3[]>>>();
+
+        foreach (Dictionary<string, Dictionary<string, Vector3[]>> originalDictionary in originalList) {
+            var dictionaryResult = new Dictionary<string, Dictionary<string, Vector3[]>>();
+
+            foreach (KeyValuePair<string, Dictionary<string, Vector3[]>> space in originalDictionary) {
+                var spaceResult = new Dictionary<string, Vector3[]>();
+
+                foreach (KeyValuePair<string, Vector3[]> spaceElements in space.Value) {
+                    spaceResult.Add(spaceElements.Key, spaceElements.Value);
+                }
+
+                dictionaryResult.Add(space.Key, spaceResult);
+            }
+
+            result.Add(dictionaryResult);
+        }
+
+        return result;
+    }
+
+    //配置結果確認用
+    public void Check(Dictionary<string, Dictionary<string, Vector3[]>> pattern) {
+        foreach (KeyValuePair<string, Dictionary<string, Vector3[]>> space in pattern) {
+            Debug.Log(space.Key + "の要素");
+            foreach (KeyValuePair<string, Vector3[]> spaceElements in space.Value) {
+                Debug.Log("スペース名: " + spaceElements.Key);
+                /*
+                for (int i = 0; i < spaceElements.Value.Length; i++) {
+                    Debug.Log("座標" + i + ": " + spaceElements.Value[i]);
+                }
+                */
+            }
+        }
     }
 }

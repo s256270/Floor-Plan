@@ -7,7 +7,7 @@ public class CreateMbps : FloorPlanner
     //階段室の座標
     Vector3[] stairsCoordinates;
     //住戸の座標のリスト
-    List<Vector3[]> dwellingCoordinates;
+    List<Vector3[]> dwellingCoordinates = new List<Vector3[]>();
 
     //階段室のある1辺に接している住戸（dwellingCoordinatesのインデックスで管理）の組のリスト
     List<List<int>> contactStairs = new List<List<int>>();
@@ -20,17 +20,16 @@ public class CreateMbps : FloorPlanner
     /// </summary> 
     /// <param name="plan">プラン図</param>
     /// <returns>間取図（それぞれの部屋名と座標がセットのリスト）</returns>
-    public void PlaceMbps() {
+    public List<Dictionary<string, Dictionary<string, Vector3[]>>> PlaceMbps() {
         //配置結果のリスト
         var result = new List<Dictionary<string, Dictionary<string, Vector3[]>>>();
 
         /* 必要な座標の準備 */
         //階段室の座標のみを抜き出し
-        stairsCoordinates = plan["Stairs"]["Stairs"];
+        stairsCoordinates = pr.plan["Stairs"]["Stairs"];
 
         //住戸座標のリストを作成
         makeDwellingCoordinatesList();
-
 
         /* 2部屋にまたがるMBPSの配置開始 */
         result = placeMbpsInTwoDwellings();
@@ -38,13 +37,15 @@ public class CreateMbps : FloorPlanner
         /* 1部屋のみのMBPSの配置開始 */
         result = placeMbpsInOneDwelling(result);
 
-        //配置結果をFloorPlannerに渡す
-        allPattern.AddRange(result);
+        return result;
     }
 
     public List<Dictionary<string, Dictionary<string, Vector3[]>>> placeMbpsInTwoDwellings() {
         //配置結果のリスト
         var result = new List<Dictionary<string, Dictionary<string, Vector3[]>>>();
+
+        //2住戸にまたがるMBPSの全配置パターンを作成
+        maketwoDwellingsMbpsAllPatternList();
 
         //2住戸にまたがるMBPSの全配置パターンで配置
         for (int i = 0; i < twoDwellingsMbpsAllPattern.Count; i++) {
@@ -124,23 +125,26 @@ public class CreateMbps : FloorPlanner
                         
                         //2つの住戸が接するとき
                         if (!ZeroJudge(contactDwellingCoodinates)) {
-                            //x座標をContactGapの結果に，y座標を2つの住戸が接する辺の上に接するようにずらしてみる
-                            if (JudgeInside(currentDwellingCoordinates, CorrectCoordinates(mbpsCoordinates, new Vector3(ContactGap(mbpsCoordinates, contactStairsCoodinates)[j], contactDwellingCoodinates[0].y + Mathf.Abs(mbpsCoordinates[0].y), 0)))) {
-                                gapX = ContactGap(mbpsCoordinates, contactStairsCoodinates)[j];
-                                gapY = contactStairsCoodinates[0].y + Mathf.Abs(mbpsCoordinates[0].y);
+                            //2つの住戸が接する辺が階段室の辺に触れているとき
+                            if (OnLineSegment(contactStairsCoodinates, contactDwellingCoodinates[0]) || OnLineSegment(contactStairsCoodinates, contactDwellingCoodinates[1])) {
+                                //x座標をContactGapの結果に，y座標を2つの住戸が接する辺の上に接するようにずらしてみる
+                                if (JudgeInside(currentDwellingCoordinates, CorrectCoordinates(mbpsCoordinates, new Vector3(ContactGap(mbpsCoordinates, contactStairsCoodinates)[j], contactDwellingCoodinates[0].y + Mathf.Abs(mbpsCoordinates[0].y), 0)))) {
+                                    gapX = ContactGap(mbpsCoordinates, contactStairsCoodinates)[j];
+                                    gapY = contactDwellingCoodinates[0].y + Mathf.Abs(mbpsCoordinates[0].y);
 
-                                planPattern["Dwelling" + (placePattern[i] + 1)].Add("Mbps", CorrectCoordinates(mbpsCoordinates, new Vector3(gapX, gapY, 0)));
+                                    planPattern["Dwelling" + (placePattern[i] + 1)].Add("Mbps", CorrectCoordinates(mbpsCoordinates, new Vector3(gapX, gapY, 0)));
 
-                                break;
-                            }
-                            //x座標をContactGapの結果に，y座標を2つの住戸が接する辺の下に接するようにずらしてみる
-                            else if (JudgeInside(currentDwellingCoordinates, CorrectCoordinates(mbpsCoordinates, new Vector3(ContactGap(mbpsCoordinates, contactStairsCoodinates)[j], contactDwellingCoodinates[0].y - Mathf.Abs(mbpsCoordinates[0].y), 0)))) {
-                                gapX = ContactGap(mbpsCoordinates, contactStairsCoodinates)[j];
-                                gapY = contactStairsCoodinates[0].y - Mathf.Abs(mbpsCoordinates[0].y);
+                                    break;
+                                }
+                                //x座標をContactGapの結果に，y座標を2つの住戸が接する辺の下に接するようにずらしてみる
+                                else if (JudgeInside(currentDwellingCoordinates, CorrectCoordinates(mbpsCoordinates, new Vector3(ContactGap(mbpsCoordinates, contactStairsCoodinates)[j], contactDwellingCoodinates[0].y - Mathf.Abs(mbpsCoordinates[0].y), 0)))) {
+                                    gapX = ContactGap(mbpsCoordinates, contactStairsCoodinates)[j];
+                                    gapY = contactDwellingCoodinates[0].y - Mathf.Abs(mbpsCoordinates[0].y);
 
-                                planPattern["Dwelling" + (placePattern[i] + 1)].Add("Mbps", CorrectCoordinates(mbpsCoordinates, new Vector3(gapX, gapY, 0)));
+                                    planPattern["Dwelling" + (placePattern[i] + 1)].Add("Mbps", CorrectCoordinates(mbpsCoordinates, new Vector3(gapX, gapY, 0)));
 
-                                break;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -159,23 +163,26 @@ public class CreateMbps : FloorPlanner
                         
                         //2つの住戸が接するとき
                         if (!ZeroJudge(contactDwellingCoodinates)) {
-                            //y座標をContactGapの結果に，x座標を2つの住戸が接する辺の上に接するようにずらしてみる
-                            if (JudgeInside(currentDwellingCoordinates, CorrectCoordinates(mbpsCoordinates, new Vector3(contactDwellingCoodinates[0].x + Mathf.Abs(mbpsCoordinates[0].x), ContactGap(mbpsCoordinates, contactStairsCoodinates)[j], 0)))) {
-                                gapX = contactStairsCoodinates[0].x + Mathf.Abs(mbpsCoordinates[0].x);
-                                gapY = ContactGap(mbpsCoordinates, contactStairsCoodinates)[j];
+                            //2つの住戸が接する辺が階段室の辺に触れているとき
+                            if (OnLineSegment(contactStairsCoodinates, contactDwellingCoodinates[0]) || OnLineSegment(contactStairsCoodinates, contactDwellingCoodinates[1])) {
+                                //y座標をContactGapの結果に，x座標を2つの住戸が接する辺の上に接するようにずらしてみる
+                                if (JudgeInside(currentDwellingCoordinates, CorrectCoordinates(mbpsCoordinates, new Vector3(contactDwellingCoodinates[0].x + Mathf.Abs(mbpsCoordinates[0].x), ContactGap(mbpsCoordinates, contactStairsCoodinates)[j], 0)))) {
+                                    gapX = contactDwellingCoodinates[0].x + Mathf.Abs(mbpsCoordinates[0].x);
+                                    gapY = ContactGap(mbpsCoordinates, contactStairsCoodinates)[j];
 
-                                planPattern["Dwelling" + (placePattern[i] + 1)].Add("Mbps", CorrectCoordinates(mbpsCoordinates, new Vector3(gapX, gapY, 0)));
+                                    planPattern["Dwelling" + (placePattern[i] + 1)].Add("Mbps", CorrectCoordinates(mbpsCoordinates, new Vector3(gapX, gapY, 0)));
 
-                                break;
-                            }
-                            //y座標をContactGapの結果に，x座標を2つの住戸が接する辺の下に接するようにずらしてみる
-                            else if (JudgeInside(currentDwellingCoordinates, CorrectCoordinates(mbpsCoordinates, new Vector3(contactDwellingCoodinates[0].x - Mathf.Abs(mbpsCoordinates[0].x), ContactGap(mbpsCoordinates, contactStairsCoodinates)[j], 0)))) {
-                                gapX = contactStairsCoodinates[0].x - Mathf.Abs(mbpsCoordinates[0].x);
-                                gapY = ContactGap(mbpsCoordinates, contactStairsCoodinates)[j];
+                                    break;
+                                }
+                                //y座標をContactGapの結果に，x座標を2つの住戸が接する辺の下に接するようにずらしてみる
+                                else if (JudgeInside(currentDwellingCoordinates, CorrectCoordinates(mbpsCoordinates, new Vector3(contactDwellingCoodinates[0].x - Mathf.Abs(mbpsCoordinates[0].x), ContactGap(mbpsCoordinates, contactStairsCoodinates)[j], 0)))) {
+                                    gapX = contactDwellingCoodinates[0].x - Mathf.Abs(mbpsCoordinates[0].x);
+                                    gapY = ContactGap(mbpsCoordinates, contactStairsCoodinates)[j];
 
-                                planPattern["Dwelling" + (placePattern[i] + 1)].Add("Mbps", CorrectCoordinates(mbpsCoordinates, new Vector3(gapX, gapY, 0)));
+                                    planPattern["Dwelling" + (placePattern[i] + 1)].Add("Mbps", CorrectCoordinates(mbpsCoordinates, new Vector3(gapX, gapY, 0)));
 
-                                break;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -286,13 +293,13 @@ public class CreateMbps : FloorPlanner
     /// <summary>
     /// 2住戸にまたがるMBPSの全配置パターンを作成する
     /// </summary> 
-    public void makeAllPatternList() {
+    public void maketwoDwellingsMbpsAllPatternList() {
         //階段室のある1辺に接している住戸（dwellingCoordinatesのインデックスで管理）の組のリスト
         //List<List<int>> contactStairs = new List<List<int>>();
 
         /* リストを作成 */
         //階段室の1辺の座標
-        for (int i = 0; i < stairsCoordinates.Length; i++) {   
+        for (int i = 0; i < stairsCoordinates.Length; i++) {  
             List<int> contactDwellingsIndex = new List<int>();         
             for (int j = 0; j < dwellingCoordinates.Count; j++) {
                 Vector3[] contactCoodinates = contact(new Vector3[]{stairsCoordinates[i], stairsCoordinates[(i+1)%stairsCoordinates.Length]}, dwellingCoordinates[j]);
@@ -400,14 +407,26 @@ public class CreateMbps : FloorPlanner
             }
         }
 
+        /*
+        for (int i = 0; i < twoDwellingsMbpsPattern.Count; i++) {
+            Debug.Log("-------------------");
+            for (int j = 0; j < twoDwellingsMbpsPattern[i].Count; j++) {
+                Debug.Log(twoDwellingsMbpsPattern[i][j]);
+            }
+        }
+        */
+
         //配置パターンの要素に重複がないかを確認
         for (int i = 0; i < twoDwellingsMbpsPattern.Count - 1; i++) {
             for (int j = i + 1; j < twoDwellingsMbpsPattern.Count; j++) {
                 if ((twoDwellingsMbpsPattern[i][0] == twoDwellingsMbpsPattern[j][0]) || (twoDwellingsMbpsPattern[i][0] == twoDwellingsMbpsPattern[j][1])) {
-                    if ((twoDwellingsMbpsPattern[i][1] == twoDwellingsMbpsPattern[j][0]) || (twoDwellingsMbpsPattern[i][1] == twoDwellingsMbpsPattern[j][1])) {
-                        //一つでも重複があればここで終了
-                        return;
-                    }
+                    //一つでも重複があればここで終了
+                    return;
+                }
+
+                if ((twoDwellingsMbpsPattern[i][1] == twoDwellingsMbpsPattern[j][0]) || (twoDwellingsMbpsPattern[i][1] == twoDwellingsMbpsPattern[j][1])) {
+                    //一つでも重複があればここで終了
+                    return;
                 }
             }
         }
@@ -420,10 +439,12 @@ public class CreateMbps : FloorPlanner
     /// 住戸の座標のリストを作成
     /// </summary> 
     public void makeDwellingCoordinatesList() {
-        foreach (KeyValuePair<string, Dictionary<string, Vector3[]>> space in plan) {
+        foreach (KeyValuePair<string, Dictionary<string, Vector3[]>> space in pr.plan) {
             if (space.Key.Contains("Dwelling")) {
                 foreach (KeyValuePair<string, Vector3[]> spaceElements in space.Value) {
-                    dwellingCoordinates.Add(spaceElements.Value);
+                    if (spaceElements.Key.Contains("1K")) {
+                        dwellingCoordinates.Add(spaceElements.Value);
+                    }
                 }
             }
         }
