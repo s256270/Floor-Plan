@@ -9,7 +9,8 @@ public class FloorPlanner : CreateRoom
     [SerializeField] public Parts pa;
     [SerializeField] CreateMbps cm;
     [SerializeField] CreateEntrance ce;
-    [SerializeField] CreateWetareas cw;
+    [SerializeField] CreateWetareas cwa;
+    [SerializeField] CreateWestern cws;
     
     public List<Dictionary<string, Dictionary<string, Vector3[]>>> allPattern = new List<Dictionary<string, Dictionary<string, Vector3[]>>>();
     public Dictionary<string, Dictionary<string, Vector3[]>> plan = new Dictionary<string, Dictionary<string, Vector3[]>>();
@@ -29,9 +30,10 @@ public class FloorPlanner : CreateRoom
         allPattern = ce.PlaceEntrance(allPattern);
 
         //全パターンの配置結果に水回りの部屋を配置
-        allPattern = cw.PlaceWetareas(allPattern);
+        allPattern = cwa.PlaceWetareas(allPattern);
 
-        
+        //全パターンの配置結果に洋室を配置
+        allPattern = cws.PlaceWestern(allPattern);
 
         return allPattern;
     }
