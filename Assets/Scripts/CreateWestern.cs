@@ -251,6 +251,126 @@ public class CreateWestern : FloorPlanner
             }
             else {
                 limit = min;
+
+                //基準となる辺からlimit方向へ動かして洋室範囲を決定
+                for (float x = westernStandardside[0][0].x - 10.0f; x >= limit; x -= 10.0f) {
+                    //Debug.Log("x: " + x);
+                    /* 配置範囲との交点を求める */
+                    //切り取るための交点の候補
+                    List<Vector3> intersectionCandidate = new List<Vector3>();
+                    for (int j = 0; j < western_range.Length; j++) {
+                        //配置範囲の交わっているか調べる辺
+                        Vector3[] checkRangeSide = new Vector3[]{western_range[j], western_range[(j+1)%western_range.Length]};
+                        //交わっているか調べるための動かす辺を拡張した線分
+                        Vector3[] checkExpantionSide = new Vector3[]{new Vector3(x, 20000f, 0), new Vector3(x, -20000f, 0)};
+                        
+                        //上の4点が一直線上にない場合
+                        if (!OnLineSegment(checkExpantionSide, checkRangeSide[0]) || !OnLineSegment(checkExpantionSide, checkRangeSide[1])) {
+                            //上の2本の線分が交わっている場合
+                            if (CrossJudge(checkRangeSide, checkExpantionSide)) {
+                                //交点を追加
+                                intersectionCandidate.Add(Intersection(checkRangeSide, checkExpantionSide));
+                            }
+                        }
+                    }
+
+                    /* 洋室の範囲を決める辺になるように交点を仕分ける */
+                    //仕分けた交点のリスト
+                    List<Vector3[]> intersection = new List<Vector3[]>();
+
+                    //交点をy座標でソート
+                    intersectionCandidate.Sort((a, b) => (int)(b.y - a.y));
+                    
+                    //交点を2つずつ確認し，中点が配置範囲に含まれるならば交点として追加
+                    for (int j = 0; j < intersectionCandidate.Count - 1; j++) {
+                        Vector3[] currentIntersection = new Vector3[]{intersectionCandidate[j], intersectionCandidate[j+1]};
+                        Vector3 middlePoint = new Vector3((currentIntersection[0].x + currentIntersection[1].x) / 2, (currentIntersection[0].y + currentIntersection[1].y) / 2, 0);
+
+                        if (JudgeInside(western_range, new Vector3[]{middlePoint})) {
+                            intersection.Add(currentIntersection);
+                        }
+                    }
+
+                    /* 配置範囲を交点で切り取る */
+                    Vector3[] rangeAddedIntersection = western_range;
+
+                    //交点の組ごとに処理を行う
+                    for (int j = 0; j < intersection.Count; j++) {
+                        //配置範囲に交点を追加
+                        rangeAddedIntersection = AddPoint(rangeAddedIntersection, intersection[j][0]);
+                        rangeAddedIntersection = AddPoint(rangeAddedIntersection, intersection[j][1]);
+
+                        List<Vector3> rangeAddedIntersectionList = new List<Vector3>(rangeAddedIntersection.ToList());
+
+                        //追加した交点のインデックス
+                        int smallerIntersectionIndex =  rangeAddedIntersectionList.IndexOf(intersection[j][0]);
+                        int biggerIntersectionIndex =  rangeAddedIntersectionList.IndexOf(intersection[j][1]);
+                        
+                        if (smallerIntersectionIndex > biggerIntersectionIndex) {
+                            int temp = smallerIntersectionIndex;
+                            smallerIntersectionIndex = biggerIntersectionIndex;
+                            biggerIntersectionIndex = temp;
+                        }
+
+                        //基準となる辺のインデックス
+                        int westernStandardsideIndexA =  rangeAddedIntersectionList.IndexOf(westernStandardside[0][0]);
+                        int westernStandardsideIndexB =  rangeAddedIntersectionList.IndexOf(westernStandardside[0][1]);
+
+                        //基準となる辺のインデックスが交点の小さい方のインデックスと大きい方のインデックスの間にある場合
+                        if ((smallerIntersectionIndex < westernStandardsideIndexA) && (westernStandardsideIndexA < biggerIntersectionIndex)) {
+                            if ((smallerIntersectionIndex < westernStandardsideIndexB) && (westernStandardsideIndexB < biggerIntersectionIndex)) {
+                                //間以外を削除
+                                rangeAddedIntersectionList.RemoveRange(biggerIntersectionIndex + 1, rangeAddedIntersectionList.Count - biggerIntersectionIndex - 1);
+                                rangeAddedIntersectionList.RemoveRange(0, smallerIntersectionIndex);
+                            }
+                        }
+                        //基準となる辺のインデックスが交点の小さい方のインデックスと大きい方のインデックスの間にない場合
+                        else if ((westernStandardsideIndexA < smallerIntersectionIndex) || (biggerIntersectionIndex < westernStandardsideIndexA)) {
+                            if ((westernStandardsideIndexB < smallerIntersectionIndex) || (biggerIntersectionIndex < westernStandardsideIndexB)) {
+                                //間を削除
+                                rangeAddedIntersectionList.RemoveRange(smallerIntersectionIndex + 1, biggerIntersectionIndex - smallerIntersectionIndex - 1);
+                            }
+                        }
+
+                        rangeAddedIntersection = rangeAddedIntersectionList.ToArray();
+                    }
+
+                    /* 洋室の面積が最大のものを追加 */
+
+                    //洋室を現在のパターンに追加
+                    var currentWetAreasPattern = new Dictionary<string, Vector3[]>(dictionary);
+                    currentWetAreasPattern.Add("Western", rangeAddedIntersection);
+                    
+                    bool westernDicisionFlag = false;
+                    //洋室の面積が他の部屋の入口を封鎖しないもので，最大のものを追加
+                    foreach (string key in currentWetAreasPattern.Keys) {
+                        //調べる部屋がユニットバスの場合
+                        if (key == "UB" || key == "Western") {
+                            //スキップ
+                            continue;
+                        }
+
+                        //部屋の入口を封鎖しないか調べる
+                        if (!SecureNecessarySide(key, currentWetAreasPattern)) {
+                            //洋室の面積が最大のもの以外を削除する
+                            if (result.Count > 0) {
+                                result.RemoveRange(0, result.Count - 1);
+                            }
+
+                            westernDicisionFlag = true;
+
+                            break;
+                        }
+                    }
+
+                    //洋室の面積が最大のものが見つかったら終了
+                    if (westernDicisionFlag) {
+                        break;
+                    }
+
+                    //洋室を追加したものをリストに追加
+                    result.Add(currentWetAreasPattern);
+                }
             }
 
         }

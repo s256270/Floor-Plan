@@ -5,7 +5,6 @@ using UnityEngine;
 
 public class FloorPlanner : CreateRoom
 {
-    [SerializeField] public PlanReader pr;
     [SerializeField] public Parts pa;
     [SerializeField] CreateMbps cm;
     [SerializeField] CreateEntrance ce;
@@ -13,27 +12,27 @@ public class FloorPlanner : CreateRoom
     [SerializeField] CreateWestern cws;
     
     public List<Dictionary<string, Dictionary<string, Vector3[]>>> allPattern = new List<Dictionary<string, Dictionary<string, Vector3[]>>>();
-    public Dictionary<string, Dictionary<string, Vector3[]>> plan = new Dictionary<string, Dictionary<string, Vector3[]>>();
     
     /// <summary>
     /// プランを入力すると部屋の配置を行い，間取図を作成する
     /// </summary> 
     /// <param name="plan">プラン図</param>
     /// <returns>間取図（それぞれの部屋名と座標がセットのリスト）</returns>
-    public List<Dictionary<string, Dictionary<string, Vector3[]>>> Placement() {
-        //plan = new Dictionary<string, Dictionary<string, Vector3[]>>(pr.plan);
+    public List<Dictionary<string, Dictionary<string, Vector3[]>>> Placement(Dictionary<string, Dictionary<string, Vector3[]>> plan) {
+        //配置結果の配置結果にプラン図を追加
+        allPattern.Add(plan);
 
         //全パターンの配置結果にMBPSを配置
-        //allPattern = cm.PlaceMbps();
+        allPattern = cm.PlaceMbps(allPattern);
 
         //全パターンの配置結果に玄関を配置
-        //allPattern = ce.PlaceEntrance(allPattern);
+        allPattern = ce.PlaceEntrance(allPattern);
 
         //全パターンの配置結果に水回りの部屋を配置
-        //allPattern = cwa.PlaceWetareas(allPattern);
+        allPattern = cwa.PlaceWetareas(allPattern);
 
         //全パターンの配置結果に洋室を配置
-        //allPattern = cws.PlaceWestern(allPattern);
+        allPattern = cws.PlaceWestern(allPattern);
 
         return allPattern;
     }

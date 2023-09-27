@@ -16,7 +16,7 @@ public class CreateEntrance : FloorPlanner
         //配置結果のリスト
         var result = new List<Dictionary<string, Dictionary<string, Vector3[]>>>();
 
-        stairsCoordinates = pr.plan["Stairs"]["Stairs"];
+        stairsCoordinates = allPattern[0]["Stairs"]["Stairs"];
 
         //現在の全パターンの配置結果について
         for (int i = 0; i < allPattern.Count; i++) {

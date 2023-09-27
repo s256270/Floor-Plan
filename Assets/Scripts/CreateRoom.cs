@@ -9,8 +9,6 @@ public class CreateRoom : MonoBehaviour
 {
     //[SerializeField] private GameObject roomNamePrefab; //部屋名のプレハブ
 
-    //private GameObject room; //部屋と部屋名をまとめるのオブジェクト
-    //private GameObject roomObject; //部屋のオブジェクト
     public LineRenderer lineRenderer; //linerendererコンポーネント
 
     //部屋を描画する

@@ -19,7 +19,7 @@ public class Packing : CreateRoom
 
     void Start()
     {   
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 1/*2*/; i++) {
             //Debug.Log("最初のi: " + i);
             //住戸作成
             dwelling = new Vector3[]{new Vector3(-3400, 1900, 0), new Vector3(4400, 1900, 0), new Vector3(4400, -1900, 0), new Vector3(-3400, -1900, 0)};
@@ -49,7 +49,7 @@ public class Packing : CreateRoom
             range = FrameChange(dwelling, entrance);
             //さらにMBPSを除いた範囲
             range = FrameChange(range, mbps);
-            
+
             if (true) {
                 //リストの作成
                 allPattern.AddRange(PlacementListCreate(new int[]{0, 1, 2, 3}));
@@ -109,7 +109,6 @@ public class Packing : CreateRoom
 
     void Update()
     {
-        
         if (Input.GetKeyDown(KeyCode.Return)) {
             if (count < limit) {
                 Debug.Log((count+1) + "パターン目");
@@ -167,7 +166,6 @@ public class Packing : CreateRoom
                 Debug.Log("終了");
             }
         }
-        
     }
 
     //リストの作成
@@ -1190,21 +1188,21 @@ public class Packing : CreateRoom
         /* 得点の算出 */
         //洋室の面積の割合に洋室の形状の割合を掛ける
         var westernSizeShapeRatioList = new Dictionary<int, float>();
-        float coefficient = 1.0f;
+        //float coefficient = 1.0f;
         foreach (KeyValuePair<int, float> kvp in westernSizeRatioList) {
             westernSizeShapeRatioList.Add(kvp.Key, kvp.Value * westernShapeRatioList[kvp.Key]);
             //westernSizeShapeRatioList.Add(kvp.Key, kvp.Value - coefficient * westernShapeRatioList[kvp.Key]);
         }
 
         //評価指標の辞書を評価指標の降順にソート
-        var westernSizeRatioListSort = westernSizeRatioList.OrderByDescending((x) => x.Value);
+        var westernSizeShapeRatioListSort = westernSizeShapeRatioList.OrderByDescending((x) => x.Value);
         
 
         // ↓↓↓ここから先の手法は要検討
 
         //評価指標の辞書のインデックスに合わせて全パターンのリストをソート
         var allPatternSort = new List<Dictionary<string, Vector3[]>>();
-        foreach (KeyValuePair<int, float> kvp in westernSizeRatioListSort) {
+        foreach (KeyValuePair<int, float> kvp in westernSizeShapeRatioListSort) {
             allPatternSort.Add(allPattern[kvp.Key]);
         }
         

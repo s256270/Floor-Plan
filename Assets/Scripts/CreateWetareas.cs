@@ -110,7 +110,7 @@ public class CreateWetareas : FloorPlanner
         //玄関から洋室へつながる辺の決定
         List<Vector3[]> hallway_side = new List<Vector3[]>();
 
-        int entranceSideIndex = 1;
+        int entranceSideIndex = 0;
         int westernSideIndex = 0;
 
         if (!CrossJudge(new Vector3[]{entrance_side[entranceSideIndex][0], western_side[westernSideIndex][0]}, new Vector3[]{entrance_side[entranceSideIndex][1], western_side[westernSideIndex][1]})) {
@@ -338,7 +338,7 @@ public class CreateWetareas : FloorPlanner
 
     /***
 
-    配置の大事なとこ？
+    配置の中心部
 
     ***/
     public Dictionary<string, Vector3[]> CenterOfPlacement(Dictionary<string, Vector3[]> placementPattern, int[] wetAreasPermutation, int[] rotationPattern, Vector3[] current_side) {
@@ -455,13 +455,30 @@ public class CreateWetareas : FloorPlanner
                 }
                 else if (current_side[0].y == current_side[1].y) {
                     float max = current_room[0].x;
+                    float min = current_room[0].x;
                     for (int k = 1; k < current_room.Length; k++) {
                         if (max < current_room[k].x) {
                             max = current_room[k].x;
                         }
+                        if (min > current_room[k].x) {
+                            min = current_room[k].x;
+                        }
                     }
 
-                    gap_x = Mathf.Max(current_side[0].x, current_side[1].x) - max;
+                    for (int k = 0; k < balcony.Length; k++) {
+                        Vector3[] temp = contact(new Vector3[]{balcony[k], balcony[(k+1)%balcony.Length]}, range);
+
+                        if (!ZeroJudge(temp)) {
+                            if (temp[0].x - entrance[0].x > 0) {
+                                gap_x = Mathf.Min(current_side[0].x, current_side[1].x) - min;
+                            }
+                            else {
+                                gap_x = Mathf.Max(current_side[0].x, current_side[1].x) - max;
+                            }
+                        }
+                    }
+
+                    //gap_x = Mathf.Max(current_side[0].x, current_side[1].x) - max;
 
                     for (int k = 0; k < ContactGap(current_room, current_side).Length; k++) {
                         if (JudgeInside(range, CorrectCoordinates(current_room, new Vector3(gap_x, ContactGap(current_room, current_side)[k], 0)))) {
