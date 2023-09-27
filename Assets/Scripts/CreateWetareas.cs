@@ -110,7 +110,7 @@ public class CreateWetareas : FloorPlanner
         //玄関から洋室へつながる辺の決定
         List<Vector3[]> hallway_side = new List<Vector3[]>();
 
-        int entranceSideIndex = 0;
+        int entranceSideIndex = 1;
         int westernSideIndex = 0;
 
         if (!CrossJudge(new Vector3[]{entrance_side[entranceSideIndex][0], western_side[westernSideIndex][0]}, new Vector3[]{entrance_side[entranceSideIndex][1], western_side[westernSideIndex][1]})) {
