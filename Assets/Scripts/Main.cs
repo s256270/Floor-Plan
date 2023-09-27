@@ -9,6 +9,7 @@ public class Main : MonoBehaviour
 
     [SerializeField] PlanReader pr;
     [SerializeField] FloorPlanner fp;
+    [SerializeField] Evaluation ev;
     [SerializeField] CreateRoom cr;
 
     int count = 0;
@@ -16,13 +17,17 @@ public class Main : MonoBehaviour
 
     void Start()
     {
-        //間取図を表示
-        //Display();
+        //全パターンのリストにプラン図を追加
+        allPattern.Add(pr.plan);
 
-        allPattern.AddRange(fp.Placement());
+        //部屋を配置
+        //allPattern.AddRange(fp.Placement());
 
         //重複を削除
-        allPattern = RemoveDuplicates(allPattern);
+        //allPattern = RemoveDuplicates(allPattern);
+
+        //間取図を評価
+        //allPattern = ev.EvaluateFloorPlan(allPattern);
 
         limit = allPattern.Count;
         Debug.Log("総パターン数：" + limit);

@@ -75,19 +75,6 @@ public class CreateWetareas : FloorPlanner
                 if (rotationAllPattern[j][3] == 1 || rotationAllPattern[j][1] == 1) {
                     continue;
                 }
-
-                /* 洋室あり */
-                /*
-                List<Dictionary<string, Vector3[]>> wetAreasResult = PlaceWetareasOnePattern(wetAreasAllPermutation[i], rotationAllPattern[j]);
-                var westernResult = new List<Dictionary<string, Vector3[]>>();
-                for (int k = 0; k < wetAreasResult.Count; k++) {
-                    //Debug.Log("k: " + k);
-
-                    westernResult.AddRange(CreateWestern(wetAreasResult[k]));
-                }
-
-                result.AddRange(westernResult);
-                */
                 
                 /* 洋室なし */
                 result.AddRange(PlaceWetareasOnePattern(wetAreasAllPermutation[i], rotationAllPattern[j]));
@@ -119,7 +106,6 @@ public class CreateWetareas : FloorPlanner
                 western_side.Add(balcony_contact);
             }
         }
-        //western_side = new Vector3[]{new Vector3(-3400, -1900, 0), new Vector3(-3400, 1900, 0)};
 
         //玄関から洋室へつながる辺の決定
         List<Vector3[]> hallway_side = new List<Vector3[]>();
@@ -239,8 +225,6 @@ public class CreateWetareas : FloorPlanner
                     }
                 }
             }
-
-            //break;
         }
 
         //長い辺から順に並べていく
@@ -309,8 +293,6 @@ public class CreateWetareas : FloorPlanner
                     }
                 }
             }
-
-            //break;
         }
 
         //必要な部屋がすべて配置されていないものを除く
@@ -584,138 +566,6 @@ public class CreateWetareas : FloorPlanner
         return result;
     }
     
-    /// <summary>
-    /// 水回りと洋室を配置した住戸に対して評価指標を用いて評価
-    /// </summary> 
-    /// <param name="allPattern">全パターンのリスト</param>
-    /// <returns>評価の高いもののリストを返す</returns>
-    public List<Dictionary<string, Vector3[]>> Evaluation(List<Dictionary<string, Vector3[]>> allPattern) {
-        //評価指標によって絞ったパターンのリスト
-        var selectedPattern = new List<Dictionary<string, Vector3[]>>();
-
-        //評価指標のリスト
-        var westernSizeRatioList = new Dictionary<int, float>(); //全パターンのリストと対応付けるためのインデックスと洋室の大きさの割合の辞書
-        var westernShapeRatioList = new Dictionary<int, float>(); //全パターンのリストと対応付けるためのインデックスと洋室の形状の割合の辞書
-
-
-        Vector3[] hallway = range;
-
-        /* 評価指標のリストを作成 */
-        //全パターンについてひとつずつ評価
-        for (int i = 0; i < allPattern.Count; i++) {
-            //Debug.Log("i: " + i);
-
-            //廊下の座標
-            hallway = dwelling;
-
-            //リストを整える
-            foreach (string roomName in allPattern[i].Keys) {
-                hallway = FrameChange(NumberClean(hallway), NumberClean(allPattern[i][roomName]));
-            }
-
-            /*
-            //廊下の幅の最小値を算出
-            float hallwayLengthMin = Vector3.Distance(hallway[0], hallway[1]);
-            for (int j = 0; j < hallway.Length - 1; j++) {
-                for (int k = j + 1; k < hallway.Length; k++) {
-                    if (Vector3.Distance(hallway[j], hallway[k]) == 0) {
-                        Debug.Log("                                    0");
-                    }
-                    if (Vector3.Distance(hallway[j], hallway[k]) < hallwayLengthMin) {
-                        hallwayLengthMin = Vector3.Distance(hallway[j], hallway[k]);
-                    }
-                }
-            }
-
-            //廊下の幅の最小値が700より小さい場合
-            if (hallwayLengthMin < 700.0f) {
-                //allPatternから削除
-                allPattern.RemoveAt(i);
-                i--;
-                continue;
-            }
-            */
-        }
-
-        for (int i = 0; i < allPattern.Count; i++) {
-            //洋室の座標
-            Vector3[] westernCoordinates = allPattern[i]["Western"];
-
-            /* 洋室の面積の割合を算出 */
-            //洋室の面積
-            float westernSize = areaCalculation(westernCoordinates);
-            //住戸の面積
-            float dwellingSize = areaCalculation(dwelling);
-            //洋室の面積の割合
-            float westernSizeRatio = westernSize / dwellingSize;
-            //洋室の面積の割合のリストに追加
-            westernSizeRatioList.Add(i, westernSizeRatio);
-
-
-            /* 洋室の形状を割合として算出 */
-            //洋室の座標のx座標の最大値・最小値
-            float westernMaxX = westernCoordinates[0].x;
-            float westernMinX = westernCoordinates[0].x;
-
-            //洋室の座標のy座標の最大値・最小値
-            float westernMaxY = westernCoordinates[0].y;
-            float westernMinY = westernCoordinates[0].y;
-
-            for (int j = 0; j < westernCoordinates.Length; j++) {
-                if (westernMaxX < westernCoordinates[j].x) {
-                    westernMaxX = westernCoordinates[j].x;
-                }
-
-                if (westernCoordinates[j].x < westernMinX) {
-                    westernMinX = westernCoordinates[j].x;
-                }
-
-                if (westernMaxY < westernCoordinates[j].y) {
-                    westernMaxY = westernCoordinates[j].y;
-                }
-
-                if (westernCoordinates[j].y < westernMinY) {
-                    westernMinY = westernCoordinates[j].y;
-                }
-            }
-
-            //洋室の形状の割合
-            float westernShapeRatio =  westernSize / ((westernMaxX - westernMinX) * (westernMaxY - westernMinY));
-            //洋室の形状の割合のリストに追加
-            westernShapeRatioList.Add(i, westernShapeRatio);
-        }
-
-        Debug.Log("allPattern.Count: " + allPattern.Count);
-
-        /* 得点の算出 */
-        //洋室の面積の割合に洋室の形状の割合を掛ける
-        var westernSizeShapeRatioList = new Dictionary<int, float>();
-        foreach (KeyValuePair<int, float> kvp in westernSizeRatioList) {
-            westernSizeShapeRatioList.Add(kvp.Key, kvp.Value * westernShapeRatioList[kvp.Key]);
-        }
-
-        //評価指標の辞書を評価指標の降順にソート
-        var westernSizeRatioListSort = westernSizeRatioList.OrderByDescending((x) => x.Value);
-        
-
-        // ↓↓↓ここから先の手法は要検討
-
-        //評価指標の辞書のインデックスに合わせて全パターンのリストをソート
-        var allPatternSort = new List<Dictionary<string, Vector3[]>>();
-        foreach (KeyValuePair<int, float> kvp in westernSizeRatioListSort) {
-            allPatternSort.Add(allPattern[kvp.Key]);
-        }
-        
-
-        /* 評価指標のリストをもとにパターンを絞る */
-        //全パターンのリストのうち，前から20個を選択
-        for (int i = 0; i < 20/*allPatternSort.Count*/; i++) {
-            selectedPattern.Add(allPatternSort[i]);
-        }
-
-        return selectedPattern;
-    }
-
     /// <summary>
     /// 2つの辞書が等しいかどうかを判定
     /// </summary> 

@@ -24,16 +24,16 @@ public class FloorPlanner : CreateRoom
         //plan = new Dictionary<string, Dictionary<string, Vector3[]>>(pr.plan);
 
         //全パターンの配置結果にMBPSを配置
-        allPattern = cm.PlaceMbps();
+        //allPattern = cm.PlaceMbps();
 
         //全パターンの配置結果に玄関を配置
-        allPattern = ce.PlaceEntrance(allPattern);
+        //allPattern = ce.PlaceEntrance(allPattern);
 
         //全パターンの配置結果に水回りの部屋を配置
-        allPattern = cwa.PlaceWetareas(allPattern);
+        //allPattern = cwa.PlaceWetareas(allPattern);
 
         //全パターンの配置結果に洋室を配置
-        allPattern = cws.PlaceWestern(allPattern);
+        //allPattern = cws.PlaceWestern(allPattern);
 
         return allPattern;
     }

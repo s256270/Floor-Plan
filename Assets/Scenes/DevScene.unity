@@ -169,6 +169,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pr: {fileID: 1103580612}
   fp: {fileID: 780180544}
+  ev: {fileID: 1737145035}
   cr: {fileID: 643341035}
 --- !u!1 &519420028
 GameObject:
@@ -546,6 +547,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1737145034}
+  - component: {fileID: 1737145035}
   m_Layer: 0
   m_Name: EvaluateFloorPlan
   m_TagString: Untagged
@@ -568,6 +570,19 @@ Transform:
   m_Father: {fileID: 1227615354}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1737145035
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1737145033}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6efe9daba4347034db0326cc1dc05fab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lineRenderer: {fileID: 0}
 --- !u!1 &1760270683
 GameObject:
   m_ObjectHideFlags: 0
