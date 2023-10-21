@@ -20,41 +20,41 @@ public class CreateMbps : FloorPlanner
     /// </summary> 
     /// <param name="plan">プラン図</param>
     /// <returns>間取図（それぞれの部屋名と座標がセットのリスト）</returns>
-    public List<Dictionary<string, Dictionary<string, Vector3[]>>> PlaceMbps(List<Dictionary<string, Dictionary<string, Vector3[]>>> allPattern) {
+    public List<List<Dictionary<string, Vector3[]>>> PlaceMbps(List<List<Dictionary<string, Vector3[]>>> allPattern) {
         //配置結果のリスト
-        var result = new List<Dictionary<string, Dictionary<string, Vector3[]>>>();
+        var result = new List<List<Dictionary<string, Vector3[]>>>();
 
         /* 必要な座標の準備 */
         //階段室の座標のみを抜き出し
-        stairsCoordinates = allPattern[0]["Stairs"]["Stairs"];
+        stairsCoordinates = pr.plan[0]["Stairs"];
 
         //住戸座標のリストを作成
-        dwellingCoordinates = makeDwellingCoordinatesList(allPattern[0]);
+        dwellingCoordinates = makeDwellingCoordinatesList(pr.plan);
 
         /* 2部屋にまたがるMBPSの配置開始 */
         result = placeTwoDwellingsMbps(allPattern);
 
         /* 1部屋のみのMBPSの配置開始 */
-        result = placeOneDwellingMbps(result);
+        //result = placeOneDwellingMbps(result);
 
         return result;
     }
 
-    public List<Dictionary<string, Dictionary<string, Vector3[]>>> placeTwoDwellingsMbps(List<Dictionary<string, Dictionary<string, Vector3[]>>> allPattern) {
+    public List<List<Dictionary<string, Vector3[]>>> placeTwoDwellingsMbps(List<List<Dictionary<string, Vector3[]>>> allPattern) {
         //配置結果のリスト
-        var result = new List<Dictionary<string, Dictionary<string, Vector3[]>>>();
+        var result = new List<List<Dictionary<string, Vector3[]>>>();
 
         //プラン図の状態を保持
-        var plan = DuplicateDictionary(allPattern[0]);
+        //var plan = DuplicateDictionary(allPattern[0]);
 
         //2住戸にまたがるMBPSの全配置パターンを作成
-        maketwoDwellingsMbpsAllPatternList();
+        makeTwoDwellingsMbpsAllPatternList();
 
         //2住戸にまたがるMBPSの全配置パターンで配置
         for (int i = 0; i < twoDwellingsMbpsAllPattern.Count; i++) {
 
             //i番目の配置パターンの結果
-            var thisPatternResult = new Dictionary<string, Dictionary<string, Vector3[]>>(plan);
+            var thisPatternResult = new List<Dictionary<string, Vector3[]>>();
 
             for (int j = 0; j < twoDwellingsMbpsAllPattern[i].Count; j++) {
                 thisPatternResult = placeTwoDwellingsMbps(thisPatternResult, twoDwellingsMbpsAllPattern[i][j]);
@@ -67,7 +67,7 @@ public class CreateMbps : FloorPlanner
         return result;
     }
 
-    public Dictionary<string, Dictionary<string, Vector3[]>> placeTwoDwellingsMbps(Dictionary<string, Dictionary<string, Vector3[]>> planPattern, List<int> placePattern) {
+    public List<Dictionary<string, Vector3[]>> placeTwoDwellingsMbps(List<Dictionary<string, Vector3[]>> planPattern, List<int> placePattern) {
         /* MBPSが接する階段室の辺を求める */
         int stairsIndex = 0;
 
@@ -135,7 +135,7 @@ public class CreateMbps : FloorPlanner
                                     gapX = ContactGap(mbpsCoordinates, contactStairsCoodinates)[j];
                                     gapY = contactDwellingCoodinates[0].y + Mathf.Abs(mbpsCoordinates[0].y);
 
-                                    planPattern["Dwelling" + (placePattern[i] + 1)].Add("Mbps", CorrectCoordinates(mbpsCoordinates, new Vector3(gapX, gapY, 0)));
+                                    //planPattern["Dwelling" + (placePattern[i] + 1)].Add("Mbps", CorrectCoordinates(mbpsCoordinates, new Vector3(gapX, gapY, 0)));
 
                                     break;
                                 }
@@ -144,7 +144,7 @@ public class CreateMbps : FloorPlanner
                                     gapX = ContactGap(mbpsCoordinates, contactStairsCoodinates)[j];
                                     gapY = contactDwellingCoodinates[0].y - Mathf.Abs(mbpsCoordinates[0].y);
 
-                                    planPattern["Dwelling" + (placePattern[i] + 1)].Add("Mbps", CorrectCoordinates(mbpsCoordinates, new Vector3(gapX, gapY, 0)));
+                                    //planPattern["Dwelling" + (placePattern[i] + 1)].Add("Mbps", CorrectCoordinates(mbpsCoordinates, new Vector3(gapX, gapY, 0)));
 
                                     break;
                                 }
@@ -173,7 +173,7 @@ public class CreateMbps : FloorPlanner
                                     gapX = contactDwellingCoodinates[0].x + Mathf.Abs(mbpsCoordinates[0].x);
                                     gapY = ContactGap(mbpsCoordinates, contactStairsCoodinates)[j];
 
-                                    planPattern["Dwelling" + (placePattern[i] + 1)].Add("Mbps", CorrectCoordinates(mbpsCoordinates, new Vector3(gapX, gapY, 0)));
+                                    //planPattern["Dwelling" + (placePattern[i] + 1)].Add("Mbps", CorrectCoordinates(mbpsCoordinates, new Vector3(gapX, gapY, 0)));
 
                                     break;
                                 }
@@ -182,7 +182,7 @@ public class CreateMbps : FloorPlanner
                                     gapX = contactDwellingCoodinates[0].x - Mathf.Abs(mbpsCoordinates[0].x);
                                     gapY = ContactGap(mbpsCoordinates, contactStairsCoodinates)[j];
 
-                                    planPattern["Dwelling" + (placePattern[i] + 1)].Add("Mbps", CorrectCoordinates(mbpsCoordinates, new Vector3(gapX, gapY, 0)));
+                                    //planPattern["Dwelling" + (placePattern[i] + 1)].Add("Mbps", CorrectCoordinates(mbpsCoordinates, new Vector3(gapX, gapY, 0)));
 
                                     break;
                                 }
@@ -345,14 +345,14 @@ public class CreateMbps : FloorPlanner
     /// <summary>
     /// 2住戸にまたがるMBPSの全配置パターンを作成する
     /// </summary> 
-    public void maketwoDwellingsMbpsAllPatternList() {
+    public void makeTwoDwellingsMbpsAllPatternList() {
         //階段室のある1辺に接している住戸（dwellingCoordinatesのインデックスで管理）の組のリスト
         //List<List<int>> contactStairs = new List<List<int>>();
 
         /* リストを作成 */
         //階段室の1辺の座標
         for (int i = 0; i < stairsCoordinates.Length; i++) {  
-            List<int> contactDwellingsIndex = new List<int>();         
+            List<int> contactDwellingsIndex = new List<int>();       
             for (int j = 0; j < dwellingCoordinates.Count; j++) {
                 Vector3[] contactCoodinates = contact(new Vector3[]{stairsCoordinates[i], stairsCoordinates[(i+1)%stairsCoordinates.Length]}, dwellingCoordinates[j]);
                 //階段室と住戸が接しているとき
@@ -481,16 +481,14 @@ public class CreateMbps : FloorPlanner
     /// <summary>
     /// 住戸の座標のリストを作成
     /// </summary> 
-    public List<Vector3[]> makeDwellingCoordinatesList(Dictionary<string, Dictionary<string, Vector3[]>> plan) {
+    public List<Vector3[]> makeDwellingCoordinatesList(List<Dictionary<string, Vector3[]>> plan) {
         //作成結果
         var result = new List<Vector3[]>();
 
-        foreach (KeyValuePair<string, Dictionary<string, Vector3[]>> space in plan) {
-            if (space.Key.Contains("Dwelling")) {
-                foreach (KeyValuePair<string, Vector3[]> spaceElements in space.Value) {
-                    if (spaceElements.Key.Contains("1K")) {
-                        result.Add(spaceElements.Value);
-                    }
+        for (int i = 1; i < plan.Count; i++) {
+            foreach (KeyValuePair<string, Vector3[]> planPartsElement in plan[i]) {
+                if (planPartsElement.Key.Contains("1K")) {
+                    result.Add(planPartsElement.Value);
                 }
             }
         }

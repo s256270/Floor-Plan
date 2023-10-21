@@ -6,132 +6,116 @@ using UnityEngine;
 public class PlanReader : MonoBehaviour
 {    
     //プラン作成時の部屋を管理するリスト
-    public Dictionary<string, Dictionary<string, Vector3[]>> plan = new Dictionary<string, Dictionary<string, Vector3[]>>() {
+    public List<Dictionary<string, Vector3[]>> plan = new List<Dictionary<string, Vector3[]>>() {
         //階段室
-        {
-            "Stairs",
-            new Dictionary<string, Vector3[]>() {
-                {
-                    "Stairs",
-                    new Vector3[]{
-                        new Vector3(-1850, 3150, 0),
-                        new Vector3(1150, 3150, 0),
-                        new Vector3(1150, -2550, 0),
-                        new Vector3(-1850, -2550, 0)
-                    }
+        new Dictionary<string, Vector3[]>() {
+            {
+                "Stairs",
+                new Vector3[]{
+                    new Vector3(-1850, 3150, 0),
+                    new Vector3(1150, 3150, 0),
+                    new Vector3(1150, -2550, 0),
+                    new Vector3(-1850, -2550, 0)
                 }
             }
         },
 
         //住戸1
-        {
-            "Dwelling1",
-            new Dictionary<string, Vector3[]>() {
-                {
-                    "1K",
-                    new Vector3[]{
-                        new Vector3(-9650, 3650, 0),
-                        new Vector3(-1850, 3650, 0),
-                        new Vector3(-1850, -150, 0),
-                        new Vector3(-9650, -150, 0)
-                    }
-                },
+        new Dictionary<string, Vector3[]>() {
+            {
+                "1K",
+                new Vector3[]{
+                    new Vector3(-9650, 3650, 0),
+                    new Vector3(-1850, 3650, 0),
+                    new Vector3(-1850, -150, 0),
+                    new Vector3(-9650, -150, 0)
+                }
+            },
 
-                {
-                    "Balcony",
-                    new Vector3[]{
-                        new Vector3(-10650, 2850, 0),
-                        new Vector3(-9650, 2850, 0),
-                        new Vector3(-9650, -150, 0),
-                        new Vector3(-10650, -150, 0)
-                    }
+            {
+                "Balcony",
+                new Vector3[]{
+                    new Vector3(-10650, 2850, 0),
+                    new Vector3(-9650, 2850, 0),
+                    new Vector3(-9650, -150, 0),
+                    new Vector3(-10650, -150, 0)
                 }
             }
         },
 
         //住戸2
-        {
-            "Dwelling2",
-            new Dictionary<string, Vector3[]>() {
-                {
-                    "1K",
-                    new Vector3[]{
-                        new Vector3(1150, 3150, 0),
-                        new Vector3(9650, 3150, 0),
-                        new Vector3(9650, -150, 0),
-                        new Vector3(2150, -150, 0),
-                        new Vector3(2150, -2200, 0),
-                        new Vector3(1150, -2200, 0)
-                    }
-                },
+        new Dictionary<string, Vector3[]>() {
+            {
+                "1K",
+                new Vector3[]{
+                    new Vector3(1150, 3150, 0),
+                    new Vector3(9650, 3150, 0),
+                    new Vector3(9650, -150, 0),
+                    new Vector3(2150, -150, 0),
+                    new Vector3(2150, -2200, 0),
+                    new Vector3(1150, -2200, 0)
+                }
+            },
 
-                {
-                    "Balcony",
-                    new Vector3[]{
-                        new Vector3(9650, 3150, 0),
-                        new Vector3(10650, 3150, 0),
-                        new Vector3(10650, -150, 0),
-                        new Vector3(9650, -150, 0)
-                    }
+            {
+                "Balcony",
+                new Vector3[]{
+                    new Vector3(9650, 3150, 0),
+                    new Vector3(10650, 3150, 0),
+                    new Vector3(10650, -150, 0),
+                    new Vector3(9650, -150, 0)
                 }
             }
         },
 
-
         //住戸3
-        {
-            "Dwelling3",
-            new Dictionary<string, Vector3[]>() {
-                {
-                    "1K",
-                    new Vector3[]{
-                        new Vector3(-9650, -150, 0),
-                        new Vector3(-1850, -150, 0),
-                        new Vector3(-1850, -2550, 0),
-                        new Vector3(-350, -2550, 0),
-                        new Vector3(-350, -3550, 0),
-                        new Vector3(-9650, -3550, 0)
-                    }
-                },
+        new Dictionary<string, Vector3[]>() {
+            {
+                "1K",
+                new Vector3[]{
+                    new Vector3(-9650, -150, 0),
+                    new Vector3(-1850, -150, 0),
+                    new Vector3(-1850, -2550, 0),
+                    new Vector3(-350, -2550, 0),
+                    new Vector3(-350, -3550, 0),
+                    new Vector3(-9650, -3550, 0)
+                }
+            },
 
-                {
-                    "Balcony",
-                    new Vector3[]{
-                        new Vector3(-9650, -150, 0),
-                        new Vector3(-10650, -150, 0),
-                        new Vector3(-10650, -3550, 0),
-                        new Vector3(-9650, -3550, 0)
-                    }
+            {
+                "Balcony",
+                new Vector3[]{
+                    new Vector3(-9650, -150, 0),
+                    new Vector3(-10650, -150, 0),
+                    new Vector3(-10650, -3550, 0),
+                    new Vector3(-9650, -3550, 0)
                 }
             }
         },
 
         //住戸4
-        {
-            "Dwelling4",
-            new Dictionary<string, Vector3[]>() {
-                {
-                    "1K",
-                    new Vector3[]{
-                        new Vector3(-350, -2550, 0),
-                        new Vector3(1150, -2550, 0),
-                        new Vector3(1150, -2200, 0),
-                        new Vector3(2150, -2200, 0),
-                        new Vector3(2150, -150, 0),
-                        new Vector3(9650, -150, 0),
-                        new Vector3(9650, -3550, 0),
-                        new Vector3(-350, -3550, 0)
-                    }
-                },
+        new Dictionary<string, Vector3[]>() {
+            {
+                "1K",
+                new Vector3[]{
+                    new Vector3(-350, -2550, 0),
+                    new Vector3(1150, -2550, 0),
+                    new Vector3(1150, -2200, 0),
+                    new Vector3(2150, -2200, 0),
+                    new Vector3(2150, -150, 0),
+                    new Vector3(9650, -150, 0),
+                    new Vector3(9650, -3550, 0),
+                    new Vector3(-350, -3550, 0)
+                }
+            },
 
-                {
-                    "Balcony",
-                    new Vector3[]{
-                        new Vector3(9650, -150, 0),
-                        new Vector3(10650, -150, 0),
-                        new Vector3(10650, -3550, 0),
-                        new Vector3(9650, -3550, 0)
-                    }
+            {
+                "Balcony",
+                new Vector3[]{
+                    new Vector3(9650, -150, 0),
+                    new Vector3(10650, -150, 0),
+                    new Vector3(10650, -3550, 0),
+                    new Vector3(9650, -3550, 0)
                 }
             }
         }

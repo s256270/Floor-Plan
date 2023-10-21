@@ -349,12 +349,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lineRenderer: {fileID: 0}
-  pr: {fileID: 1103580612}
   pa: {fileID: 1838514748}
+  pr: {fileID: 1103580612}
   cm: {fileID: 1154823184}
   ce: {fileID: 1903703920}
   cwa: {fileID: 1139609502}
   cws: {fileID: 1760270685}
+  stairsCoordinates: []
 --- !u!1 &1103580611
 GameObject:
   m_ObjectHideFlags: 0
@@ -444,12 +445,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lineRenderer: {fileID: 0}
-  pr: {fileID: 1103580612}
   pa: {fileID: 1838514748}
+  pr: {fileID: 1103580612}
   cm: {fileID: 1154823184}
   ce: {fileID: 1903703920}
   cwa: {fileID: 1139609502}
   cws: {fileID: 1760270685}
+  stairsCoordinates: []
 --- !u!1 &1154823182
 GameObject:
   m_ObjectHideFlags: 0
@@ -495,12 +497,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lineRenderer: {fileID: 0}
-  pr: {fileID: 1103580612}
   pa: {fileID: 1838514748}
+  pr: {fileID: 1103580612}
   cm: {fileID: 1154823184}
   ce: {fileID: 1903703920}
   cwa: {fileID: 1139609502}
   cws: {fileID: 1760270685}
+  stairsCoordinates: []
 --- !u!1 &1227615353
 GameObject:
   m_ObjectHideFlags: 0
@@ -628,12 +631,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lineRenderer: {fileID: 0}
-  pr: {fileID: 1103580612}
   pa: {fileID: 1838514748}
+  pr: {fileID: 1103580612}
   cm: {fileID: 1154823184}
   ce: {fileID: 1903703920}
   cwa: {fileID: 1139609502}
   cws: {fileID: 1760270685}
+  stairsCoordinates: []
 --- !u!1 &1838514747
 GameObject:
   m_ObjectHideFlags: 0
@@ -759,9 +763,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lineRenderer: {fileID: 0}
-  pr: {fileID: 1103580612}
   pa: {fileID: 1838514748}
+  pr: {fileID: 1103580612}
   cm: {fileID: 1154823184}
   ce: {fileID: 1903703920}
   cwa: {fileID: 1139609502}
   cws: {fileID: 1760270685}
+  stairsCoordinates: []

@@ -22,17 +22,27 @@ public class Packing : CreateRoom
         for (int i = 0; i < 1/*2*/; i++) {
             //Debug.Log("最初のi: " + i);
             //住戸作成
-            dwelling = new Vector3[]{new Vector3(-3400, 1900, 0), new Vector3(4400, 1900, 0), new Vector3(4400, -1900, 0), new Vector3(-3400, -1900, 0)};
+            dwelling = new Vector3[]{new Vector3(-350, -2550, 0),
+                        new Vector3(1150, -2550, 0),
+                        new Vector3(1150, -2200, 0),
+                        new Vector3(2150, -2200, 0),
+                        new Vector3(2150, -150, 0),
+                        new Vector3(9650, -150, 0),
+                        new Vector3(9650, -3550, 0),
+                        new Vector3(-350, -3550, 0)};
             createRoom("dwelling", dwelling);
 
             //バルコニー作成
-            balcony = new Vector3[]{new Vector3(-4400, 1100, 0), new Vector3(-3400, 1100, 0), new Vector3(-3400, -1900, 0), new Vector3(-4400, -1900, 0)};
+            balcony = new Vector3[]{new Vector3(9650, -150, 0),
+                        new Vector3(10650, -150, 0),
+                        new Vector3(10650, -3550, 0),
+                        new Vector3(9650, -3550, 0)};
             createRoom("balcony", balcony);
             
             if (i == 0) {
                 //玄関作成
-                entrance = new Vector3[]{new Vector3(3400, -50, 0), new Vector3(4400, -50, 0), new Vector3(4400, -1550, 0), new Vector3(3400, -1550, 0)};
-                //createRoom("entrance", entrance);
+                entrance = new Vector3[]{new Vector3(-350, -2550, 0), new Vector3(1150, -2550, 0), new Vector3(1150, -3550, 0), new Vector3(-350, -3550, 0)};
+                createRoom("entrance", entrance);
             } else if (i == 1) {
                 Destroy(GameObject.Find("entrance"));
                 //玄関作成
@@ -40,22 +50,26 @@ public class Packing : CreateRoom
                 //createRoom("entrance", entrance);
             }
             //MBPS作成
-            mbps = new Vector3[]{new Vector3(3400, -1550, 0), new Vector3(4400, -1550, 0), new Vector3(4400, -1900, 0), new Vector3(3400, -1900, 0)};
-            //createRoom("mbps", mbps);
+            mbps = new Vector3[]{new Vector3(1150, -2200, 0), new Vector3(2150, -2200, 0), new Vector3(2150, -2550, 0), new Vector3(1150, -2550, 0)};
+            createRoom("mbps", mbps);
 
             //水回り範囲の決定
             range = dwelling;
             //住戸から玄関を除いた範囲
             range = FrameChange(dwelling, entrance);
+
+            createRoom("range", range);
             //さらにMBPSを除いた範囲
             range = FrameChange(range, mbps);
+
+            createRoom("range", range);
 
             if (true) {
                 //リストの作成
                 allPattern.AddRange(PlacementListCreate(new int[]{0, 1, 2, 3}));
             } else {
                 //初めの方だけリストの作成
-                allPattern = PlacementListCreate(new int[]{0, 1, 2, 3}, 0, 0);
+                allPattern = PlacementListCreate(new int[]{0, 1, 2, 3}, 15, 10);
             }
 
             //玄関とMBPSを追加
@@ -69,7 +83,7 @@ public class Packing : CreateRoom
             }
         }
 
-        allPattern = Evaluation(allPattern);
+        //allPattern = Evaluation(allPattern);
         
         limit = allPattern.Count;
         Debug.Log("総パターン数：" + limit);
@@ -211,7 +225,6 @@ public class Packing : CreateRoom
         List<int[]> rotationAllPattern = flagPatternList(wetAreasAllPermutation[wetAreasAllPermutationIndex].Length);
         
         /* 洋室あり */
-        /*
         List<Dictionary<string, Vector3[]>> wetAreasResult = placement(wetAreasAllPermutation[wetAreasAllPermutationIndex], rotationAllPattern[rotationAllPatternIndex]);
         var westernResult = new List<Dictionary<string, Vector3[]>>();
         for (int i = 1; i < wetAreasResult.Count; i++) {
@@ -220,7 +233,6 @@ public class Packing : CreateRoom
         }
 
         result.AddRange(westernResult);
-        */
         
         /* 洋室なし */
         result.AddRange(placement(wetAreasAllPermutation[wetAreasAllPermutationIndex], rotationAllPattern[rotationAllPatternIndex]));
@@ -255,7 +267,7 @@ public class Packing : CreateRoom
         //玄関から洋室へつながる辺の決定
         List<Vector3[]> hallway_side = new List<Vector3[]>();
 
-        int entranceSideIndex = 1;
+        int entranceSideIndex = 0;
         int westernSideIndex = 0;
 
         if (!CrossJudge(new Vector3[]{entrance_side[entranceSideIndex][0], western_side[westernSideIndex][0]}, new Vector3[]{entrance_side[entranceSideIndex][1], western_side[westernSideIndex][1]})) {
@@ -604,13 +616,30 @@ public class Packing : CreateRoom
                 }
                 else if (current_side[0].y == current_side[1].y) {
                     float max = current_room[0].x;
+                    float min = current_room[0].x;
                     for (int k = 1; k < current_room.Length; k++) {
                         if (max < current_room[k].x) {
                             max = current_room[k].x;
                         }
+                        if (min > current_room[k].x) {
+                            min = current_room[k].x;
+                        }
                     }
 
-                    gap_x = Mathf.Max(current_side[0].x, current_side[1].x) - max;
+                    for (int k = 0; k < balcony.Length; k++) {
+                        Vector3[] temp = contact(new Vector3[]{balcony[k], balcony[(k+1)%balcony.Length]}, range);
+
+                        if (!ZeroJudge(temp)) {
+                            if (temp[0].x - entrance[0].x > 0) {
+                                gap_x = Mathf.Min(current_side[0].x, current_side[1].x) - min;
+                            }
+                            else {
+                                gap_x = Mathf.Max(current_side[0].x, current_side[1].x) - max;
+                            }
+                        }
+                    }
+
+                    //gap_x = Mathf.Max(current_side[0].x, current_side[1].x) - max;
 
                     for (int k = 0; k < ContactGap(current_room, current_side).Length; k++) {
                         if (JudgeInside(range, CorrectCoordinates(current_room, new Vector3(gap_x, ContactGap(current_room, current_side)[k], 0)))) {
@@ -1535,6 +1564,11 @@ public class Packing : CreateRoom
             }
         }
 
+        createRoom("outer", newOuter.ToArray());
+
+        Debug.Log("start_coordinates: " + start_coordinates);
+        Debug.Log("end_coordinates: " + end_coordinates);
+
         //内側の部屋の必要な座標を追加
         List<Vector3> needInside = new List<Vector3>();
 
@@ -1579,6 +1613,8 @@ public class Packing : CreateRoom
                 }
             }
         }
+
+        createRoom("inside", needInside.ToArray());
 
         //内側の必要な頂点が2つで，元の内側の部屋の始点と終点の場合のみ順番を入れ替えない
         if (!((needInside.Count == 2) && ((Array.IndexOf(inside, needInside[0]) == 0) && (Array.IndexOf(inside, needInside[1]) == inside.Length - 1)))) {

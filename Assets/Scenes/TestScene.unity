@@ -269,7 +269,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 2600
+  orthographic size: 5000
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -398,22 +398,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lineRenderer: {fileID: 0}
-  entrance_coordinate_x:
-  - {x: -600, y: 350, z: 0}
-  - {x: 600, y: 350, z: 0}
-  - {x: 600, y: -350, z: 0}
-  - {x: -600, y: -350, z: 0}
-  entrance_coordinate_y:
-  - {x: -350, y: 600, z: 0}
-  - {x: 350, y: 600, z: 0}
-  - {x: 350, y: -600, z: 0}
-  - {x: -350, y: -600, z: 0}
-  mbps_coordinate:
+  entranceCoordinates:
+  - {x: -750, y: 500, z: 0}
+  - {x: 750, y: 500, z: 0}
+  - {x: 750, y: -500, z: 0}
+  - {x: -750, y: -500, z: 0}
+  twoDwellingMbpsCoordinates:
   - {x: -175, y: 500, z: 0}
   - {x: 175, y: 500, z: 0}
   - {x: 175, y: -500, z: 0}
   - {x: -175, y: -500, z: 0}
-  mbps_coordinate2:
+  oneDwellingMbpsCoordinates:
   - {x: -350, y: 350, z: 0}
   - {x: 350, y: 350, z: 0}
   - {x: 350, y: -350, z: 0}
