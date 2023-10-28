@@ -22,27 +22,17 @@ public class Packing : CreateRoom
         for (int i = 0; i < 1/*2*/; i++) {
             //Debug.Log("最初のi: " + i);
             //住戸作成
-            dwelling = new Vector3[]{new Vector3(-350, -2550, 0),
-                        new Vector3(1150, -2550, 0),
-                        new Vector3(1150, -2200, 0),
-                        new Vector3(2150, -2200, 0),
-                        new Vector3(2150, -150, 0),
-                        new Vector3(9650, -150, 0),
-                        new Vector3(9650, -3550, 0),
-                        new Vector3(-350, -3550, 0)};
-            createRoom("dwelling", dwelling);
+            dwelling = new Vector3[]{new Vector3(-3400, 1900, 0), new Vector3(4400, 1900, 0), new Vector3(4400, -1900, 0), new Vector3(-3400, -1900, 0)};
+            //createRoom("dwelling", dwelling);
 
             //バルコニー作成
-            balcony = new Vector3[]{new Vector3(9650, -150, 0),
-                        new Vector3(10650, -150, 0),
-                        new Vector3(10650, -3550, 0),
-                        new Vector3(9650, -3550, 0)};
-            createRoom("balcony", balcony);
+            balcony = new Vector3[]{new Vector3(-4400, 1100, 0), new Vector3(-3400, 1100, 0), new Vector3(-3400, -1900, 0), new Vector3(-4400, -1900, 0)};
+            //createRoom("balcony", balcony);
             
             if (i == 0) {
                 //玄関作成
-                entrance = new Vector3[]{new Vector3(-350, -2550, 0), new Vector3(1150, -2550, 0), new Vector3(1150, -3550, 0), new Vector3(-350, -3550, 0)};
-                createRoom("entrance", entrance);
+                entrance = new Vector3[]{new Vector3(3400, -50, 0), new Vector3(4400, -50, 0), new Vector3(4400, -1550, 0), new Vector3(3400, -1550, 0)};
+                //createRoom("entrance", entrance);
             } else if (i == 1) {
                 Destroy(GameObject.Find("entrance"));
                 //玄関作成
@@ -50,19 +40,19 @@ public class Packing : CreateRoom
                 //createRoom("entrance", entrance);
             }
             //MBPS作成
-            mbps = new Vector3[]{new Vector3(1150, -2200, 0), new Vector3(2150, -2200, 0), new Vector3(2150, -2550, 0), new Vector3(1150, -2550, 0)};
-            createRoom("mbps", mbps);
+            mbps = new Vector3[]{new Vector3(3400, -1550, 0), new Vector3(4400, -1550, 0), new Vector3(4400, -1900, 0), new Vector3(3400, -1900, 0)};
+            //createRoom("mbps", mbps);
 
             //水回り範囲の決定
             range = dwelling;
             //住戸から玄関を除いた範囲
             range = FrameChange(dwelling, entrance);
 
-            createRoom("range", range);
+            //createRoom("range", range);
             //さらにMBPSを除いた範囲
             range = FrameChange(range, mbps);
 
-            createRoom("range", range);
+            //createRoom("range", range);
 
             if (true) {
                 //リストの作成
@@ -83,12 +73,13 @@ public class Packing : CreateRoom
             }
         }
 
-        //allPattern = Evaluation(allPattern);
+        allPattern = SecureWidth(allPattern);
+        allPattern = Evaluation(allPattern);
         
         limit = allPattern.Count;
         Debug.Log("総パターン数：" + limit);
 
-        /*
+        
         //全パターンを一度に表示
         //カメラサイズ13000がちょうどいい（普段は2600）
         GameObject.Find("Main Camera").GetComponent<Camera>().orthographicSize = 13000;
@@ -118,7 +109,7 @@ public class Packing : CreateRoom
                 }
             }
         }
-        */
+        
     }
 
     void Update()
@@ -267,7 +258,7 @@ public class Packing : CreateRoom
         //玄関から洋室へつながる辺の決定
         List<Vector3[]> hallway_side = new List<Vector3[]>();
 
-        int entranceSideIndex = 0;
+        int entranceSideIndex = 1;
         int westernSideIndex = 0;
 
         if (!CrossJudge(new Vector3[]{entrance_side[entranceSideIndex][0], western_side[westernSideIndex][0]}, new Vector3[]{entrance_side[entranceSideIndex][1], western_side[westernSideIndex][1]})) {
@@ -1010,6 +1001,118 @@ public class Packing : CreateRoom
     }
 
     /// <summary>
+    /// 部屋を利用するための幅が取れていないものを除く
+    /// </summary> 
+    /// <param name="allPattern">全パターンのリスト</param>
+    /// <returns>幅が取れていない間取図を除いたもののリストを返す</returns>
+    public List<Dictionary<string, Vector3[]>> SecureWidth(List<Dictionary<string, Vector3[]>> allPattern) {
+        //結果を格納するリスト
+        var result = new List<Dictionary<string, Vector3[]>>(allPattern);
+
+        //全パターンについてひとつずつ調べる
+        for (int i = 0; i < result.Count; i++) {
+            //廊下の座標を求める
+            Vector3[] hallway = dwelling;
+            foreach (string roomName in result[i].Keys) {
+                hallway = FrameChange(NumberClean(hallway), NumberClean(result[i][roomName]));
+            }
+
+            //調べる部屋を決める
+            foreach (string checkRoom in result[i].Keys) {
+                //調べる部屋が洗面室，トイレ，キッチン以外の場合
+                if (!(checkRoom == "Washroom" || checkRoom == "Toilet" || checkRoom == "Kitchen")) {
+                    //スキップ
+                    continue;
+                }
+
+                //調べる部屋の座標
+                Vector3[] checkRoomCoordinates = result[i][checkRoom];
+
+                //廊下と共有している最大の辺を求める
+                Vector3[] checkRoomSideMax = new Vector3[2]; //最大の辺
+                for (int j = 0; j < checkRoomCoordinates.Length; j++) {
+                    Vector3[] contactCoordinates = contact(new Vector3[]{checkRoomCoordinates[j], checkRoomCoordinates[(j+1)%checkRoomCoordinates.Length]}, hallway);
+
+                    if (Vector3.Distance(checkRoomSideMax[0], checkRoomSideMax[1]) <= Vector3.Distance(contactCoordinates[0], contactCoordinates[1])) {
+                        checkRoomSideMax = contactCoordinates;
+                    }
+                }
+
+                //最大辺の前のスペースに幅が取れているか調べる
+                //スペースが取れているか調べるための長方形の座標
+                Vector3[] checkRectangle = new Vector3[4];
+
+                //辺がx軸平行の場合
+                if (checkRoomSideMax[0].y == checkRoomSideMax[1].y) {
+                    //x座標が小さい順にソート
+                    if (checkRoomSideMax[0].x > checkRoomSideMax[1].x) {
+                        Array.Reverse(checkRoomSideMax);
+                    }
+                    
+                    //スペースが取れているかの判定
+                    bool spaceFlag = false;
+
+                    //スペースが取れているか調べるための長方形の座標を作成
+                    checkRectangle = new Vector3[]{checkRoomSideMax[0], checkRoomSideMax[1], new Vector3(checkRoomSideMax[1].x, checkRoomSideMax[1].y + 800.0f, 0), new Vector3(checkRoomSideMax[0].x, checkRoomSideMax[0].y + 800.0f, 0)};
+                    //スペースが取れているか調べる
+                    if (JudgeInside(hallway, checkRectangle)) {
+                        spaceFlag = true;
+                    }
+                    
+                    //スペースが取れているか調べるための長方形の座標を作成
+                    checkRectangle = new Vector3[]{new Vector3(checkRoomSideMax[0].x, checkRoomSideMax[0].y + 800.0f, 0), new Vector3(checkRoomSideMax[1].x, checkRoomSideMax[1].y + 800.0f, 0), checkRoomSideMax[1], checkRoomSideMax[0]};
+                    //スペースが取れているか調べる
+                    if (JudgeInside(hallway, checkRectangle)) {
+                        spaceFlag = true;
+                    }
+
+                    //スペースが取れていない場合
+                    if (!spaceFlag) {
+                        //allPatternから削除
+                        result.RemoveAt(i);
+                        i--;
+                        break;
+                    }
+                }
+                //辺がy軸平行の場合
+                else if (checkRoomSideMax[0].x == checkRoomSideMax[1].x) {
+                    //y座標が小さい順にソート
+                    if (checkRoomSideMax[0].y > checkRoomSideMax[1].y) {
+                        Array.Reverse(checkRoomSideMax);
+                    }
+                    
+                    //スペースが取れているかの判定
+                    bool spaceFlag = false;
+
+                    //スペースが取れているか調べるための長方形の座標を作成
+                    checkRectangle = new Vector3[]{checkRoomSideMax[0], new Vector3(checkRoomSideMax[0].x + 800.0f, checkRoomSideMax[0].y, 0), new Vector3(checkRoomSideMax[1].x + 800.0f, checkRoomSideMax[1].y, 0), checkRoomSideMax[1]};
+                    //スペースが取れているか調べる
+                    if (JudgeInside(hallway, checkRectangle)) {
+                        spaceFlag = true;
+                    }
+                    
+                    //スペースが取れているか調べるための長方形の座標を作成
+                    checkRectangle = new Vector3[]{new Vector3(checkRoomSideMax[0].x - 800.0f, checkRoomSideMax[0].y, 0), checkRoomSideMax[0], checkRoomSideMax[1], new Vector3(checkRoomSideMax[1].x - 800.0f, checkRoomSideMax[1].y, 0)};
+                    //スペースが取れているか調べる
+                    if (JudgeInside(hallway, checkRectangle)) {
+                        spaceFlag = true;
+                    }
+
+                    //スペースが取れていない場合
+                    if (!spaceFlag) {
+                        //allPatternから削除
+                        result.RemoveAt(i);
+                        i--;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
     /// 水回りと洋室を配置した住戸に対して評価指標を用いて評価
     /// </summary> 
     /// <param name="allPattern">全パターンのリスト</param>
@@ -1212,7 +1315,7 @@ public class Packing : CreateRoom
             */
         }
 
-        Debug.Log("allPattern.Count: " + allPattern.Count);
+        //Debug.Log("allPattern.Count: " + allPattern.Count);
 
         /* 得点の算出 */
         //洋室の面積の割合に洋室の形状の割合を掛ける
@@ -1564,11 +1667,6 @@ public class Packing : CreateRoom
             }
         }
 
-        createRoom("outer", newOuter.ToArray());
-
-        Debug.Log("start_coordinates: " + start_coordinates);
-        Debug.Log("end_coordinates: " + end_coordinates);
-
         //内側の部屋の必要な座標を追加
         List<Vector3> needInside = new List<Vector3>();
 
@@ -1613,8 +1711,6 @@ public class Packing : CreateRoom
                 }
             }
         }
-
-        createRoom("inside", needInside.ToArray());
 
         //内側の必要な頂点が2つで，元の内側の部屋の始点と終点の場合のみ順番を入れ替えない
         if (!((needInside.Count == 2) && ((Array.IndexOf(inside, needInside[0]) == 0) && (Array.IndexOf(inside, needInside[1]) == inside.Length - 1)))) {
