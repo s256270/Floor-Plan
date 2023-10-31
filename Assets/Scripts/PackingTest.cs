@@ -11,6 +11,34 @@ public class PackingTest : CreateRoom
     void Start()
     {
         /*
+        //洋室作成テスト
+        Vector3[] dwelling = new Vector3[]{new Vector3(-3400, 1900, 0), new Vector3(4400, 1900, 0), new Vector3(4400, -1900, 0), new Vector3(-3400, -1900, 0)};
+        Vector3[] balcony = new Vector3[]{new Vector3(-4400, 1100, 0), new Vector3(-3400, 1100, 0), new Vector3(-3400, -1900, 0), new Vector3(-4400, -1900, 0)};
+        Vector3[] entrance = new Vector3[]{new Vector3(3400, -50, 0), new Vector3(4400, -50, 0), new Vector3(4400, -1550, 0), new Vector3(3400, -1550, 0)};
+        Vector3[] mbps = new Vector3[]{new Vector3(3400, -1550, 0), new Vector3(4400, -1550, 0), new Vector3(4400, -1900, 0), new Vector3(3400, -1900, 0)};
+
+        //水回り範囲の決定
+        Vector3[] range = dwelling;
+        //住戸から玄関を除いた範囲
+        range = pack.FrameChange(dwelling, entrance);
+        //さらにMBPSを除いた範囲
+        range = pack.FrameChange(range, mbps);
+
+        createRoom("range", range);
+
+        Dictionary<string, Vector3[]> dictionary = new Dictionary<string, Vector3[]>() {
+            {"UB", new Vector3[]{new Vector3(2600, 1900, 0), new Vector3(4400, 1900, 0), new Vector3(4400, 500, 0), new Vector3(2600, 500, 0)}},
+            {"Washroom", new Vector3[]{new Vector3(1000, 1900, 0), new Vector3(2600, 1900, 0), new Vector3(2600, 300, 0), new Vector3(1000, 300, 0)}},
+            {"Toilet", new Vector3[]{new Vector3(2000, -1000, 0), new Vector3(3400, -1000, 0), new Vector3(3400, -1900, 0), new Vector3(2000, -1900, 0)}},
+            {"Kitchen", new Vector3[]{new Vector3(-400, -1200, 0), new Vector3(2000, -1200, 0), new Vector3(2000, -1900, 0), new Vector3(-400, -1900, 0)}}
+        };
+
+        List<Dictionary<string, Vector3[]>> result = pack.CreateWestern(dictionary);
+
+        createRoom("western", result[0]["Western"]);
+        */
+
+        /*
         //SequenceEqualテスト
         Dictionary<string, Vector3[]> resultA = new Dictionary<string, Vector3[]>(){{"UB", new Vector3[]{new Vector3(-900, 700, 0), new Vector3(900, 700, 0), new Vector3(900, -700, 0), new Vector3(-900, -700, 0)}}, {"Washroom", new Vector3[]{new Vector3(-800, 800, 0), new Vector3(800, 800, 0), new Vector3(800, -800, 0), new Vector3(-800, -800, 0)}}, {"Toilet", new Vector3[]{new Vector3(-800, 800, 0), new Vector3(800, 800, 0), new Vector3(800, -800, 0), new Vector3(-800, -800, 0)}}, {"Kitchen", new Vector3[]{new Vector3(-800, 800, 0), new Vector3(800, 800, 0), new Vector3(800, -800, 0), new Vector3(-800, -800, 0)}}};
         Dictionary<string, Vector3[]> resultB = new Dictionary<string, Vector3[]>(){{"UB", new Vector3[]{new Vector3(-900, 700, 0), new Vector3(900, 700, 0), new Vector3(900, -700, 0), new Vector3(-900, -700, 0)}}, {"Washroom", new Vector3[]{new Vector3(-800, 800, 0), new Vector3(800, 800, 0), new Vector3(800, -800, 0), new Vector3(-800, -800, 0)}}, {"Toilet", new Vector3[]{new Vector3(-800, 800, 0), new Vector3(800, 800, 0), new Vector3(800, -800, 0), new Vector3(-800, -800, 0)}}, {"Kitchen", new Vector3[]{new Vector3(-800, 800, 0), new Vector3(800, 800, 0), new Vector3(800, -800, 0), new Vector3(-800, -800, 0)}}};
@@ -22,11 +50,11 @@ public class PackingTest : CreateRoom
 
         /*
         //FrameChangeテスト
-        Vector3[] range = new Vector3[]{new Vector3(-3400, 1900, 0), new Vector3(100, 1900, 0), new Vector3(100, 500, 0), new Vector3(1000, 500, 0), new Vector3(1000, 300, 0), new Vector3(2600, 300, 0), new Vector3(2600, 500, 0), new Vector3(4400, 500, 0), new Vector3(4400, -50, 0), new Vector3(3400, -50, 0), new Vector3(3400, -1200, 0), new Vector3(1000, -1200, 0), new Vector3(1000, -1900, 0), new Vector3(-3400, -1900, 0)};
-        createRoom("range", range, Color.red);
+        Vector3[] range = new Vector3[]{new Vector3(-3400, 1900, 0), new Vector3(-2300, 1900, 0), new Vector3(-2300, 1200, 0), new Vector3(100, 1200, 0), new Vector3(100, 500, 0), new Vector3(1000, 500, 0), new Vector3(1000, 300, 0), new Vector3(2600, 300, 0), new Vector3(2600, 500, 0), new Vector3(4400, 500, 0), new Vector3(4400, -1900, 0), new Vector3(-3400, -1900, 0)};
+        createRoom("range", range);
         
-        Vector3[] western = new Vector3[]{new Vector3(-3400, 1900, 0), new Vector3(100, 1900, 0), new Vector3(100, 500, 0), new Vector3(210, 500, 0), new Vector3(210, -1900, 0), new Vector3(-3400, -1900, 0)};
-        createRoom("western", western, Color.gray);
+        Vector3[] western = new Vector3[]{new Vector3(-3400, 1900, 0), new Vector3(-2300, 1900, 0), new Vector3(-2300, -1900, 0), new Vector3(-3400, -1900, 0)};
+        createRoom("western", western);
 
         createRoom("hallway", pack.FrameChange(range, western));
         */
@@ -38,7 +66,7 @@ public class PackingTest : CreateRoom
             Debug.Log("i: " + i);
             pack.SideSubstraction(new Vector3[]{new Vector3(-2300, 1900, 0), new Vector3(100, 1900, 0)}, new Vector3[]{range[i], range[(i+1)%range.Length]});
         }
-        */
+        
         
 
         /*

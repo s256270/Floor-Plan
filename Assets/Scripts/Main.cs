@@ -17,8 +17,21 @@ public class Main : MonoBehaviour
 
     void Start()
     {
+        Display(pr.plan);
+
+        //2住戸のMBPS配置の例
+        cr.createRoom("mbps", fp.CorrectCoordinates(fp.Rotation(new Vector3[]{new Vector3(-175, 500, 0), new Vector3(175, 500, 0), new Vector3(175, -500, 0), new Vector3(-175, -500, 0)}), new Vector3(-2350, 25, 0)));
+        cr.createRoom("mbps", fp.CorrectCoordinates(fp.Rotation(new Vector3[]{new Vector3(-175, 500, 0), new Vector3(175, 500, 0), new Vector3(175, -500, 0), new Vector3(-175, -500, 0)}), new Vector3(-2350, -325, 0)));
+
+        //1住戸のMBPS配置の例
+        //cr.createRoom("mbps", fp.CorrectCoordinates(fp.Rotation(new Vector3[]{new Vector3(-350, 350, 0), new Vector3(350, 350, 0), new Vector3(350, -350, 0), new Vector3(-350, -350, 0)}), new Vector3(-2200, 3300, 0)));
+        //cr.createRoom("mbps", fp.CorrectCoordinates(fp.Rotation(new Vector3[]{new Vector3(-350, 350, 0), new Vector3(350, 350, 0), new Vector3(350, -350, 0), new Vector3(-350, -350, 0)}), new Vector3(-2200, -500, 0)));
+
+        //玄関配置の例
+        cr.createRoom("entrance", fp.CorrectCoordinates(fp.Rotation(new Vector3[]{new Vector3(-175, 500, 0), new Vector3(175, 500, 0), new Vector3(175, -500, 0), new Vector3(-175, -500, 0)}), new Vector3(-2350, 25, 0)));
+
         //部屋を配置
-        allPattern = fp.Placement();
+        //allPattern = fp.Placement();
 
         //重複を削除
         //allPattern = RemoveDuplicates(allPattern);

@@ -132,7 +132,7 @@ public class FloorPlanner : CreateRoom
 
     /// <summary>
     /// 辺Aから辺Aと辺Bの重なっている部分を除いた辺を返す
-    /// </summary> 
+    /// </summary>
     /// <param name="sideA">辺Aの座標</param>
     /// <param name="sideB">辺Bの座標</param>
     /// <returns>辺Aから辺Aと辺Bの重なっている部分を除いた辺の座標</returns>
