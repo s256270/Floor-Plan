@@ -121,6 +121,33 @@ public class PlanReader : MonoBehaviour
         }
     };
 
+    Vector3[] stairsCoordinates;
+    List<Vector3[]> dwellingCoordinates;
+    
+    void Start()
+    {
+        stairsCoordinates = plan[0]["Stairs"];
+        dwellingCoordinates = makeDwellingCoordinatesList(plan);
+    }
+
+    /// <summary>
+    /// 住戸の座標のリストを作成
+    /// </summary> 
+    public List<Vector3[]> makeDwellingCoordinatesList(List<Dictionary<string, Vector3[]>> plan) {
+        //作成結果
+        var result = new List<Vector3[]>();
+
+        for (int i = 1; i < plan.Count; i++) {
+            foreach (KeyValuePair<string, Vector3[]> planPartsElement in plan[i]) {
+                if (planPartsElement.Key.Contains("1K")) {
+                    result.Add(planPartsElement.Value);
+                }
+            }
+        }
+
+        return result;
+    }
+
     /*
     //旧プラン作成時の部屋を管理するリスト
     public List<GameObject> plan2 = new List<GameObject>();

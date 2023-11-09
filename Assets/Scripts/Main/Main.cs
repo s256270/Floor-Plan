@@ -28,7 +28,7 @@ public class Main : MonoBehaviour
         //cr.createRoom("mbps", fp.CorrectCoordinates(fp.Rotation(new Vector3[]{new Vector3(-350, 350, 0), new Vector3(350, 350, 0), new Vector3(350, -350, 0), new Vector3(-350, -350, 0)}), new Vector3(-2200, -500, 0)));
 
         //玄関配置の例
-        cr.createRoom("entrance", fp.CorrectCoordinates(fp.Rotation(new Vector3[]{new Vector3(-175, 500, 0), new Vector3(175, 500, 0), new Vector3(175, -500, 0), new Vector3(-175, -500, 0)}), new Vector3(-2350, 25, 0)));
+        cr.createRoom("entrance", fp.CorrectCoordinates(fp.Rotation(new Vector3[]{new Vector3(-750, 500, 0), new Vector3(750, 500, 0), new Vector3(750, -500, 0), new Vector3(-750, -500, 0)}), new Vector3(-2350, 950, 0)));
 
         //部屋を配置
         //allPattern = fp.Placement();

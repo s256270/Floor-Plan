@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CreateMbps : FloorPlanner
+public class CreateMbps : MonoBehaviour/*FloorPlanner*/
 {
     //階段室の座標
     Vector3[] stairsCoordinates;
@@ -26,13 +26,12 @@ public class CreateMbps : FloorPlanner
 
         /* 必要な座標の準備 */
         //階段室の座標のみを抜き出し
-        stairsCoordinates = pr.plan[0]["Stairs"];
-
+        stairsCoordinates = pr.stairsCoordinates;
         //住戸座標のリストを作成
-        dwellingCoordinates = makeDwellingCoordinatesList(pr.plan);
+        dwellingCoordinates = pr.dwellingCoordinates;
 
         /* 2部屋にまたがるMBPSの配置開始 */
-        result = placeTwoDwellingsMbps(allPattern);
+        //result = placeTwoDwellingsMbps(allPattern);
 
         /* 1部屋のみのMBPSの配置開始 */
         //result = placeOneDwellingMbps(result);
@@ -476,23 +475,5 @@ public class CreateMbps : FloorPlanner
 
         //配置パターンを全配置パターンのリストに追加
         twoDwellingsMbpsAllPattern.Add(twoDwellingsMbpsPattern);
-    }
-
-    /// <summary>
-    /// 住戸の座標のリストを作成
-    /// </summary> 
-    public List<Vector3[]> makeDwellingCoordinatesList(List<Dictionary<string, Vector3[]>> plan) {
-        //作成結果
-        var result = new List<Vector3[]>();
-
-        for (int i = 1; i < plan.Count; i++) {
-            foreach (KeyValuePair<string, Vector3[]> planPartsElement in plan[i]) {
-                if (planPartsElement.Key.Contains("1K")) {
-                    result.Add(planPartsElement.Value);
-                }
-            }
-        }
-
-        return result;
     }
 }

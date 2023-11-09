@@ -23,11 +23,11 @@ public class Packing : CreateRoom
             //Debug.Log("最初のi: " + i);
             //住戸作成
             dwelling = new Vector3[]{new Vector3(-3400, 1900, 0), new Vector3(4400, 1900, 0), new Vector3(4400, -1900, 0), new Vector3(-3400, -1900, 0)};
-            //createRoom("dwelling", dwelling);
+            createRoom("dwelling", dwelling);
 
             //バルコニー作成
             balcony = new Vector3[]{new Vector3(-4400, 1100, 0), new Vector3(-3400, 1100, 0), new Vector3(-3400, -1900, 0), new Vector3(-4400, -1900, 0)};
-            //createRoom("balcony", balcony);
+            createRoom("balcony", balcony);
             
             if (i == 0) {
                 //玄関作成
@@ -41,18 +41,29 @@ public class Packing : CreateRoom
             }
             //MBPS作成
             mbps = new Vector3[]{new Vector3(3400, -1550, 0), new Vector3(4400, -1550, 0), new Vector3(4400, -1900, 0), new Vector3(3400, -1900, 0)};
-            //createRoom("mbps", mbps);
+            createRoom("mbps", mbps);
 
             //水回り範囲の決定
             range = dwelling;
             //住戸から玄関を除いた範囲
             range = FrameChange(dwelling, entrance);
 
-            //createRoom("range", range);
             //さらにMBPSを除いた範囲
             range = FrameChange(range, mbps);
 
-            //createRoom("range", range);
+            /*
+            //例
+            Vector3[] ub = new Vector3[]{new Vector3(-700, 975, 0), new Vector3(700, 975, 0), new Vector3(700, -975, 0), new Vector3(-700, -975, 0)};
+            createRoom("UB", CorrectCoordinates(ub, new Vector3(3700, 925, 0)));
+            Vector3[] washroom = new Vector3[]{new Vector3(-750, 750, 0), new Vector3(750, 750, 0), new Vector3(750, -750, 0), new Vector3(-750, -750, 0)};
+            createRoom("Washroom", CorrectCoordinates(washroom, new Vector3(2250, 1150, 0)));
+            Vector3[] toilet = new Vector3[]{new Vector3(-700, 450, 0), new Vector3(700, 450, 0), new Vector3(700, -450, 0), new Vector3(-700, -450, 0)};
+            createRoom("Toilet", CorrectCoordinates(toilet, new Vector3(2700, -1450, 0)));
+            Vector3[] kitchen = new Vector3[]{new Vector3(-850, 350, 0), new Vector3(850, 350, 0), new Vector3(850, -350, 0), new Vector3(-850, -350, 0)};
+            createRoom("Kitchen", CorrectCoordinates(kitchen, new Vector3(1150, -1550, 0)));
+            Vector3[] western = new Vector3[]{new Vector3(-3400, 1900, 0), new Vector3(500, 1900, 0), new Vector3(500, -200, 0), new Vector3(300, -200, 0), new Vector3(300, -1900, 0), new Vector3(-3400, -1900, 0)};
+            createRoom("Western", CorrectCoordinates(western, new Vector3(0, 0, 0)));
+            */
 
             
             if (true) {
@@ -127,8 +138,8 @@ public class Packing : CreateRoom
             if (count < limit) {
                 Debug.Log((count+1) + "パターン目");
 
-                Vector3[] hallway = dwelling;
-                hallway = FrameChange(NumberClean(hallway), NumberClean(mbps));
+                //Vector3[] hallway = dwelling;
+                //hallway = FrameChange(NumberClean(hallway), NumberClean(mbps));
                 //createRoom("hallway", hallway);
 
                 if (GameObject.Find("UB")) {
@@ -158,25 +169,25 @@ public class Packing : CreateRoom
                 foreach (string roomName in currentPattern.Keys) {
                     if (roomName == "UB") {
                         createRoom(roomName, currentPattern[roomName]);
-                        hallway = FrameChange(NumberClean(hallway), NumberClean(currentPattern[roomName]));
+                        //hallway = FrameChange(NumberClean(hallway), NumberClean(currentPattern[roomName]));
                         //createRoom("hallway", hallway);
                         //createRoom(roomName, currentPattern[roomName], Color.cyan);
                     }
                     if (roomName == "Washroom") {
                         createRoom(roomName, currentPattern[roomName]);
-                        hallway = FrameChange(NumberClean(hallway), NumberClean(currentPattern[roomName]));
+                        //hallway = FrameChange(NumberClean(hallway), NumberClean(currentPattern[roomName]));
                         //createRoom("hallway", hallway);
                         //createRoom(roomName, currentPattern[roomName], Color.magenta);
                     }
                     if (roomName == "Toilet") {
                         createRoom(roomName, currentPattern[roomName]);
-                        hallway = FrameChange(NumberClean(hallway), NumberClean(currentPattern[roomName]));
+                        //hallway = FrameChange(NumberClean(hallway), NumberClean(currentPattern[roomName]));
                         //createRoom("hallway", hallway);
                         //createRoom(roomName, currentPattern[roomName], Color.green);
                     }
                     if (roomName == "Kitchen") {
                         createRoom(roomName, currentPattern[roomName]);
-                        hallway = FrameChange(NumberClean(hallway), NumberClean(currentPattern[roomName]));
+                        //hallway = FrameChange(NumberClean(hallway), NumberClean(currentPattern[roomName]));
                         //createRoom("hallway", hallway);
                         //createRoom(roomName, currentPattern[roomName], Color.gray);
                     }
@@ -184,19 +195,19 @@ public class Packing : CreateRoom
                         //Debug.Log("面積の割合： " + ((areaCalculation(currentPattern[roomName]) / areaCalculation(dwelling)) * 100) + "%");
                         Debug.Log("面積： " + areaCalculation(currentPattern[roomName]) + "m^2");
                         createRoom(roomName, currentPattern[roomName]);
-                        hallway = FrameChange(NumberClean(hallway), NumberClean(currentPattern[roomName]));
+                        //hallway = FrameChange(NumberClean(hallway), NumberClean(currentPattern[roomName]));
                         //createRoom("hallway", hallway);
                         //createRoom(roomName, currentPattern[roomName], Color.yellow);
                     }
                     if (roomName == "Entrance") {
                         createRoom(roomName, currentPattern[roomName]);
-                        hallway = FrameChange(NumberClean(hallway), NumberClean(currentPattern[roomName]));
+                        //hallway = FrameChange(NumberClean(hallway), NumberClean(currentPattern[roomName]));
                         //createRoom("hallway", hallway);
                         //createRoom(roomName, currentPattern[roomName], Color.yellow);
                     }
                 }
 
-                createRoom("hallway", hallway);
+                //createRoom("hallway", hallway);
 
                 count++;
             } else {
@@ -1235,7 +1246,7 @@ public class Packing : CreateRoom
 
             //洋室の面積による得点
             float westernSizePoint = westernSize;
-            //洋室の面積の割合のリストに追加
+            //洋室の面積のリストに追加
             westernSizePointList.Add(westernSizePoint);
 
 
@@ -1267,7 +1278,7 @@ public class Packing : CreateRoom
             }
 
             //洋室の形状の割合
-            float westernShapeRatio =  westernSize / ((westernMaxX - westernMinX) * (westernMaxY - westernMinY));
+            float westernShapeRatio =  westernSize * 1000000 / ((westernMaxX - westernMinX) * (westernMaxY - westernMinY));
 
             //洋室の形状の割合による得点
             float westernShapePoint = westernShapeRatio;
@@ -1288,6 +1299,7 @@ public class Packing : CreateRoom
         /* 得点の算出 */
         for (int i = 0; i < westernSizePointList.Count; i++) {
             float evaluationPoint = westernSizePointList[i] * westernShapePointList[i] * toiletPsDistancePointList[i] * kitchenWallPointList[i];
+            //float evaluationPoint = westernShapePointList[i];
             evaluationPointList.Add(i, evaluationPoint);
         }
 
@@ -1309,6 +1321,12 @@ public class Packing : CreateRoom
         for (int i = 0; i < 10/*allPatternSort.Count*/; i++) {
             selectedPattern.Add(allPatternSort[i]);
         }
+
+        /*
+        for (int i = 0; i < 10; i++) {
+            Debug.Log((i+1) + "番目の得点：" + evaluationPointListSort.ElementAt(i).Value);
+        }
+        */
 
         return selectedPattern;
     }
