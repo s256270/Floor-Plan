@@ -132,8 +132,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 42656606}
+  - component: {fileID: 42656607}
   m_Layer: 0
-  m_Name: makeTwoDwellingsMbpsList
+  m_Name: MakeTwoDwellingsMbpsList
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -152,7 +153,66 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1478263280}
-  m_RootOrder: 5
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &42656607
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 42656605}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d9a0bd0be5ed5f488b61ff4bc916869, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pr: {fileID: 155191406}
+  cr: {fileID: 1824586474}
+--- !u!1 &155191405
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 155191407}
+  - component: {fileID: 155191406}
+  m_Layer: 0
+  m_Name: PlanReader
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &155191406
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 155191405}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dd3a80385ee0fc2439f8ecf2f545a867, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stairsCoordinates: []
+--- !u!4 &155191407
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 155191405}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -3818.1946, y: -0.3632202, z: 116.4915}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1478263280}
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &519420028
 GameObject:
@@ -207,7 +267,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 5000
+  orthographic size: 6000
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -268,7 +328,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1478263280}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1317663743
 MonoBehaviour:
@@ -283,7 +343,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cr: {fileID: 1824586474}
-  pr: {fileID: 0}
+  cm: {fileID: 1418783398}
+  pr: {fileID: 155191406}
 --- !u!1 &1418783396
 GameObject:
   m_ObjectHideFlags: 0
@@ -314,7 +375,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1478263280}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1418783398
 MonoBehaviour:
@@ -328,13 +389,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15f2a54c247419144ac191615bfd88ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lineRenderer: {fileID: 0}
-  pa: {fileID: 0}
-  pr: {fileID: 0}
-  cm: {fileID: 0}
-  ce: {fileID: 0}
-  cwa: {fileID: 0}
-  cws: {fileID: 0}
+  pr: {fileID: 155191406}
+  ctdm: {fileID: 1512755267}
 --- !u!1 &1478263279
 GameObject:
   m_ObjectHideFlags: 0
@@ -364,6 +420,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1838514749}
+  - {fileID: 155191407}
   - {fileID: 1317663742}
   - {fileID: 1418783397}
   - {fileID: 1824586473}
@@ -402,7 +459,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1478263280}
-  m_RootOrder: 4
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1512755267
 MonoBehaviour:
@@ -416,6 +473,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 362f14c103cab1c47890b9b3596bed20, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mtdml: {fileID: 42656607}
+  pr: {fileID: 155191406}
+  cr: {fileID: 1824586474}
 --- !u!1 &1824586472
 GameObject:
   m_ObjectHideFlags: 0
@@ -446,7 +506,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1478263280}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1824586474
 MonoBehaviour:

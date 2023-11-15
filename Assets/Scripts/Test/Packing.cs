@@ -51,20 +51,6 @@ public class Packing : CreateRoom
             //さらにMBPSを除いた範囲
             range = FrameChange(range, mbps);
 
-            /*
-            //例
-            Vector3[] ub = new Vector3[]{new Vector3(-700, 975, 0), new Vector3(700, 975, 0), new Vector3(700, -975, 0), new Vector3(-700, -975, 0)};
-            createRoom("UB", CorrectCoordinates(ub, new Vector3(3700, 925, 0)));
-            Vector3[] washroom = new Vector3[]{new Vector3(-750, 750, 0), new Vector3(750, 750, 0), new Vector3(750, -750, 0), new Vector3(-750, -750, 0)};
-            createRoom("Washroom", CorrectCoordinates(washroom, new Vector3(2250, 1150, 0)));
-            Vector3[] toilet = new Vector3[]{new Vector3(-700, 450, 0), new Vector3(700, 450, 0), new Vector3(700, -450, 0), new Vector3(-700, -450, 0)};
-            createRoom("Toilet", CorrectCoordinates(toilet, new Vector3(2700, -1450, 0)));
-            Vector3[] kitchen = new Vector3[]{new Vector3(-850, 350, 0), new Vector3(850, 350, 0), new Vector3(850, -350, 0), new Vector3(-850, -350, 0)};
-            createRoom("Kitchen", CorrectCoordinates(kitchen, new Vector3(1150, -1550, 0)));
-            Vector3[] western = new Vector3[]{new Vector3(-3400, 1900, 0), new Vector3(500, 1900, 0), new Vector3(500, -200, 0), new Vector3(300, -200, 0), new Vector3(300, -1900, 0), new Vector3(-3400, -1900, 0)};
-            createRoom("Western", CorrectCoordinates(western, new Vector3(0, 0, 0)));
-            */
-
             
             if (true) {
                 //リストの作成
@@ -87,7 +73,7 @@ public class Packing : CreateRoom
         }
 
         allPattern = SecureWidth(allPattern);
-        allPattern = Evaluation(allPattern);
+        //allPattern = Evaluation(allPattern);
         
         limit = allPattern.Count;
         Debug.Log("総パターン数：" + limit);

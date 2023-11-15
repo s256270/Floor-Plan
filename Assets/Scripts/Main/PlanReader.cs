@@ -121,8 +121,8 @@ public class PlanReader : MonoBehaviour
         }
     };
 
-    Vector3[] stairsCoordinates;
-    List<Vector3[]> dwellingCoordinates;
+    public Vector3[] stairsCoordinates;
+    public List<Vector3[]> dwellingCoordinates;
     
     void Start()
     {
