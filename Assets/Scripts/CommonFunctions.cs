@@ -73,66 +73,55 @@ public class CommonFunctions : MonoBehaviour
     //     }
     // }
 
-    // //x座標もy座標も異なるが部屋が接しているときの座標を返す
-    // public Vector3[] ContactCoodinates(Vector3[] side, Vector3[] room) {
-    //     //4点の座標を格納する変数
-    //     Vector3 A1, A2, B1, B2;
+    /// <summary>
+    /// 線分と多角形の接している座標を求める
+    /// </summary>
+    /// <param name="line">線分</param>
+    /// <param name="polygon">多角形</param>
+    /// <returns>線分と多角形に接しているときその座標配列を返し，接していないとき空の配列を返す</returns>
+    public Vector3[] ContactCoodinates(Vector3[] line, Vector3[] polygon) {
+        //4点の座標を格納する変数
+        Vector3 A1, A2, B1, B2;
 
-    //     //部屋Aのすべての辺を調べる   
-    //     A1 = side[0];
-    //     A2 = side[1];
+        //部屋Aのすべての辺を調べる   
+        A1 = line[0];
+        A2 = line[1];
         
-    //     //部屋のすべての辺を調べる
-    //     for (int j = 0; j < room.Length; j++) {
-    //         B1 = room[j];
-    //         B2 = room[(j+1)%room.Length];
+        //部屋のすべての辺を調べる
+        for (int j = 0; j < polygon.Length; j++) {
+            B1 = polygon[j];
+            B2 = polygon[(j+1)%polygon.Length];
 
-    //         //座標をx, yごとに分けるためのリスト
-    //         List<float> coordinates_x = new List<float>();
-    //         List<float> coordinates_y = new List<float>();
+            //2つの部屋が接しているとき
+            string positionRelation = LinePositionRelation(line, new Vector3[] {B1, B2});
+            if (positionRelation == "match" || positionRelation == "include" || positionRelation == "overlap") {
+                //座標をソートするためのリスト
+                List<Vector3> coordinatesListToSort = new List<Vector3>(){A1, A2, B1, B2};
 
-    //         //4点が一直線上に並んでいるとき（端から真ん中，真ん中から反対の端の距離の和が端から端の距離と同じとき × 2）
-    //         if (OnLineSegment(new Vector3[] {A1, A2}, B1) && OnLineSegment(new Vector3[] {A1, A2}, B2)) {
-    //             //2つの部屋を通り抜けられるように接しているとき（片方の辺の最小の点がもう片方の辺の最大の点より大きいとき）
-    //             if (! (((Mathf.Max(A1.x, A2.x) <= Mathf.Min(B1.x, B2.x)) || (Mathf.Min(A1.x, A2.x) >= Mathf.Max(B1.x, B2.x))) && ((Mathf.Max(A1.y, A2.y) <= Mathf.Min(B1.y, B2.y)) || (Mathf.Min(A1.y, A2.y) >= Mathf.Max(B1.y, B2.y)))) ) {
-    //                 /*** 
-    //                 xとyを別々にソートしてる
-    //                 x軸平行，y軸平行のときのみ成立
-    //                 後で変更する　多分
-    //                 ***/
+                //x座標の昇順にソート
+                coordinatesListToSort.Sort((a, b) => a.x.CompareTo(b.x));
 
-    //                 //x座標を昇順にソート
-    //                 coordinates_x.Add(A1.x);
-    //                 coordinates_x.Add(A2.x);
-    //                 coordinates_x.Add(B1.x);
-    //                 coordinates_x.Add(B2.x);
+                //対象の辺がy軸平行のとき
+                if (A1.x == A2.x) {
+                    //y座標の昇順にソート
+                    coordinatesListToSort.Sort((a, b) => a.y.CompareTo(b.y));
+                }
 
-    //                 coordinates_x.Sort();
+                //接している辺の共通部分（昇順の真ん中2つ）を返す
+                return new Vector3[] {coordinatesListToSort[1], coordinatesListToSort[2]};
+            }
+        }
 
-    //                 //y座標を昇順にソート
-    //                 coordinates_y.Add(A1.y);
-    //                 coordinates_y.Add(A2.y);
-    //                 coordinates_y.Add(B1.y);
-    //                 coordinates_y.Add(B2.y);
-
-    //                 coordinates_y.Sort();
-
-    //                 //接している辺の共通部分（昇順の真ん中2つ）を返す
-    //                 return new Vector3[] {new Vector3(coordinates_x[1], coordinates_y[1], 0), new Vector3(coordinates_x[2], coordinates_y[2], 0)};
-    //             }
-    //         }
-    //     }
-
-    //     //どれにも当てはまらなかったとき，すべてが0の点を返す
-    //     return new Vector3[] {Vector3.zero, Vector3.zero};            
-    // }
+        //どれにも当てはまらなかったとき，空の配列を返す
+        return new Vector3[]{};
+    }
 
     /// <summary>
     /// 一直線上にある2つの線分がどのような位置関係にあるかを判定
     /// </summary>
     /// <param name="lineA">線分A</param>
     /// <param name="lineB">線分B</param>
-    /// <returns></returns>
+    /// <returns>一直線上に無い場合not straight，一致する場合match，端点のみが重なる場合point overlap，完全に包含されてる場合include，一部重なっている場合overlap，全く重なっていない場合not overlap</returns>
     public string LinePositionRelation(Vector3[] lineA, Vector3[] lineB) {
         //2線分が一直線上にあるかどうかの判定
         if (!StraightLineJudge(lineA, lineB)) {
@@ -187,7 +176,7 @@ public class CommonFunctions : MonoBehaviour
         float s2 = (line1[0] - line2[1]) * (line1[1] - line2[0]);
 
         //s1とs2の正負によって位置関係を判定
-        if (s1 == 0 && s2 < 0) {
+        if ((s1 == 0 && (line1[0] - line2[0]) == 0 && (line1[1] - line2[1]) == 0) && s2 < 0) {
             //一致
             return "match";
         }
@@ -195,7 +184,7 @@ public class CommonFunctions : MonoBehaviour
             //端点が重なっている
             return "point overlap";
         }
-        else if (s1 < 0 && s2 < 0) {
+        else if (s1 <= 0 && s2 < 0) {
             //包含
             return "include";
         }
@@ -273,12 +262,12 @@ public class CommonFunctions : MonoBehaviour
     /// <summary>
     /// 全座標が0かどうかを判定
     /// </summary>
-    /// <param name="room">判定する座標</param>
+    /// <param name="line">判定する座標</param>
     /// <returns>全ての座標が0ならtrue，そうでなければfalse</returns>
-    public bool ZeroJudge(Vector3[] room) {
+    public bool ZeroJudge(Vector3[] polygon) {
         bool flag = false;
         
-        if (room.All(i => i == Vector3.zero)) {
+        if (polygon.All(i => i == Vector3.zero)) {
             flag = true;
         }
 
