@@ -246,7 +246,7 @@ public class CreateRoom : MonoBehaviour
         }
 
         //どれにも当てはまらなかったとき，すべてが0の点を返す
-        return new Vector3[] {Vector3.zero, Vector3.zero};            
+        return new Vector3[] {Vector3.zero, Vector3.zero};
     }
 
     //x座標もy座標も異なるが部屋が接しているときの座標を返す
@@ -368,7 +368,7 @@ public class CreateRoom : MonoBehaviour
         }
 
         //どれにも当てはまらなかったとき，すべてが0の点を返す
-        return new Vector3[] {Vector3.zero, Vector3.zero};            
+        return new Vector3[] {Vector3.zero, Vector3.zero};
     }
 
     //x座標もy座標も異なるが部屋が接しているときの座標を返す
