@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
-
 public class CommonFunctions : MonoBehaviour
 {
     public LineRenderer lineRenderer; //linerendererコンポーネント
@@ -58,21 +57,6 @@ public class CommonFunctions : MonoBehaviour
         lineRenderer.endColor = color;
     }
 
-    // //部屋の1辺と部屋が接している座標を返す
-    // public Vector3[] Contact(Vector3[] side, Vector3[] room) {
-    //     //すべてがゼロの座標（接しているかどうかの判定に使用）
-    //     Vector3[] zero = new Vector3[] {Vector3.zero, Vector3.zero};
-
-    //     //接している（すべての座標がゼロでない）とき，その座標を返す
-    //     if ((contact_xy(side, room)[0] != zero[0]) && (contact_xy(side, room)[1] != zero[1])) {
-    //         return contact_xy(side, room);
-    //     }
-    //     //接していない場合，すべてがゼロの座標を返す
-    //     else {
-    //         return new Vector3[] {Vector3.zero, Vector3.zero};
-    //     }
-    // }
-
     /// <summary>
     /// 線分と多角形の接している座標を求める
     /// </summary>
@@ -80,6 +64,17 @@ public class CommonFunctions : MonoBehaviour
     /// <param name="polygon">多角形</param>
     /// <returns>線分と多角形に接しているときその座標配列を返し，接していないとき空の配列を返す</returns>
     public Vector3[] ContactCoodinates(Vector3[] line, Vector3[] polygon) {
+        try {
+            //lineが線分でなかった場合にエラーを出す
+            if (line.Length != 2) {
+                throw new Exception("line is not line segment in ContactCoodinates");
+            }
+        }
+        catch (Exception e) {
+            //エラーを出力
+            Debug.LogError(e.Message);
+        }
+
         //4点の座標を格納する変数
         Vector3 A1, A2, B1, B2;
 
@@ -114,6 +109,48 @@ public class CommonFunctions : MonoBehaviour
 
         //どれにも当てはまらなかったとき，空の配列を返す
         return new Vector3[]{};
+    }
+
+    /// <summary>
+    /// 線分と多角形が接しているかどうかを判定
+    /// </summary>
+    /// <param name="line">線分</param>
+    /// <param name="polygon">多角形</param>
+    /// <returns>線分と多角形に接しているときTrue，接していないときFalseを返す</returns>
+    public bool ContactJudge(Vector3[] line, Vector3[] polygon) {
+        try {
+            //lineが線分でなかった場合にエラーを出す
+            if (line.Length != 2) {
+                throw new Exception("line is not line segment in ContactCoodinates");
+            }
+        }
+        catch (Exception e) {
+            //エラーを出力
+            Debug.LogError(e.Message);
+        }
+
+        //4点の座標を格納する変数
+        Vector3 A1, A2, B1, B2;
+
+        //部屋Aのすべての辺を調べる   
+        A1 = line[0];
+        A2 = line[1];
+        
+        //部屋のすべての辺を調べる
+        for (int j = 0; j < polygon.Length; j++) {
+            B1 = polygon[j];
+            B2 = polygon[(j+1)%polygon.Length];
+
+            //2つの部屋が接しているとき
+            string positionRelation = LinePositionRelation(line, new Vector3[] {B1, B2});
+            if (positionRelation == "match" || positionRelation == "include" || positionRelation == "overlap") {
+                //trueを返す
+                return true;
+            }
+        }
+
+        //falseを返す
+        return false;
     }
 
     /// <summary>

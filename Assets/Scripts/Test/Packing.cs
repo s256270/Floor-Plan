@@ -52,13 +52,8 @@ public class Packing : CreateRoom
             range = FrameChange(range, mbps);
 
             
-            if (true) {
-                //リストの作成
-                allPattern.AddRange(PlacementListCreate(new int[]{0, 1, 2, 3}));
-            } else {
-                //初めの方だけリストの作成
-                allPattern = PlacementListCreate(new int[]{0, 1, 2, 3}, 15, 10);
-            }
+            //リストの作成
+            allPattern.AddRange(PlacementListCreate(new int[]{0, 1, 2, 3}));
 
             //玄関とMBPSを追加
             for (int j = 0; j < allPattern.Count; j++) {

@@ -7,6 +7,7 @@ public class CreateTwoDwellingMbps : MonoBehaviour
     [SerializeField] MakeTwoDwellingsMbpsList mtdml;
     [SerializeField] PlanReader pr;
     [SerializeField] CreateRoom cr;
+    [SerializeField] CommonFunctions cf;
     [SerializeField] Parts pa;
 
     //階段室の座標
@@ -54,7 +55,13 @@ public class CreateTwoDwellingMbps : MonoBehaviour
         return result;
     }
 
-    public List<Dictionary<string, Vector3[]>> placeTwoDwellingsMbps(List<Dictionary<string, Vector3[]>> planPattern, List<int> placePattern) {
+    /// <summary>
+    /// 2住戸にまたがるMBPSを配置
+    /// </summary>
+    /// <param name="currentPlacement">現在の配置結果</param>
+    /// <param name="dwellingIndexSet">2住戸にまたがるMBPSを配置する住戸のインデックスの組合わせ</param>
+    /// <returns>dwellingIndexで指定された住戸にMBPSを配置した結果</returns>
+    public List<Dictionary<string, Vector3[]>> placeTwoDwellingsMbps(List<Dictionary<string, Vector3[]>> currentPlacement, List<int> dwellingIndexSet) {
         //MBPSが接する階段室の辺を求める
         int stairsIndex = StairsSideContactMbps(placePattern);
         
@@ -156,37 +163,39 @@ public class CreateTwoDwellingMbps : MonoBehaviour
         return planPattern;
     }
 
-    public int StairsSideContactMbps(List<int> placePattern) {
-        int stairsIndex = 0;
+    /// <summary>
+    /// MBPSが接する階段室の辺を求める
+    /// </summary> 
+    /// <param name="dwellingIndexSet">2住戸にまたがるMBPSを配置する住戸のインデックスの組み合わせ</param>
+    /// <returns>MBPSが接する階段室の辺のインデックス</returns>
+    public int StairsSideContactMbps(List<int> dwellingIndexSet) {
+        int correctStairsIndex = 0;
 
+        //片方の住戸が接する階段室の辺のインデックスの候補
         List<int> stairsIndexCandidates1 = new List<int>();
+        //もう片方の住戸が接する階段室の辺のインデックスの候補
         List<int> stairsIndexCandidates2 = new List<int>();
 
-        //階段室のある1辺について
-        for (int i = 0; i < stairsCoordinates.Length; i++) {
-            for (int j = 0; j < dwellingCoordinates[placePattern[0]].Length; j++) {
-                Vector3[] contactCoodinates = cr.contact(new Vector3[]{stairsCoordinates[i], stairsCoordinates[(i+1)%stairsCoordinates.Length]}, dwellingCoordinates[placePattern[0]]);
-
-                //階段室と住戸が接しているとき
-                if (!cr.ZeroJudge(contactCoodinates)) {
-                    stairsIndexCandidates1.Add(i);
+        //それぞれの住戸について
+        for (int i = 0; i < dwellingIndexSet.Count; i++) {
+            //階段室1辺について
+            for (int j = 0; j < stairsCoordinates.Length; j++) {
+                //住戸が接しているとき
+                if (cf.ContactJudge(new Vector3[]{stairsCoordinates[j], stairsCoordinates[(j+1)%stairsCoordinates.Length]}, dwellingCoordinates[dwellingIndexSet[i]][k])) {
+                    //それぞれの住戸に対応する階段室の辺のインデックスの候補を追加
+                    if (i == 0) {
+                        stairsIndexCandidates1.Add(j);
+                    } else if (i == 1) {
+                        stairsIndexCandidates2.Add(j);
+                    }
                 }
             }
-
-            for (int j = 0; j < dwellingCoordinates[placePattern[1]].Length; j++) {
-                Vector3[] contactCoodinates = cr.contact(new Vector3[]{stairsCoordinates[i], stairsCoordinates[(i+1)%stairsCoordinates.Length]}, dwellingCoordinates[placePattern[1]]);
-
-                //階段室と住戸が接しているとき
-                if (!cr.ZeroJudge(contactCoodinates)) {
-                    stairsIndexCandidates2.Add(i);
-                }
-            }
-            
         }
 
-        stairsIndex = stairsIndexCandidates1.FindAll(n => stairsIndexCandidates2.Contains(n))[0];
+        //2つの住戸が接する階段室の辺のインデックスを求める
+        correctStairsIndex = stairsIndexCandidates1.FindAll(n => stairsIndexCandidates2.Contains(n))[0];
 
-        return stairsIndex;
+        return correctStairsIndex;
     }
 
     /// <summary>
