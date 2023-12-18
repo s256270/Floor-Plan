@@ -22,7 +22,7 @@ public class CreateMbps : MonoBehaviour/*FloorPlanner*/
         var result = new List<List<Dictionary<string, Vector3[]>>>();
 
         /* 2部屋にまたがるMBPSの配置開始 */
-        result = ctdm.placeTwoDwellingsMbps(allPattern);
+        //result = ctdm.placeTwoDwellingsMbps(allPattern);
 
         /* 1部屋のみのMBPSの配置開始 */
         //result = placeOneDwellingMbps(result);

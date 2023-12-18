@@ -6,47 +6,51 @@ public class MBPSTest : MonoBehaviour
 {
     [SerializeField] CreateRoom cr;
     [SerializeField] CreateMbps cm;
+    [SerializeField] CreateTwoDwellingMbps ctdm;
     [SerializeField] PlanReader pr;
 
     Vector3[] dwelling;
     Vector3[] balcony;
 
-    List<List<Dictionary<string, Vector3[]>>> allPattern = new List<List<Dictionary<string, Vector3[]>>>();
+    List<Dictionary<string, Vector3[]>[]> allPattern = new List<Dictionary<string, Vector3[]>[]>();
 
-    int count = 0;
-    int limit = 0;
+    // int count = 0;
+    // int limit = 0;
 
     void Start()
     {
-        allPattern = cm.PlaceMbps(allPattern);
+        Display(pr.plan);
 
-        limit = allPattern.Count;
-        Debug.Log("総パターン数：" + limit);
+        ctdm.placeTwoDwellingsMbps(new Dictionary<string, Vector3[]>[4], new List<int>(){0, 2});
+        ctdm.placeTwoDwellingsMbps(new Dictionary<string, Vector3[]>[4], new List<int>(){1, 3});
+
+        // limit = allPattern.Count;
+        // Debug.Log("総パターン数：" + limit);
     }
 
-    void Update()
-    {
-        //Enterキーを押すと，間取図を表示
-        if (Input.GetKeyDown(KeyCode.Return)) {
-            if (count < limit) {
-                Debug.Log((count+1) + "パターン目");
+    // void Update()
+    // {
+    //     //Enterキーを押すと，間取図を表示
+    //     if (Input.GetKeyDown(KeyCode.Return)) {
+    //         if (count < limit) {
+    //             Debug.Log((count+1) + "パターン目");
 
-                //前の間取図を削除
-                if (GameObject.Find("FloorPlan")) {
-                    Destroy(GameObject.Find("FloorPlan"));
-                }
+    //             //前の間取図を削除
+    //             if (GameObject.Find("FloorPlan")) {
+    //                 Destroy(GameObject.Find("FloorPlan"));
+    //             }
 
-                List<Dictionary<string, Vector3[]>> currentPattern = allPattern[count];
+    //             List<Dictionary<string, Vector3[]>> currentPattern = allPattern[count];
 
-                //間取図を表示
-                Display(currentPattern);
+    //             //間取図を表示
+    //             Display(currentPattern);
 
-                count++;
-            } else {
-                Debug.Log("終了");
-            }
-        }
-    }
+    //             count++;
+    //         } else {
+    //             Debug.Log("終了");
+    //         }
+    //     }
+    // }
 
     //間取図を表示
     public void Display(List<Dictionary<string, Vector3[]>> currentPattern) {

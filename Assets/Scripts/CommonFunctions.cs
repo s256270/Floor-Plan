@@ -14,7 +14,7 @@ public class CommonFunctions : MonoBehaviour
     /// <param name="name">オブジェクト名</param>
     /// <param name="positions">描画したい座標</param>
     /// <returns>描画したオブジェクト</returns>
-    public GameObject createRoom(string name, Vector3[] positions) {
+    public GameObject CreateRoom(string name, Vector3[] positions) {
         //親となるゲームオブジェクトを生成
         GameObject room = new GameObject(name);
 
@@ -49,8 +49,8 @@ public class CommonFunctions : MonoBehaviour
         return room;
     }
 
-    public void createRoom(string name, Vector3[] positions, UnityEngine.Color color) {
-        createRoom(name, positions);
+    public void CreateRoom(string name, Vector3[] positions, UnityEngine.Color color) {
+        CreateRoom(name, positions);
 
         //色の変更
         lineRenderer.startColor = color;
@@ -63,11 +63,11 @@ public class CommonFunctions : MonoBehaviour
     /// <param name="line">線分</param>
     /// <param name="polygon">多角形</param>
     /// <returns>線分と多角形に接しているときその座標配列を返し，接していないとき空の配列を返す</returns>
-    public Vector3[] ContactCoodinates(Vector3[] line, Vector3[] polygon) {
+    public Vector3[] ContactCoordinates(Vector3[] line, Vector3[] polygon) {
         try {
             //lineが線分でなかった場合にエラーを出す
             if (line.Length != 2) {
-                throw new Exception("line is not line segment in ContactCoodinates");
+                throw new Exception("\"line\" is not line segment in \"ContactCoodinates\"");
             }
         }
         catch (Exception e) {
@@ -297,6 +297,98 @@ public class CommonFunctions : MonoBehaviour
     }
 
     /// <summary>
+    /// 多角形を原点周りに90, 180, 270°回転させる
+    /// </summary> 
+    /// <param name="polygon">回転させたい多角形の座標配列</param>
+    /// <param name="angle">回転させたい角度</param>
+    /// <returns>回転させた後の座標配列</returns>
+    public Vector3[] Rotation(Vector3[] polygon, int angle) {
+        //回転させた後の座標を格納する配列
+        Vector3[] rotatedCoordinates = new Vector3[polygon.Length];
+
+        //90°回転させる
+        if (angle == 90) {
+            for (int i = 0; i < polygon.Length; i++) {
+                rotatedCoordinates[i].x = - polygon[i].y;
+                rotatedCoordinates[i].y = polygon[i].x;
+            }
+            
+            //先頭の座標が一番左上になるように座標を並び替える
+            rotatedCoordinates = topArrange(rotatedCoordinates);
+        }
+        //180°回転させる
+        else if (angle == 180) {
+            for (int i = 0; i < polygon.Length; i++) {
+                rotatedCoordinates[i].x = - polygon[i].x;
+                rotatedCoordinates[i].y = - polygon[i].y;
+            }
+
+            //先頭の座標が一番左上になるように座標を並び替える
+            rotatedCoordinates = topArrange(rotatedCoordinates);
+        }
+        //270°回転させる
+        else if (angle == 270) {
+            for (int i = 0; i < polygon.Length; i++) {
+                rotatedCoordinates[i].x = polygon[i].y;
+                rotatedCoordinates[i].y = - polygon[i].x;
+            }
+
+            //先頭の座標が一番左上になるように座標を並び替える
+            rotatedCoordinates = topArrange(rotatedCoordinates);
+        }
+
+        return rotatedCoordinates;
+    }
+
+    /// <summary>
+    /// 先頭の座標が一番左上になるように座標を並び替える
+    /// </summary> 
+    /// <param name="coordinates">並び替えたい座標配列</param>
+    /// <returns>並び替えた座標配列</returns>
+    public Vector3[] topArrange(Vector3[] coodinates) {
+        //並べ替えた座標配列
+        Vector3[] arrangedCoordinates = new Vector3[coodinates.Length];
+
+        //一番小さいx座標を見つける
+        float minX = coodinates[0].x;
+        for (int i = 1; i < coodinates.Length; i++) {
+            if (minX > coodinates[i].x) {
+                minX = coodinates[i].x;
+            }
+        }
+
+        //x座標が小さいもののうち，一番大きいy座標を探す
+        float maxY = float.MinValue;
+        for (int i = 1; i < coodinates.Length; i++) {
+            if (maxY < coodinates[i].y) {
+                //x座標が一番小さいもののうち，このy座標が存在するとき
+                if (coodinates.Contains(new Vector3(minX, coodinates[i].y, 0))) {
+                    maxY = coodinates[i].y;
+                }
+            }
+        }
+
+        //先頭の座標
+        Vector3 topCoordinates = new Vector3(minX, maxY, 0);
+        
+        //先頭の座標と一致する座標のインデックスを見つける
+        int topIndex = 0;
+        for (int i = 0; i < coodinates.Length; i++) {
+            if (coodinates[i] == topCoordinates) {
+                topIndex = i;
+                break;
+            }
+        }
+
+        //topIndexが先頭になるように並び替える
+        for (int i = 0; i < coodinates.Length; i++) {
+            arrangedCoordinates[i] = coodinates[(topIndex+i)%coodinates.Length];
+        }
+
+        return arrangedCoordinates;
+    }
+
+    /// <summary>
     /// 全座標が0かどうかを判定
     /// </summary>
     /// <param name="line">判定する座標</param>
@@ -309,6 +401,32 @@ public class CommonFunctions : MonoBehaviour
         }
 
         return flag;
+    }
+
+    /// <summary>
+    /// 線分の傾きを求める
+    /// </summary>
+    /// <param name="line">傾きを求める線分</param>
+    /// <returns>線分の傾き, y軸平行のときのみ無限を返す</returns>
+    public float Slope(Vector3[] line) {
+        //傾き
+        float slope = 0f;
+
+        //線分の端点の座標
+        Vector3 l1 = line[0];
+        Vector3 l2 = line[1];
+
+        //線分がy軸平行のとき
+        if (l1.x == l2.x) {
+            slope = Mathf.Infinity;
+        }
+        //それ以外のとき
+        else {
+            slope = (l2.y - l1.y) / (l2.x - l1.x);
+        }
+        
+        //傾きを返す
+        return slope;
     }
 
     /// <summary>

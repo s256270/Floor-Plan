@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,9 +16,9 @@ public class CreateTwoDwellingMbps : MonoBehaviour
     //住戸の座標のリスト
     List<Vector3[]> dwellingCoordinates;
 
-    public List<List<Dictionary<string, Vector3[]>>> placeTwoDwellingsMbps(List<List<Dictionary<string, Vector3[]>>> allPattern) {
+    public List<Dictionary<string, Vector3[]>[]> placeTwoDwellingsMbps(List<Dictionary<string, Vector3[]>[]> allPattern) {
         //配置結果のリスト
-        var result = new List<List<Dictionary<string, Vector3[]>>>();
+        var result = new List<Dictionary<string, Vector3[]>[]>();
 
         /* 必要な座標の準備 */
         //階段室の座標のみを抜き出し
@@ -42,7 +43,7 @@ public class CreateTwoDwellingMbps : MonoBehaviour
         for (int i = 0; i < twoDwellingsMbpsAllPattern.Count; i++) {
 
             //i番目の配置パターンの結果
-            var thisPatternResult = new List<Dictionary<string, Vector3[]>>();
+            var thisPatternResult = new Dictionary<string, Vector3[]>[4];
 
             for (int j = 0; j < twoDwellingsMbpsAllPattern[i].Count; j++) {
                 thisPatternResult = placeTwoDwellingsMbps(thisPatternResult, twoDwellingsMbpsAllPattern[i][j]);
@@ -61,106 +62,166 @@ public class CreateTwoDwellingMbps : MonoBehaviour
     /// <param name="currentPlacement">現在の配置結果</param>
     /// <param name="dwellingIndexSet">2住戸にまたがるMBPSを配置する住戸のインデックスの組合わせ</param>
     /// <returns>dwellingIndexで指定された住戸にMBPSを配置した結果</returns>
-    public List<Dictionary<string, Vector3[]>> placeTwoDwellingsMbps(List<Dictionary<string, Vector3[]>> currentPlacement, List<int> dwellingIndexSet) {
+    public Dictionary<string, Vector3[]>[] placeTwoDwellingsMbps(Dictionary<string, Vector3[]>[] currentPlacement, List<int> dwellingIndexSet) {
         //MBPSが接する階段室の辺を求める
-        int stairsIndex = StairsSideContactMbps(placePattern);
+        int stairsIndex = StairsSideContactMbps(dwellingIndexSet);
         
-        /* 2つの住戸にMBPSを配置 */
-        for (int i = 0; i < placePattern.Count; i++) {
+        //MBPSを配置する2つの住戸のループ
+        for (int i = 0; i < dwellingIndexSet.Count; i++) {
             //MBPSを配置する住戸の座標
-            Vector3[] currentDwellingCoordinates = dwellingCoordinates[placePattern[i]];
+            Vector3[] currentDwellingCoordinates = pr.dwellingCoordinates[dwellingIndexSet[i]];
 
-            /* 住戸と階段室の接する辺の座標を求める */
-            Vector3[] contactStairsCoodinates = new Vector3[2];
-            Vector3[] contactCoodinates = cr.contact(new Vector3[]{stairsCoordinates[stairsIndex], stairsCoordinates[(stairsIndex+1)%stairsCoordinates.Length]}, currentDwellingCoordinates);
-            
-            if (!cr.ZeroJudge(contactCoodinates)) {
-                contactStairsCoodinates = contactCoodinates;
-            }
-            
-            /* MBPSの座標を決める */
-            float gapX = 0; //x座標のずれ
-            float gapY = 0; //y座標のずれ
+            //住戸と階段室の接する辺の座標を求める
+            Vector3[] contactStairsCoordinates = cf.ContactCoordinates(new Vector3[]{pr.stairsCoordinates[stairsIndex], pr.stairsCoordinates[(stairsIndex+1)%pr.stairsCoordinates.Length]}, currentDwellingCoordinates);
 
-            //住戸と階段室の接する辺がy軸平行のとき
-            if (contactStairsCoodinates[0].x == contactStairsCoodinates[1].x) {
-                //配置するMBPSの座標
-                Vector3[] mbpsCoordinates = Rotation(pa.twoDwellingMbpsCoordinates);
+            //2つの住戸が接する辺のうち，階段室の辺に触れている辺の座標
+            Vector3[] contactDwellingCoordinates = new Vector3[2];
 
-                //MBPSが住戸と階段室の接する辺に接するようなx座標を探す
-                for (int j = 0; j < ContactGap(mbpsCoordinates, contactStairsCoodinates).Length; j++) {
-                    //MBPSが2つの住戸が接する辺に接するようなy座標を探す
-                    for (int k = 0; k < currentDwellingCoordinates.Length; k++) {
-                        Vector3[] contactDwellingCoodinates = cr.contact(new Vector3[]{currentDwellingCoordinates[k], currentDwellingCoordinates[(k+1)%currentDwellingCoordinates.Length]}, dwellingCoordinates[placePattern[(i+1)%placePattern.Count]]);
-                        
-                        //2つの住戸が接するとき
-                        if (!cr.ZeroJudge(contactDwellingCoodinates)) {
-                            //2つの住戸が接する辺が階段室の辺に触れているとき
-                            if (OnLineSegment(contactStairsCoodinates, contactDwellingCoodinates[0]) || OnLineSegment(contactStairsCoodinates, contactDwellingCoodinates[1])) {
-                                //x座標をContactGapの結果に，y座標を2つの住戸が接する辺の上に接するようにずらしてみる
-                                if (JudgeInside(currentDwellingCoordinates, CorrectCoordinates(mbpsCoordinates, new Vector3(ContactGap(mbpsCoordinates, contactStairsCoodinates)[j], contactDwellingCoodinates[0].y + Mathf.Abs(mbpsCoordinates[0].y), 0)))) {
-                                    gapX = ContactGap(mbpsCoordinates, contactStairsCoodinates)[j];
-                                    gapY = contactDwellingCoodinates[0].y + Mathf.Abs(mbpsCoordinates[0].y);
-
-                                    //planPattern["Dwelling" + (placePattern[i] + 1)].Add("Mbps", CorrectCoordinates(mbpsCoordinates, new Vector3(gapX, gapY, 0)));
-
-                                    break;
-                                }
-                                //x座標をContactGapの結果に，y座標を2つの住戸が接する辺の下に接するようにずらしてみる
-                                else if (JudgeInside(currentDwellingCoordinates, CorrectCoordinates(mbpsCoordinates, new Vector3(ContactGap(mbpsCoordinates, contactStairsCoodinates)[j], contactDwellingCoodinates[0].y - Mathf.Abs(mbpsCoordinates[0].y), 0)))) {
-                                    gapX = ContactGap(mbpsCoordinates, contactStairsCoodinates)[j];
-                                    gapY = contactDwellingCoodinates[0].y - Mathf.Abs(mbpsCoordinates[0].y);
-
-                                    //planPattern["Dwelling" + (placePattern[i] + 1)].Add("Mbps", CorrectCoordinates(mbpsCoordinates, new Vector3(gapX, gapY, 0)));
-
-                                    break;
-                                }
-                            }
-                        }
+            //MBPSを配置する住戸の辺についてのループ
+            for (int j = 0; j < currentDwellingCoordinates.Length; j++) {
+                //MBPSを配置する住戸の1辺がもう一方の住戸と接しているとき
+                if (cf.ContactJudge(new Vector3[]{currentDwellingCoordinates[j], currentDwellingCoordinates[(j+1)%currentDwellingCoordinates.Length]}, pr.dwellingCoordinates[dwellingIndexSet[(i+1)%dwellingIndexSet.Count]])) {
+                    //住戸同士が接している辺が階段室の辺に触れているとき
+                    if (OnLineSegment(contactStairsCoordinates, cf.ContactCoordinates(new Vector3[]{currentDwellingCoordinates[j], currentDwellingCoordinates[(j+1)%currentDwellingCoordinates.Length]}, pr.dwellingCoordinates[dwellingIndexSet[(i+1)%dwellingIndexSet.Count]])[0]) || OnLineSegment(contactStairsCoordinates, cf.ContactCoordinates(new Vector3[]{currentDwellingCoordinates[j], currentDwellingCoordinates[(j+1)%currentDwellingCoordinates.Length]}, pr.dwellingCoordinates[dwellingIndexSet[(i+1)%dwellingIndexSet.Count]])[1])) {
+                        //欲しい辺の座標を確定
+                        contactDwellingCoordinates = cf.ContactCoordinates(new Vector3[]{currentDwellingCoordinates[j], currentDwellingCoordinates[(j+1)%currentDwellingCoordinates.Length]}, pr.dwellingCoordinates[dwellingIndexSet[(i+1)%dwellingIndexSet.Count]]);
                     }
                 }
             }
-            //住戸と階段室の接する辺がx軸平行のとき
-            else if (contactStairsCoodinates[0].y == contactStairsCoodinates[1].y) {
-                //配置するMBPSの座標
-                Vector3[] mbpsCoordinates = pa.twoDwellingMbpsCoordinates;
 
-                //MBPSが住戸と階段室の接する辺に接するようなy座標を探す
-                for (int j = 0; j < ContactGap(mbpsCoordinates, contactStairsCoodinates).Length; j++) {
-                    //MBPSが2つの住戸が接する辺に接するようなx座標を探す
-                    for (int k = 0; k < currentDwellingCoordinates.Length; k++) {
-                        Vector3[] contactDwellingCoodinates = cr.contact(new Vector3[]{currentDwellingCoordinates[k], currentDwellingCoordinates[(k+1)%currentDwellingCoordinates.Length]}, dwellingCoordinates[placePattern[(i+1)%placePattern.Count]]);
-                        
-                        //2つの住戸が接するとき
-                        if (!cr.ZeroJudge(contactDwellingCoodinates)) {
-                            //2つの住戸が接する辺が階段室の辺に触れているとき
-                            if (OnLineSegment(contactStairsCoodinates, contactDwellingCoodinates[0]) || OnLineSegment(contactStairsCoodinates, contactDwellingCoodinates[1])) {
-                                //y座標をContactGapの結果に，x座標を2つの住戸が接する辺の上に接するようにずらしてみる
-                                if (JudgeInside(currentDwellingCoordinates, CorrectCoordinates(mbpsCoordinates, new Vector3(contactDwellingCoodinates[0].x + Mathf.Abs(mbpsCoordinates[0].x), ContactGap(mbpsCoordinates, contactStairsCoodinates)[j], 0)))) {
-                                    gapX = contactDwellingCoodinates[0].x + Mathf.Abs(mbpsCoordinates[0].x);
-                                    gapY = ContactGap(mbpsCoordinates, contactStairsCoodinates)[j];
+            //階段室と接する辺のどちら側にMBPSが入るか調べる
+            int stairsShiftDirection = ShiftJudge(currentDwellingCoordinates, contactStairsCoordinates);
+            //2つの住戸が接する辺のどちら側にMBPSが入るか調べる
+            int dwellingShiftDirection = ShiftJudge(currentDwellingCoordinates, contactDwellingCoordinates);
 
-                                    //planPattern["Dwelling" + (placePattern[i] + 1)].Add("Mbps", CorrectCoordinates(mbpsCoordinates, new Vector3(gapX, gapY, 0)));
+            //配置するMBPSの座標
+            Vector3[] mbpsCoordinates = pa.twoDwellingMbpsCoordinatesLeft1;
 
-                                    break;
-                                }
-                                //y座標をContactGapの結果に，x座標を2つの住戸が接する辺の下に接するようにずらしてみる
-                                else if (JudgeInside(currentDwellingCoordinates, CorrectCoordinates(mbpsCoordinates, new Vector3(contactDwellingCoodinates[0].x - Mathf.Abs(mbpsCoordinates[0].x), ContactGap(mbpsCoordinates, contactStairsCoodinates)[j], 0)))) {
-                                    gapX = contactDwellingCoodinates[0].x - Mathf.Abs(mbpsCoordinates[0].x);
-                                    gapY = ContactGap(mbpsCoordinates, contactStairsCoodinates)[j];
+            //階段室に接する辺がy軸平行のとき
+            if (cf.Slope(contactStairsCoordinates) == Mathf.Infinity) {
+                //左側の住戸に配置するMBPSについて
+                if (stairsShiftDirection * dwellingShiftDirection < 0) {
+                    //配置するMBPSの形状を決める
+                    mbpsCoordinates = pa.twoDwellingMbpsCoordinatesLeft3;
 
-                                    //planPattern["Dwelling" + (placePattern[i] + 1)].Add("Mbps", CorrectCoordinates(mbpsCoordinates, new Vector3(gapX, gapY, 0)));
-
-                                    break;
-                                }
-                            }
-                        }
+                    //回転させる角度
+                    int rotationAngle = 0;
+                    
+                    //どれだけ回転させるかを決める
+                    if (dwellingShiftDirection > 0) {
+                        rotationAngle = 270;
                     }
+                    else if (dwellingShiftDirection < 0) {
+                        rotationAngle = 90;
+                    }
+
+                    //回転させる
+                    mbpsCoordinates = cf.Rotation(mbpsCoordinates, rotationAngle);
+                }
+                //右側の住戸に配置するMBPSについて
+                else if (stairsShiftDirection * dwellingShiftDirection > 0) {
+                    //配置するMBPSの形状を決める
+                    mbpsCoordinates = pa.twoDwellingMbpsCoordinatesRight3;
+                    
+                    //回転させる角度
+                    int rotationAngle = 0;
+
+                    //どれだけ回転させるかを決める
+                    if (dwellingShiftDirection < 0) {
+                        rotationAngle = 270;
+                    }
+                    else if (dwellingShiftDirection > 0) {
+                        rotationAngle = 90;
+                    }
+
+                    //回転させる
+                    mbpsCoordinates = cf.Rotation(mbpsCoordinates, rotationAngle);
+                }
+
+                //MBPSの幅・高さを求める
+                float width = MakeRectangle(mbpsCoordinates)[1].x - MakeRectangle(mbpsCoordinates)[0].x;
+                float height = MakeRectangle(mbpsCoordinates)[0].y - MakeRectangle(mbpsCoordinates)[3].y;
+
+                //MBPSをずらして配置
+                //x軸方向にずらす
+                if (stairsShiftDirection < 0) {
+                    mbpsCoordinates = CorrectCoordinates(mbpsCoordinates, new Vector3(contactStairsCoordinates[0].x - width / 2, 0, 0));
+                }
+                else if (stairsShiftDirection > 0) {
+                    mbpsCoordinates = CorrectCoordinates(mbpsCoordinates, new Vector3(contactStairsCoordinates[0].x + width / 2, 0, 0));
+                }
+
+                //y軸方向にずらす
+                if (dwellingShiftDirection < 0) {
+                    mbpsCoordinates = CorrectCoordinates(mbpsCoordinates, new Vector3(0, contactDwellingCoordinates[0].y - height / 2, 0));
+                }
+                else if (dwellingShiftDirection > 0) {
+                    mbpsCoordinates = CorrectCoordinates(mbpsCoordinates, new Vector3(0, contactDwellingCoordinates[0].y + height / 2, 0));
                 }
             }
+            //階段室に接する辺がy軸平行でないとき
+            else {
+                //上側の住戸に配置するMBPSについて
+                if (stairsShiftDirection * dwellingShiftDirection > 0) {
+                    //配置するMBPSの形状を決める
+                    mbpsCoordinates = pa.twoDwellingMbpsCoordinatesLeft1;
+
+                    //回転させる角度
+                    int rotationAngle = 0;
+                    
+                    //どれだけ回転させるかを決める
+                    if (dwellingShiftDirection > 0) {
+                        rotationAngle = 180;
+
+                        //回転させる
+                        mbpsCoordinates = cf.Rotation(mbpsCoordinates, rotationAngle);
+                    }
+                }
+                //下側の住戸に配置するMBPSについて
+                else if (stairsShiftDirection * dwellingShiftDirection < 0) {
+                    //配置するMBPSの形状を決める
+                    mbpsCoordinates = pa.twoDwellingMbpsCoordinatesLeft1;
+                    
+                    //回転させる角度
+                    int rotationAngle = 0;
+
+                    //どれだけ回転させるかを決める
+                    if (dwellingShiftDirection < 0) {
+                        rotationAngle = 180;
+
+                        //回転させる
+                        mbpsCoordinates = cf.Rotation(mbpsCoordinates, rotationAngle);
+                    }
+                }
+
+                //MBPSの幅・高さを求める
+                float width = MakeRectangle(mbpsCoordinates)[1].x - MakeRectangle(mbpsCoordinates)[0].x;
+                float height = MakeRectangle(mbpsCoordinates)[0].y - MakeRectangle(mbpsCoordinates)[3].y;
+
+                //MBPSをずらして配置
+                //x軸方向にずらす
+                if (dwellingShiftDirection < 0) {
+                    mbpsCoordinates = CorrectCoordinates(mbpsCoordinates, new Vector3(contactDwellingCoordinates[0].x - width / 2, 0, 0));
+                }
+                else if (dwellingShiftDirection > 0) {
+                    mbpsCoordinates = CorrectCoordinates(mbpsCoordinates, new Vector3(contactDwellingCoordinates[0].x + width / 2, 0, 0));
+                }
+
+                //y軸方向にずらす
+                if (stairsShiftDirection < 0) {
+                    mbpsCoordinates = CorrectCoordinates(mbpsCoordinates, new Vector3(0, contactStairsCoordinates[0].y - height / 2, 0));
+                }
+                else if (stairsShiftDirection > 0) {
+                    mbpsCoordinates = CorrectCoordinates(mbpsCoordinates, new Vector3(0, contactStairsCoordinates[0].y + height / 2, 0));
+                }
+            }
+
+            //配置結果を格納
+            //currentPlacement[dwellingIndexSet[i]].Add("Mbps", mbpsCoordinates);
+            cf.CreateRoom("Mbps", mbpsCoordinates);
         }
 
-        return planPattern;
+        return currentPlacement;
     }
 
     /// <summary>
@@ -179,9 +240,9 @@ public class CreateTwoDwellingMbps : MonoBehaviour
         //それぞれの住戸について
         for (int i = 0; i < dwellingIndexSet.Count; i++) {
             //階段室1辺について
-            for (int j = 0; j < stairsCoordinates.Length; j++) {
+            for (int j = 0; j < pr.stairsCoordinates.Length; j++) {
                 //住戸が接しているとき
-                if (cf.ContactJudge(new Vector3[]{stairsCoordinates[j], stairsCoordinates[(j+1)%stairsCoordinates.Length]}, dwellingCoordinates[dwellingIndexSet[i]][k])) {
+                if (cf.ContactJudge(new Vector3[]{pr.stairsCoordinates[j], pr.stairsCoordinates[(j+1)%pr.stairsCoordinates.Length]}, pr.dwellingCoordinates[dwellingIndexSet[i]])) {
                     //それぞれの住戸に対応する階段室の辺のインデックスの候補を追加
                     if (i == 0) {
                         stairsIndexCandidates1.Add(j);
@@ -196,6 +257,108 @@ public class CreateTwoDwellingMbps : MonoBehaviour
         correctStairsIndex = stairsIndexCandidates1.FindAll(n => stairsIndexCandidates2.Contains(n))[0];
 
         return correctStairsIndex;
+    }
+
+    /// <summary>
+    /// 多角形とその辺上にある線分について，線分から上下左右どちらに動かすと多角形内部に入るかを判定
+    /// 線分の中点を上下・左右どちらかに1だけずらす．y軸平行の時は左右，それ以外のときは上下にずらす
+    /// </summary>
+    /// <param name="polygon">多角形の座標</param>
+    /// <param name="line">線分の座標</param>
+    /// <returns>右にずらすと内部にあるとき1, 左にずらすと内部にあるとき-1, 上にずらすと内部にあるとき2, 下にずらすと内部にあるとき-2, それ以外は0を返す</returns>
+    public int ShiftJudge(Vector3[] polygon, Vector3[] line) {
+        //返す値
+        int result = 0;
+
+        //エラー処理
+        try {
+            //lineが多角形の辺上になかった場合にエラーを出す
+            for (int i = 0; i < polygon.Length; i++) {
+                if (OnLineSegment(new Vector3[]{polygon[i], polygon[(i+1)%polygon.Length]}, line[0]) && OnLineSegment(new Vector3[]{polygon[i], polygon[(i+1)%polygon.Length]}, line[1])) {
+                    break;
+                }
+            }
+
+            //TODO: エラー処理をちゃんとする
+            //throw new Exception("\"line\" is not on the egde of \"polygon\" in \"ShiftJudge\"");
+        }
+        catch (Exception e) {
+            //エラーを出力
+            Debug.LogError(e.Message);
+        }
+
+        //線分の中点
+        Vector3 midPoint = new Vector3((line[0].x + line[1].x) / 2, (line[0].y + line[1].y) / 2, 0);
+
+        //線分がy軸平行のとき
+        if (cf.Slope(line) == Mathf.Infinity) {
+            //線分の中点を左右に1だけずらした点が多角形の内部にあるかどうかを判定
+            if (CheckPoint(polygon, new Vector3(midPoint.x - 1, midPoint.y, 0))) {
+                result = -1;
+            }
+            else if (CheckPoint(polygon, new Vector3(midPoint.x + 1, midPoint.y, 0))) {
+                result = 1;
+            }
+        }
+        //線分がy軸平行でないとき
+        else {
+            //線分の中点を上下に1だけずらした点が多角形の内部にあるかどうかを判定
+            if (CheckPoint(polygon, new Vector3(midPoint.x, midPoint.y - 1, 0))) {
+                result = -2;
+            }
+            else if (CheckPoint(polygon, new Vector3(midPoint.x, midPoint.y + 1, 0))) {
+                result = 2;
+            }
+        }
+
+        //結果を返す
+        return result;
+    }
+
+    /// <summary>
+    /// 多角形（x軸，y軸に平行な辺をしかない）がピッタリ収まる長方形の座標を求める
+    /// </summary> 
+    /// <param name="polygon">多角形の座標</param>
+    /// <returns>多角形がピッタリ収まる長方形の座標配列</returns>
+    public Vector3[] MakeRectangle(Vector3[] polygon) {
+        //返す長方形の座標配列
+        Vector3[] rectangle = new Vector3[4];
+
+        //多角形のx座標の最大値と最小値
+        float maxX = polygon[0].x;
+        float minX = polygon[0].x;
+
+        //多角形のy座標の最大値と最小値
+        float maxY = polygon[0].y;
+        float minY = polygon[0].y;
+
+        //多角形のx座標の最大値と最小値を求める
+        for (int i = 1; i < polygon.Length; i++) {
+            if (polygon[i].x > maxX) {
+                maxX = polygon[i].x;
+            }
+            else if (polygon[i].x < minX) {
+                minX = polygon[i].x;
+            }
+        }
+
+        //多角形のy座標の最大値と最小値を求める
+        for (int i = 1; i < polygon.Length; i++) {
+            if (polygon[i].y > maxY) {
+                maxY = polygon[i].y;
+            }
+            else if (polygon[i].y < minY) {
+                minY = polygon[i].y;
+            }
+        }
+
+        //長方形の座標を求める
+        rectangle[0] = new Vector3(minX, maxY, 0);
+        rectangle[1] = new Vector3(maxX, maxY, 0);
+        rectangle[2] = new Vector3(maxX, minY, 0);
+        rectangle[3] = new Vector3(minX, minY, 0);
+
+        return rectangle;
     }
 
     /// <summary>
