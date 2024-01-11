@@ -19,11 +19,11 @@ public class FloorPlanner : CreateRoom
     /// </summary> 
     /// <param name="plan">プラン図</param>
     /// <returns>間取図（それぞれの部屋名と座標がセットのリスト）</returns>
-    public List<List<Dictionary<string, Vector3[]>>> Placement() {
-        var allPattern = new List<List<Dictionary<string, Vector3[]>>>();
+    public List<Dictionary<string, Dictionary<string, Vector3[]>>> Placement() {
+        var allPattern = new List<Dictionary<string, Dictionary<string, Vector3[]>>>();
 
         //配置結果の配置結果にプラン図を追加
-        //allPattern.Add(plan);
+        //allPattern.Add(pr.plan);
 
         //全パターンの配置結果にMBPSを配置
         allPattern = cm.PlaceMbps(allPattern);

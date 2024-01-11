@@ -5,33 +5,22 @@ using UnityEngine;
 
 public class Main : MonoBehaviour
 {
-    List<List<Dictionary<string, Vector3[]>>> allPattern = new List<List<Dictionary<string, Vector3[]>>>();
+    List<Dictionary<string, Dictionary<string, Vector3[]>>> allPattern = new List<Dictionary<string, Dictionary<string, Vector3[]>>>();
 
     [SerializeField] PlanReader pr;
+    [SerializeField] CommonFunctions cf;
     [SerializeField] FloorPlanner fp;
     [SerializeField] Evaluation ev;
-    [SerializeField] CreateRoom cr;
 
     int count = 0;
     int limit = 0;
 
     void Start()
     {
-        Display(pr.plan);
-
-        //2住戸のMBPS配置の例
-        cr.createRoom("mbps", fp.CorrectCoordinates(fp.Rotation(new Vector3[]{new Vector3(-175, 500, 0), new Vector3(175, 500, 0), new Vector3(175, -500, 0), new Vector3(-175, -500, 0)}), new Vector3(-2350, 25, 0)));
-        cr.createRoom("mbps", fp.CorrectCoordinates(fp.Rotation(new Vector3[]{new Vector3(-175, 500, 0), new Vector3(175, 500, 0), new Vector3(175, -500, 0), new Vector3(-175, -500, 0)}), new Vector3(-2350, -325, 0)));
-
-        //1住戸のMBPS配置の例
-        //cr.createRoom("mbps", fp.CorrectCoordinates(fp.Rotation(new Vector3[]{new Vector3(-350, 350, 0), new Vector3(350, 350, 0), new Vector3(350, -350, 0), new Vector3(-350, -350, 0)}), new Vector3(-2200, 3300, 0)));
-        //cr.createRoom("mbps", fp.CorrectCoordinates(fp.Rotation(new Vector3[]{new Vector3(-350, 350, 0), new Vector3(350, 350, 0), new Vector3(350, -350, 0), new Vector3(-350, -350, 0)}), new Vector3(-2200, -500, 0)));
-
-        //玄関配置の例
-        cr.createRoom("entrance", fp.CorrectCoordinates(fp.Rotation(new Vector3[]{new Vector3(-750, 500, 0), new Vector3(750, 500, 0), new Vector3(750, -500, 0), new Vector3(-750, -500, 0)}), new Vector3(-2350, 950, 0)));
-
         //部屋を配置
-        //allPattern = fp.Placement();
+        allPattern = fp.Placement();
+
+        //allPattern.Add(pr.plan);
 
         //重複を削除
         //allPattern = RemoveDuplicates(allPattern);
@@ -55,7 +44,7 @@ public class Main : MonoBehaviour
                     Destroy(GameObject.Find("FloorPlan"));
                 }
 
-                List<Dictionary<string, Vector3[]>> currentPattern = allPattern[count];
+                Dictionary<string, Dictionary<string, Vector3[]>> currentPattern = allPattern[count];
 
                 //間取図を表示
                 Display(currentPattern);
@@ -68,46 +57,21 @@ public class Main : MonoBehaviour
     }
 
     //間取図を表示
-    public void Display(List<Dictionary<string, Vector3[]>> currentPattern) {
+    public void Display(Dictionary<string, Dictionary<string, Vector3[]>> currentPattern) {
         /* 空のオブジェクトによって，階層をつくる */
         //間取図オブジェクトを作成
         GameObject floorPlan = new GameObject("FloorPlan");
         
-        for (int i = 0; i < pr.plan.Count; i++) {
-            Dictionary<string, Vector3[]> planParts = pr.plan[i];
+        foreach (KeyValuePair<string, Dictionary<string, Vector3[]>> planParts in currentPattern) {
+            //大まかなスペースごとのオブジェクトを作成
+            GameObject planPartsObject = new GameObject(planParts.Key);
+            //間取図オブジェクトの子オブジェクトにする
+            planPartsObject.transform.SetParent(floorPlan.transform);
 
-            //階段室の場合
-            if (i == 0) {
-                //階段室オブジェクトを作成
-                GameObject stairsObject = cr.createRoom("Stairs", planParts["Stairs"]);
-                //間取図オブジェクトの子オブジェクトにする
-                stairsObject.transform.SetParent(floorPlan.transform);
-            }
-
-            //住戸の場合
-            else {
-                //住戸に関するパーツをまとめるためのオブジェクトを作成
-                GameObject dwellingObject = new GameObject("Dwelling unit" + i);
-
-                //住戸とバルコニーを作成
-                foreach (KeyValuePair<string, Vector3[]> planPartsElement in planParts) {
-                    //住戸orバルコニーのオブジェクトを作成
-                    GameObject planPartsElementObject = cr.createRoom(planPartsElement.Key, planPartsElement.Value);
-                    //住戸に関するパーツをまとめるためのオブジェクトの子オブジェクトにする
-                    planPartsElementObject.transform.SetParent(dwellingObject.transform);
-                }
-
-                //住戸の中身を作成
-                foreach (KeyValuePair<string, Vector3[]> currentPatternElement in currentPattern[i-1]) {
-                    //住戸の中身のオブジェクトを作成
-                    GameObject currentPatternElementObject = cr.createRoom(currentPatternElement.Key, currentPatternElement.Value);
-                    //住戸に関するパーツをまとめるためのオブジェクトの子オブジェクトにする
-                    currentPatternElementObject.transform.SetParent(dwellingObject.transform);
-                }
-
-                //間取図オブジェクトの子オブジェクトにする
-                dwellingObject.transform.SetParent(floorPlan.transform);
-            }
+            foreach (KeyValuePair<string, Vector3[]> planPartsElements in planParts.Value) {
+                GameObject planPartsElementsObject = cf.CreateRoom(planPartsElements.Key, planPartsElements.Value);
+                planPartsElementsObject.transform.SetParent(planPartsObject.transform);
+            }      
         }
     }
 

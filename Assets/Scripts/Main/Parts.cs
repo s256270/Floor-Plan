@@ -14,76 +14,121 @@ public class Parts : CreateRoom
     };
 
     //2住戸のMBPSの座標
-    //その1の左側
     [HideInInspector]
-    public Vector3[] twoDwellingMbpsCoordinatesLeft1 = new Vector3[]{
-        new Vector3(-175, 500, 0),
-        new Vector3(175, 500, 0),
-        new Vector3(175, -500, 0),
-        new Vector3(-175, -500, 0)
-    };
+    public List<List<Vector3[]>> twoDwellingsMbpsCoordinatesList = new List<List<Vector3[]>>() {
+        //その1
+        new List<Vector3[]>(){
+            //左側
+            new Vector3[]{
+                new Vector3(-175, 500, 0),
+                new Vector3(175, 500, 0),
+                new Vector3(175, -500, 0),
+                new Vector3(-175, -500, 0)
+            },
+            //右側
+            new Vector3[]{
+                new Vector3(-175, 500, 0),
+                new Vector3(175, 500, 0),
+                new Vector3(175, -500, 0),
+                new Vector3(-175, -500, 0)
+            }
+        },
 
-    //その1の右側
-    [HideInInspector]
-    public Vector3[] twoDwellingMbpsCoordinatesRight1 = new Vector3[]{
-        new Vector3(-175, 500, 0),
-        new Vector3(175, 500, 0),
-        new Vector3(175, -500, 0),
-        new Vector3(-175, -500, 0)
-    };
+        //その2
+        new List<Vector3[]>(){
+            //左側
+            new Vector3[]{
+                new Vector3(-525, 175, 0),
+                new Vector3(525, 175, 0),
+                new Vector3(525, -175, 0),
+                new Vector3(-525, -175, 0)
+            },
+            //右側
+            new Vector3[]{
+                new Vector3(-175, 525, 0),
+                new Vector3(175, 525, 0),
+                new Vector3(175, -525, 0),
+                new Vector3(-175, -525, 0)
+            }
+        },
 
-    //その2の左側
-    [HideInInspector]
-    public Vector3[] twoDwellingMbpsCoordinatesLeft2 = new Vector3[]{
-        new Vector3(-525, 175, 0),
-        new Vector3(525, 175, 0),
-        new Vector3(525, -175, 0),
-        new Vector3(-525, -175, 0)
-    };
-
-    //その2の右側
-    [HideInInspector]
-    public Vector3[] twoDwellingMbpsCoordinatesRight2 = new Vector3[]{
-        new Vector3(-175, 525, 0),
-        new Vector3(175, 525, 0),
-        new Vector3(175, -525, 0),
-        new Vector3(-175, -525, 0)
-    };
-
-    //その3の左側
-    [HideInInspector]
-    public Vector3[] twoDwellingMbpsCoordinatesLeft3 = new Vector3[]{
-        new Vector3(-350, 350, 0),
-        new Vector3(350, 350, 0),
-        new Vector3(350, -350, 0),
-        new Vector3(-350, -350, 0)
-    };
-
-    //その3の右側
-    [HideInInspector]
-    public Vector3[] twoDwellingMbpsCoordinatesRight3 = new Vector3[]{
-        new Vector3(-350, 350, 0),
-        new Vector3(350, 350, 0),
-        new Vector3(350, -350, 0),
-        new Vector3(-350, -350, 0)
+        //その3
+        new List<Vector3[]>(){
+            //左側
+            new Vector3[]{
+                new Vector3(-350, 350, 0),
+                new Vector3(350, 350, 0),
+                new Vector3(350, -350, 0),
+                new Vector3(-350, -350, 0)
+            },
+            //右側
+            new Vector3[]{
+                new Vector3(-350, 350, 0),
+                new Vector3(350, 350, 0),
+                new Vector3(350, -350, 0),
+                new Vector3(-350, -350, 0)
+            }
+        }
     };
     
     //1住戸のMBPSの座標
     [HideInInspector]
-    public Vector3[] oneDwellingMbpsCoordinates = new Vector3[]{
-        new Vector3(-350, 350, 0),
-        new Vector3(350, 350, 0),
-        new Vector3(350, -350, 0),
-        new Vector3(-350, -350, 0)
+    public List<Vector3[]> oneDwellingsMbpsCoordinatesList = new List<Vector3[]>() {
+        //その1
+        new Vector3[]{
+            new Vector3(-350, 350, 0),
+            new Vector3(350, 350, 0),
+            new Vector3(350, -350, 0),
+            new Vector3(-350, -350, 0)
+        },
+
+        //その2
+        new Vector3[]{
+            new Vector3(-700, 200, 0),
+            new Vector3(700, 200, 0),
+            new Vector3(700, -200, 0),
+            new Vector3(-700, -200, 0)
+        },
+
+        //その3
+        new Vector3[]{
+            new Vector3(-350, 500, 0),
+            new Vector3(350, 500, 0),
+            new Vector3(350, -500, 0),
+            new Vector3(0, -500, 0),
+            new Vector3(0, 200, 0),
+            new Vector3(-350, 200, 0)
+        }
     };
 
     //洗面室の座標
+    //その1
     [HideInInspector]
     public Vector3[] washroom_coordinates = new Vector3[]{
         new Vector3(-800, 800, 0),
         new Vector3(800, 800, 0),
         new Vector3(800, -800, 0),
         new Vector3(-800, -800, 0)
+    };
+
+    //その2
+    [HideInInspector]
+    public Vector3[] washroomCoordinates2 = new Vector3[]{
+        new Vector3(-1300, 450, 0),
+        new Vector3(1300, 450, 0),
+        new Vector3(1300, -450, 0),
+        new Vector3(-1300, -450, 0)
+    };
+
+    //その3
+    [HideInInspector]
+    public Vector3[] washroomCoordinates3 = new Vector3[]{
+        new Vector3(-700, 1200, 0),
+        new Vector3(200, 1200, 0),
+        new Vector3(200, -300, 0),
+        new Vector3(700, -300, 0),
+        new Vector3(700, -1200, 0),
+        new Vector3(-700, -1200, 0)
     };
 
     //UBの座標
@@ -105,11 +150,21 @@ public class Parts : CreateRoom
     };
 
     //キッチンの座標
+    //その1
     [HideInInspector]
     public Vector3[] kitchen_coordinates = new Vector3[]{
         new Vector3(-1200, 350, 0),
         new Vector3(1200, 350, 0),
         new Vector3(1200, -350, 0),
         new Vector3(-1200, -350, 0)
+    };
+
+    //その2
+    [HideInInspector]
+    public Vector3[] kitchenCoordinates2 = new Vector3[]{
+        new Vector3(-850, 350, 0),
+        new Vector3(850, 350, 0),
+        new Vector3(850, -350, 0),
+        new Vector3(-850, -350, 0)
     };
 }

@@ -58,12 +58,40 @@ public class CommonFunctions : MonoBehaviour
     }
 
     /// <summary>
+    /// 多角形と多角形の接している座標のリストを求める
+    /// </summary>
+    /// <param name="polygonA">多角形A</param>
+    /// <param name="polygonB">多角形B</param>
+    /// <returns>多角形と多角形に接しているときその座標配列を返し，接していないとき空の配列を返す</returns>
+    public List<Vector3[]> ContactCoordinates(Vector3[] polygonA, Vector3[] polygonB) {
+        //返すリスト
+        List<Vector3[]> contactCoordinatesList = new List<Vector3[]>();
+
+        for (int i = 0; i < polygonA.Length; i++) {
+            //lineを定義
+            Vector3[] line = new Vector3[] {polygonA[i], polygonA[(i+1)%polygonA.Length]};
+
+            //lineとpolygonBが接しているとき
+            if (ContactJudge(line, polygonB)) {
+                //接している座標を求める
+                Vector3[] contactCoordinates = LineContactCoordinates(line, polygonB);
+
+                //結果に追加
+                contactCoordinatesList.Add(contactCoordinates);
+            }
+        }
+
+        //結果を返す
+        return contactCoordinatesList;
+    }
+    
+    /// <summary>
     /// 線分と多角形の接している座標を求める
     /// </summary>
     /// <param name="line">線分</param>
     /// <param name="polygon">多角形</param>
     /// <returns>線分と多角形に接しているときその座標配列を返し，接していないとき空の配列を返す</returns>
-    public Vector3[] ContactCoordinates(Vector3[] line, Vector3[] polygon) {
+    public Vector3[] LineContactCoordinates(Vector3[] line, Vector3[] polygon) {
         try {
             //lineが線分でなかった場合にエラーを出す
             if (line.Length != 2) {
@@ -112,12 +140,35 @@ public class CommonFunctions : MonoBehaviour
     }
 
     /// <summary>
+    /// 多角形と多角形が接しているかどうかを判定
+    /// </summary>
+    /// <param name="polygonA">多角形A</param>
+    /// <param name="polygonB">多角形B</param>
+    /// <returns>多角形と多角形に接しているときTrue，接していないときFalseを返す</returns>
+    public bool ContactJudge(Vector3[] polygonA, Vector3[] polygonB) {
+        //polygonAのすべての辺を調べる
+        for (int i = 0; i < polygonA.Length; i++) {
+            //lineを定義
+            Vector3[] line = new Vector3[] {polygonA[i], polygonA[(i+1)%polygonA.Length]};
+
+            //lineとpolygonBが接しているとき
+            if (LineContactJudge(line, polygonB)) {
+                //trueを返す
+                return true;
+            }
+        }
+
+        //falseを返す
+        return false;
+    }
+    
+    /// <summary>
     /// 線分と多角形が接しているかどうかを判定
     /// </summary>
     /// <param name="line">線分</param>
     /// <param name="polygon">多角形</param>
     /// <returns>線分と多角形に接しているときTrue，接していないときFalseを返す</returns>
-    public bool ContactJudge(Vector3[] line, Vector3[] polygon) {
+    public bool LineContactJudge(Vector3[] line, Vector3[] polygon) {
         try {
             //lineが線分でなかった場合にエラーを出す
             if (line.Length != 2) {
@@ -448,5 +499,268 @@ public class CommonFunctions : MonoBehaviour
         }
 
         return Mathf.Abs((area / 2) / 1000000);
+    }
+
+    /// <summary>
+    /// 上書きを防ぐための複製
+    /// </summary> 
+    /// <param name="originalDictionary">複製したい辞書</param>
+    /// <returns>複製したい辞書に影響を与えない同じ内容の辞書を返す</returns>
+    public Dictionary<string, Dictionary<string, Vector3[]>> DuplicateDictionary(Dictionary<string, Dictionary<string, Vector3[]>> originalDictionary) {
+        var result = new Dictionary<string, Dictionary<string, Vector3[]>>();
+
+        foreach (KeyValuePair<string, Dictionary<string, Vector3[]>> space in originalDictionary) {
+            var spaceResult = new Dictionary<string, Vector3[]>();
+
+            foreach (KeyValuePair<string, Vector3[]> spaceElements in space.Value) {
+                spaceResult.Add(spaceElements.Key, spaceElements.Value);
+            }
+
+            result.Add(space.Key, spaceResult);
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// 上書きを防ぐための複製
+    /// </summary> 
+    /// <param name="originalList">複製したいリスト</param>
+    /// <returns>複製したいリストに影響を与えない同じ内容のリストを返す</returns>
+    public List<Dictionary<string, Dictionary<string, Vector3[]>>> DuplicateList(List<Dictionary<string, Dictionary<string, Vector3[]>>> originalList) {
+        var result = new List<Dictionary<string, Dictionary<string, Vector3[]>>>();
+
+        foreach (Dictionary<string, Dictionary<string, Vector3[]>> originalDictionary in originalList) {
+            var dictionaryResult = new Dictionary<string, Dictionary<string, Vector3[]>>();
+
+            foreach (KeyValuePair<string, Dictionary<string, Vector3[]>> space in originalDictionary) {
+                var spaceResult = new Dictionary<string, Vector3[]>();
+
+                foreach (KeyValuePair<string, Vector3[]> spaceElements in space.Value) {
+                    spaceResult.Add(spaceElements.Key, spaceElements.Value);
+                }
+
+                dictionaryResult.Add(space.Key, spaceResult);
+            }
+
+            result.Add(dictionaryResult);
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// 多角形とその辺上にある線分について，線分から上下左右どちらに動かすと多角形内部に入るかを判定
+    /// 線分の中点を上下・左右どちらかに1だけずらす．y軸平行の時は左右，それ以外のときは上下にずらす
+    /// </summary>
+    /// <param name="polygon">多角形の座標</param>
+    /// <param name="line">線分の座標</param>
+    /// <returns>右にずらすと内部にあるとき1, 左にずらすと内部にあるとき-1, 上にずらすと内部にあるとき2, 下にずらすと内部にあるとき-2, それ以外は0を返す</returns>
+    public int ShiftJudge(Vector3[] polygon, Vector3[] line) {
+        //返す値
+        int result = 0;
+
+        //エラー処理
+        try {
+            //lineが多角形の辺上になかった場合にエラーを出す
+            for (int i = 0; i < polygon.Length; i++) {
+                if (OnLineSegment(new Vector3[]{polygon[i], polygon[(i+1)%polygon.Length]}, line[0]) && OnLineSegment(new Vector3[]{polygon[i], polygon[(i+1)%polygon.Length]}, line[1])) {
+                    break;
+                }
+            }
+
+            //TODO: エラー処理をちゃんとする
+            //throw new Exception("\"line\" is not on the egde of \"polygon\" in \"ShiftJudge\"");
+        }
+        catch (Exception e) {
+            //エラーを出力
+            Debug.LogError(e.Message);
+        }
+
+        //線分の中点
+        Vector3 midPoint = new Vector3((line[0].x + line[1].x) / 2, (line[0].y + line[1].y) / 2, 0);
+
+        //線分がy軸平行のとき
+        if (Slope(line) == Mathf.Infinity) {
+            //線分の中点を左右に1だけずらした点が多角形の内部にあるかどうかを判定
+            if (CheckPoint(polygon, new Vector3(midPoint.x - 1, midPoint.y, 0))) {
+                result = -1;
+            }
+            else if (CheckPoint(polygon, new Vector3(midPoint.x + 1, midPoint.y, 0))) {
+                result = 1;
+            }
+        }
+        //線分がy軸平行でないとき
+        else {
+            //線分の中点を上下に1だけずらした点が多角形の内部にあるかどうかを判定
+            if (CheckPoint(polygon, new Vector3(midPoint.x, midPoint.y - 1, 0))) {
+                result = -2;
+            }
+            else if (CheckPoint(polygon, new Vector3(midPoint.x, midPoint.y + 1, 0))) {
+                result = 2;
+            }
+        }
+
+        //結果を返す
+        return result;
+    }
+
+    /// <summary>
+    /// 多角形（x軸，y軸に平行な辺をしかない）がピッタリ収まる長方形の座標を求める
+    /// </summary> 
+    /// <param name="polygon">多角形の座標</param>
+    /// <returns>多角形がピッタリ収まる長方形の座標配列</returns>
+    public Vector3[] MakeRectangle(Vector3[] polygon) {
+        //返す長方形の座標配列
+        Vector3[] rectangle = new Vector3[4];
+
+        //多角形のx座標の最大値と最小値
+        float maxX = polygon[0].x;
+        float minX = polygon[0].x;
+
+        //多角形のy座標の最大値と最小値
+        float maxY = polygon[0].y;
+        float minY = polygon[0].y;
+
+        //多角形のx座標の最大値と最小値を求める
+        for (int i = 1; i < polygon.Length; i++) {
+            if (polygon[i].x > maxX) {
+                maxX = polygon[i].x;
+            }
+            else if (polygon[i].x < minX) {
+                minX = polygon[i].x;
+            }
+        }
+
+        //多角形のy座標の最大値と最小値を求める
+        for (int i = 1; i < polygon.Length; i++) {
+            if (polygon[i].y > maxY) {
+                maxY = polygon[i].y;
+            }
+            else if (polygon[i].y < minY) {
+                minY = polygon[i].y;
+            }
+        }
+
+        //長方形の座標を求める
+        rectangle[0] = new Vector3(minX, maxY, 0);
+        rectangle[1] = new Vector3(maxX, maxY, 0);
+        rectangle[2] = new Vector3(maxX, minY, 0);
+        rectangle[3] = new Vector3(minX, minY, 0);
+
+        return rectangle;
+    }
+
+    /// <summary>
+    /// 全ての座標を同じだけ移動させる
+    /// </summary> 
+    /// <param name="shapes">動かしたい座標配列</param>
+    /// <param name="correctValue">移動させる距離</param>
+    /// <returns>移動させた後の座標配列</returns>
+    public Vector3[] CorrectCoordinates(Vector3[] shapes, Vector3 correctValue) {
+        Vector3[] correctedCoordinates = new Vector3[shapes.Length];
+
+        for (int i = 0; i < shapes.Length; i++) {
+            correctedCoordinates[i] = new Vector3(shapes[i].x + correctValue.x, shapes[i].y + correctValue.y, 0);
+        }
+
+        return correctedCoordinates;
+    }
+
+    /// <summary>
+    /// 図形に対する点の内外判定
+    /// </summary> 
+    /// <param name="points">図形の座標配列</param>
+    /// <param name="target">判定する点の座標</param>
+    /// <returns>内分の場合True，外分の場合Flase</returns>
+    public bool CheckPoint(Vector3[] points, Vector3 target) {
+        Vector3 normal = new Vector3(1f, 0f, 0f);
+        //Vector3 normal = Vector3.up;//(0, 1, 0)
+        // XY平面上に写像した状態で計算を行う
+        Quaternion rot = Quaternion.FromToRotation(normal, -Vector3.forward);
+
+        Vector3[] rotPoints = new Vector3[points.Length];
+
+        for (int i = 0; i < rotPoints.Length; i++) {
+            rotPoints[i] = rot * points[i];
+        }
+
+        target = rot * target;
+
+        int wn = 0;
+        float vt = 0;
+
+        for (int i = 0; i < rotPoints.Length; i++) {
+            // 上向きの辺、下向きの辺によって処理を分ける
+
+            int cur = i;
+            int next = (i + 1) % rotPoints.Length;
+
+            // 上向きの辺。点PがY軸方向について、始点と終点の間にある。（ただし、終点は含まない）
+            if ((rotPoints[cur].y <= target.y) && (rotPoints[next].y > target.y)) {
+                // 辺は点Pよりも右側にある。ただし重ならない
+                // 辺が点Pと同じ高さになる位置を特定し、その時のXの値と点PのXの値を比較する
+                vt = (target.y - rotPoints[cur].y) / (rotPoints[next].y - rotPoints[cur].y);
+
+                if (target.x < (rotPoints[cur].x + (vt * (rotPoints[next].x - rotPoints[cur].x)))) {
+                    // 上向きの辺と交差した場合は+1
+                    wn++;
+                }
+            }
+            else if ((rotPoints[cur].y > target.y) && (rotPoints[next].y <= target.y)) {
+                // 辺は点Pよりも右側にある。ただし重ならない
+                // 辺が点Pと同じ高さになる位置を特定し、その時のXの値と点PのXの値を比較する
+                vt = (target.y - rotPoints[cur].y) / (rotPoints[next].y - rotPoints[cur].y);
+
+                if (target.x < (rotPoints[cur].x + (vt * (rotPoints[next].x - rotPoints[cur].x)))) {
+                    // 下向きの辺と交差した場合は-1
+                    wn--;
+                }
+            }
+        }
+
+        return wn != 0;
+    }
+
+    /// <summary>
+    /// 多角形が別の多角形の内部（辺上も可）にあるかどうかの判定
+    /// </summary> 
+    /// <param name="outer">外側にあってほしい多角形の座標配列</param>
+    /// <param name="inner">内側にあってほしい多角形の座標配列</param>
+    /// <returns>多角形が別の多角形の内部にある場合True，ない場合Flase</returns>
+    public bool JudgeInside(Vector3[] outer, Vector3[] inner) {
+        bool flag = false;
+        //点がいくつ内側にあるかを数える
+        int insideCounter = 0;
+
+        //内側にあってほしい多角形の頂点を全て調べる
+        for (int i = 0; i < inner.Length; i++) {
+            //まず辺上にあるかどうかを調べる
+            bool onLineFlag = false;
+            for (int j = 0; j < outer.Length; j++) {
+                if (OnLineSegment(new Vector3[]{outer[j], outer[(j+1)%outer.Length]}, new Vector3(inner[i].x, inner[i].y, 0))) {
+                    insideCounter++;
+                    onLineFlag = true;
+                    break;
+                }
+            }
+            
+            //辺上にある場合は次の頂点へ
+            if (onLineFlag) {
+                continue;
+            }
+
+            //次に，内部にあるかどうかを調べる
+            if (CheckPoint(outer, new Vector3(inner[i].x, inner[i].y, 0))) {
+                insideCounter++;
+            }
+        }
+
+        //内側にある点の数が内側の多角形の頂点の数と同じ場合，内側にあると判定
+        if (insideCounter == inner.Length) {
+            flag = true;
+        }
+
+        return flag;
     }
 }

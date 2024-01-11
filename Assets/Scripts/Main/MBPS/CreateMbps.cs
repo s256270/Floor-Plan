@@ -6,26 +6,27 @@ public class CreateMbps : MonoBehaviour/*FloorPlanner*/
 {
     [SerializeField] PlanReader pr;
     [SerializeField] CreateTwoDwellingMbps ctdm;
-
-    //階段室の座標
-    Vector3[] stairsCoordinates;
-    //住戸の座標のリスト
-    List<Vector3[]> dwellingCoordinates;
+    [SerializeField] CreateOneDwellingMbps codm;
 
     /// <summary>
     /// プランを入力すると部屋の配置を行い，間取図を作成する
     /// </summary> 
     /// <param name="plan">プラン図</param>
     /// <returns>間取図（それぞれの部屋名と座標がセットのリスト）</returns>
-    public List<List<Dictionary<string, Vector3[]>>> PlaceMbps(List<List<Dictionary<string, Vector3[]>>> allPattern) {
+    public List<Dictionary<string, Dictionary<string, Vector3[]>>> PlaceMbps(List<Dictionary<string, Dictionary<string, Vector3[]>>> allPattern) {
         //配置結果のリスト
-        var result = new List<List<Dictionary<string, Vector3[]>>>();
+        var result = new List<Dictionary<string, Dictionary<string, Vector3[]>>>();
 
-        /* 2部屋にまたがるMBPSの配置開始 */
-        //result = ctdm.placeTwoDwellingsMbps(allPattern);
+        //2部屋にまたがるMBPSの配置開始
+        //result = ctdm.placeTwoDwellingsMbps(result);
 
-        /* 1部屋のみのMBPSの配置開始 */
-        //result = placeOneDwellingMbps(result);
+        //1住戸MBPSテスト
+        result.Add(pr.plan);
+        result[0]["Dwelling3"].Add("Mbps", new Vector3[]{new Vector3(-700, -2550, 0), new Vector3(-350, -2550, 0), new Vector3(-350, -3550, 0), new Vector3(-700, -3550, 0)});
+        result[0]["Dwelling4"].Add("Mbps", new Vector3[]{new Vector3(-350, -2550, 0), new Vector3(0, -2550, 0), new Vector3(0, -3550, 0), new Vector3(-350, -3550, 0)});
+
+        //1部屋のみのMBPSの配置開始
+        result = codm.placeOneDwellingMbps(result);
 
         return result;
     }

@@ -5,7 +5,7 @@ using UnityEngine;
 public class MakeTwoDwellingsMbpsList : MonoBehaviour
 {
     [SerializeField] PlanReader pr;
-    [SerializeField] CreateRoom cr;
+    [SerializeField] CommonFunctions cf;
 
     //階段室の座標
     Vector3[] stairsCoordinates;
@@ -27,18 +27,17 @@ public class MakeTwoDwellingsMbpsList : MonoBehaviour
 
         /* 必要な座標の準備 */
         //階段室の座標のみを抜き出し
-        stairsCoordinates = pr.stairsCoordinates;
+        stairsCoordinates = pr.getStairsCoordinates();
         //住戸座標のリストを作成
-        dwellingCoordinates = pr.dwellingCoordinates;
+        dwellingCoordinates = pr.getDwellingCoordinatesList();
 
         /* リストを作成 */
         //階段室の1辺の座標
         for (int i = 0; i < stairsCoordinates.Length; i++) {  
             List<int> contactDwellingsIndex = new List<int>();       
             for (int j = 0; j < dwellingCoordinates.Count; j++) {
-                Vector3[] contactCoodinates = cr.contact(new Vector3[]{stairsCoordinates[i], stairsCoordinates[(i+1)%stairsCoordinates.Length]}, dwellingCoordinates[j]);
                 //階段室と住戸が接しているとき
-                if (!cr.ZeroJudge(contactCoodinates)) {
+                if (cf.ContactJudge(new Vector3[]{stairsCoordinates[i], stairsCoordinates[(i+1)%stairsCoordinates.Length]}, dwellingCoordinates[j])) {
                     //住戸のリスト番号を記録
                     contactDwellingsIndex.Add(j);
                 }
