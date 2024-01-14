@@ -22,14 +22,14 @@ public class FloorPlanner : CreateRoom
     public List<Dictionary<string, Dictionary<string, Vector3[]>>> Placement() {
         var allPattern = new List<Dictionary<string, Dictionary<string, Vector3[]>>>();
 
-        //配置結果の配置結果にプラン図を追加
+        //配置結果にプラン図を追加
         //allPattern.Add(pr.plan);
 
         //全パターンの配置結果にMBPSを配置
         allPattern = cm.PlaceMbps(allPattern);
 
         //全パターンの配置結果に玄関を配置
-        //allPattern = ce.PlaceEntrance(allPattern);
+        allPattern = ce.PlaceEntrance(allPattern);
 
         //全パターンの配置結果に水回りの部屋を配置
         //allPattern = cwa.PlaceWetareas(allPattern);

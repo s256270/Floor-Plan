@@ -167,7 +167,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ab1da3963848a94397fce9df62d6e9f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fpd: {fileID: 0}
+  pr: {fileID: 0}
+  cf: {fileID: 0}
+  fp: {fileID: 0}
+  ev: {fileID: 0}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -326,6 +329,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd3a80385ee0fc2439f8ecf2f545a867, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  stairsCoordinates: []
 --- !u!4 &1103580613
 Transform:
   m_ObjectHideFlags: 0
@@ -406,31 +410,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lineRenderer: {fileID: 0}
-  entrance_coordinate_x:
-  - {x: -750, y: 500, z: 0}
-  - {x: 750, y: 500, z: 0}
-  - {x: 750, y: -500, z: 0}
-  - {x: -750, y: -500, z: 0}
-  entrance_coordinate_y:
-  - {x: -500, y: 750, z: 0}
-  - {x: 500, y: 750, z: 0}
-  - {x: 500, y: -750, z: 0}
-  - {x: -500, y: -750, z: 0}
-  mbps_coordinate:
-  - {x: -175, y: 500, z: 0}
-  - {x: 175, y: 500, z: 0}
-  - {x: 175, y: -500, z: 0}
-  - {x: -175, y: -500, z: 0}
-  mbps_coordinate2:
-  - {x: -350, y: 350, z: 0}
-  - {x: 350, y: 350, z: 0}
-  - {x: 350, y: -350, z: 0}
-  - {x: -350, y: -350, z: 0}
   washroom_coordinates:
   - {x: -800, y: 800, z: 0}
   - {x: 800, y: 800, z: 0}
   - {x: 800, y: -800, z: 0}
   - {x: -800, y: -800, z: 0}
+  washroomCoordinates2:
+  - {x: -1300, y: 450, z: 0}
+  - {x: 1300, y: 450, z: 0}
+  - {x: 1300, y: -450, z: 0}
+  - {x: -1300, y: -450, z: 0}
+  washroomCoordinates3:
+  - {x: -700, y: 1200, z: 0}
+  - {x: 200, y: 1200, z: 0}
+  - {x: 200, y: -300, z: 0}
+  - {x: 700, y: -300, z: 0}
+  - {x: 700, y: -1200, z: 0}
+  - {x: -700, y: -1200, z: 0}
   ub_coordinates:
   - {x: -950, y: 700, z: 0}
   - {x: 950, y: 700, z: 0}
@@ -446,6 +442,11 @@ MonoBehaviour:
   - {x: 1200, y: 350, z: 0}
   - {x: 1200, y: -350, z: 0}
   - {x: -1200, y: -350, z: 0}
+  kitchenCoordinates2:
+  - {x: -850, y: 350, z: 0}
+  - {x: 850, y: 350, z: 0}
+  - {x: 850, y: -350, z: 0}
+  - {x: -850, y: -350, z: 0}
 --- !u!4 &1838514749
 Transform:
   m_ObjectHideFlags: 0

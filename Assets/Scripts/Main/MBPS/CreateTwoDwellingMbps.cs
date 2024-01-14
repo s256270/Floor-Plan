@@ -20,7 +20,7 @@ public class CreateTwoDwellingMbps : MonoBehaviour
     /// </summary>
     /// <param name="allPattern">全ての配置結果</param>
     /// <returns>2住戸のMBPSを全て配置した結果</returns>
-    public List<Dictionary<string, Dictionary<string, Vector3[]>>> placeTwoDwellingsMbps(List<Dictionary<string, Dictionary<string, Vector3[]>>> allPattern) {
+    public List<Dictionary<string, Dictionary<string, Vector3[]>>> PlaceTwoDwellingsMbps(List<Dictionary<string, Dictionary<string, Vector3[]>>> allPattern) {
         //配置結果のリスト
         var result = new List<Dictionary<string, Dictionary<string, Vector3[]>>>();
 
@@ -49,7 +49,7 @@ public class CreateTwoDwellingMbps : MonoBehaviour
                 for (int k = 0; k < currentPatternResult.Count; k++) {
                     //MBPSパターンについて
                     for (int l = 0; l < pa.twoDwellingsMbpsCoordinatesList.Count; l++) {
-                        result.Add(placeTwoDwellingsMbps(currentPatternResult[k], twoDwellingsMbpsAllPattern[i][j], pa.twoDwellingsMbpsCoordinatesList[l]));
+                        result.Add(PlaceTwoDwellingsMbps(currentPatternResult[k], twoDwellingsMbpsAllPattern[i][j], pa.twoDwellingsMbpsCoordinatesList[l]));
                     }
                 }
 
@@ -69,7 +69,7 @@ public class CreateTwoDwellingMbps : MonoBehaviour
     /// <param name="currentPlacement">現在の配置結果</param>
     /// <param name="dwellingIndexSet">2住戸にまたがるMBPSを配置する住戸のインデックスの組合わせ</param>
     /// <returns>dwellingIndexで指定された住戸にMBPSを配置した結果</returns>
-    public Dictionary<string, Dictionary<string, Vector3[]>> placeTwoDwellingsMbps(Dictionary<string, Dictionary<string, Vector3[]>> currentPlacement, List<int> dwellingIndexSet, List<Vector3[]> mbpsCoodinatesSet) {
+    public Dictionary<string, Dictionary<string, Vector3[]>> PlaceTwoDwellingsMbps(Dictionary<string, Dictionary<string, Vector3[]>> currentPlacement, List<int> dwellingIndexSet, List<Vector3[]> mbpsCoordinatesSet) {
         //配置結果
         var result = cf.DuplicateDictionary(currentPlacement);
 
@@ -105,14 +105,14 @@ public class CreateTwoDwellingMbps : MonoBehaviour
             int dwellingShiftDirection = cf.ShiftJudge(currentDwellingCoordinates, contactDwellingCoordinates);
 
             //配置するMBPSの座標
-            Vector3[] mbpsCoordinates = mbpsCoodinatesSet[0];
+            Vector3[] mbpsCoordinates = mbpsCoordinatesSet[0];
 
             //階段室に接する辺がy軸平行のとき
             if (cf.Slope(contactStairsCoordinates) == Mathf.Infinity) {
                 //左側の住戸に配置するMBPSについて
                 if (stairsShiftDirection * dwellingShiftDirection < 0) {
                     //配置するMBPSの形状を決める
-                    mbpsCoordinates = mbpsCoodinatesSet[0];
+                    mbpsCoordinates = mbpsCoordinatesSet[0];
 
                     //回転させる角度
                     int rotationAngle = 0;
@@ -131,7 +131,7 @@ public class CreateTwoDwellingMbps : MonoBehaviour
                 //右側の住戸に配置するMBPSについて
                 else if (stairsShiftDirection * dwellingShiftDirection > 0) {
                     //配置するMBPSの形状を決める
-                    mbpsCoordinates = mbpsCoodinatesSet[1];
+                    mbpsCoordinates = mbpsCoordinatesSet[1];
                     
                     //回転させる角度
                     int rotationAngle = 0;
@@ -149,8 +149,8 @@ public class CreateTwoDwellingMbps : MonoBehaviour
                 }
 
                 //MBPSの幅・高さを求める
-                float width = cf.MakeRectangle(mbpsCoordinates)[1].x - cf.MakeRectangle(mbpsCoordinates)[0].x;
-                float height = cf.MakeRectangle(mbpsCoordinates)[0].y - cf.MakeRectangle(mbpsCoordinates)[3].y;
+                float width = cf.CalculateRectangleWidth(mbpsCoordinates);
+                float height = cf.CalculateRectangleHeight(mbpsCoordinates);
 
                 //MBPSをずらして配置
                 //x軸方向にずらす
@@ -174,7 +174,7 @@ public class CreateTwoDwellingMbps : MonoBehaviour
                 //上側の住戸に配置するMBPSについて
                 if (stairsShiftDirection * dwellingShiftDirection > 0) {
                     //配置するMBPSの形状を決める
-                    mbpsCoordinates = mbpsCoodinatesSet[0];
+                    mbpsCoordinates = mbpsCoordinatesSet[0];
 
                     //回転させる角度
                     int rotationAngle = 0;
@@ -190,7 +190,7 @@ public class CreateTwoDwellingMbps : MonoBehaviour
                 //下側の住戸に配置するMBPSについて
                 else if (stairsShiftDirection * dwellingShiftDirection < 0) {
                     //配置するMBPSの形状を決める
-                    mbpsCoordinates = mbpsCoodinatesSet[1];
+                    mbpsCoordinates = mbpsCoordinatesSet[1];
                     
                     //回転させる角度
                     int rotationAngle = 0;
@@ -205,8 +205,8 @@ public class CreateTwoDwellingMbps : MonoBehaviour
                 }
 
                 //MBPSの幅・高さを求める
-                float width = cf.MakeRectangle(mbpsCoordinates)[1].x - cf.MakeRectangle(mbpsCoordinates)[0].x;
-                float height = cf.MakeRectangle(mbpsCoordinates)[0].y - cf.MakeRectangle(mbpsCoordinates)[3].y;
+                float width = cf.CalculateRectangleWidth(mbpsCoordinates);
+                float height = cf.CalculateRectangleHeight(mbpsCoordinates);
 
                 //MBPSをずらして配置
                 //x軸方向にずらす

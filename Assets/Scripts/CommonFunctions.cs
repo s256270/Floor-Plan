@@ -6,6 +6,8 @@ using System.Linq;
 
 public class CommonFunctions : MonoBehaviour
 {
+    [SerializeField] PlanReader pr;
+
     public LineRenderer lineRenderer; //linerendererコンポーネント
 
     /// <summary>
@@ -95,7 +97,7 @@ public class CommonFunctions : MonoBehaviour
         try {
             //lineが線分でなかった場合にエラーを出す
             if (line.Length != 2) {
-                throw new Exception("\"line\" is not line segment in \"ContactCoodinates\"");
+                throw new Exception("\"line\" is not line segment in \"ContactCoordinates\"");
             }
         }
         catch (Exception e) {
@@ -172,7 +174,7 @@ public class CommonFunctions : MonoBehaviour
         try {
             //lineが線分でなかった場合にエラーを出す
             if (line.Length != 2) {
-                throw new Exception("line is not line segment in ContactCoodinates");
+                throw new Exception("line is not line segment in ContactCoordinates");
             }
         }
         catch (Exception e) {
@@ -289,6 +291,83 @@ public class CommonFunctions : MonoBehaviour
     }
 
     /// <summary>
+    /// 辺Aから辺Aと辺Bの重なっている部分を除いた辺を返す
+    /// </summary>
+    /// <param name="sideA">辺Aの座標</param>
+    /// <param name="sideB">辺Bの座標</param>
+    /// <returns>辺Aから辺Aと辺Bの重なっている部分を除いた辺の座標</returns>
+    public List<Vector3[]> SideSubstraction(Vector3[] sideA, Vector3[] sideB) {
+        //結果
+        List<Vector3[]> result = new List<Vector3[]>();
+
+        //2辺の位置関係
+        string positionRelation = LinePositionRelation(sideA, sideB);
+
+        //線で重なっている部分がない場合
+        if (positionRelation == "not overlap" || positionRelation == "point overlap" || positionRelation == "not straight") {
+            result.Add(sideA);
+        }
+        //エラー
+        else if (positionRelation == "error") {
+            Debug.LogError("Error in SideSubstraction");
+        }
+        //線で重なっている部分がある場合
+        else {
+            //辺Aと辺Bの重なっている部分
+            Vector3[] overlap = ContactCoordinates(sideA, sideB)[0];
+
+            //辺Aと重なっている部分の座標の順が逆の場合
+            if (Vector3.Dot(sideA[1] - sideA[0], overlap[1] - overlap[0]) < 0) {
+                //重なっている部分の座標を入れ替え
+                Array.Reverse(sideA);
+            }
+
+            //辺Aと辺Bが一致している場合
+            if (positionRelation == "match") {
+                //重なっている部分を除いた辺の座標を返す
+                result.Add(new Vector3[] {Vector3.zero, Vector3.zero});
+            }
+            //どちらかが包含している場合
+            else if (positionRelation == "include") {
+                //辺Aが辺Bを包含している場合
+                if (Vector3.Distance(sideA[0], sideA[1]) > Vector3.Distance(sideB[0], sideB[1])) {
+                    //端点が重なっている場合
+                    if (sideA[0] == overlap[0]) {
+                        //重なっている部分を除いた辺の座標を返す
+                        result.Add(new Vector3[] {overlap[1], sideA[1]});
+                    } else if (sideA[1] == overlap[1]) {
+                        //重なっている部分を除いた辺の座標を返す
+                        result.Add(new Vector3[] {sideA[0], overlap[0]});
+                    }
+                    //端点が重なっていない場合
+                    else {
+                        //重なっている部分を除いた辺の座標を返す
+                        result.Add(new Vector3[] {sideA[0], overlap[0]});
+                        result.Add(new Vector3[] {overlap[1], sideA[1]});
+                    }
+                }
+                //辺Bが辺Aを包含している場合
+                else if (Vector3.Distance(sideA[0], sideA[1]) < Vector3.Distance(sideB[0], sideB[1])) {
+                    //重なっている部分を除いた辺の座標を返す
+                    result.Add(new Vector3[] {Vector3.zero, Vector3.zero});
+                }
+            }
+            //重なっている場合
+            else if (positionRelation == "overlap") {
+                if (sideA[0] == overlap[0]) {
+                    //重なっている部分を除いた辺の座標を返す
+                    result.Add(new Vector3[] {overlap[1], sideA[1]});
+                } else if (sideA[1] == overlap[1]) {
+                    //重なっている部分を除いた辺の座標を返す
+                    result.Add(new Vector3[] {sideA[0], overlap[0]});
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
     /// 2つの線分が一直線上にあるかどうかの判定
     /// </summary>
     /// <param name="lineA">線分A</param>
@@ -357,36 +436,17 @@ public class CommonFunctions : MonoBehaviour
         //回転させた後の座標を格納する配列
         Vector3[] rotatedCoordinates = new Vector3[polygon.Length];
 
-        //90°回転させる
-        if (angle == 90) {
-            for (int i = 0; i < polygon.Length; i++) {
-                rotatedCoordinates[i].x = - polygon[i].y;
-                rotatedCoordinates[i].y = polygon[i].x;
-            }
+        //回転させる角度をラジアンに変換
+        float rad = angle * Mathf.Deg2Rad; //Deg2Rad = (PI * 2) / 360 
+        
+        //回転させる
+        for (int i = 0; i < polygon.Length; i++) {
+            rotatedCoordinates[i].x = polygon[i].x * Mathf.Cos(rad) - polygon[i].y * Mathf.Sin(rad);
+            rotatedCoordinates[i].y = polygon[i].x * Mathf.Sin(rad) + polygon[i].y * Mathf.Cos(rad);
+        }
             
-            //先頭の座標が一番左上になるように座標を並び替える
-            rotatedCoordinates = topArrange(rotatedCoordinates);
-        }
-        //180°回転させる
-        else if (angle == 180) {
-            for (int i = 0; i < polygon.Length; i++) {
-                rotatedCoordinates[i].x = - polygon[i].x;
-                rotatedCoordinates[i].y = - polygon[i].y;
-            }
-
-            //先頭の座標が一番左上になるように座標を並び替える
-            rotatedCoordinates = topArrange(rotatedCoordinates);
-        }
-        //270°回転させる
-        else if (angle == 270) {
-            for (int i = 0; i < polygon.Length; i++) {
-                rotatedCoordinates[i].x = polygon[i].y;
-                rotatedCoordinates[i].y = - polygon[i].x;
-            }
-
-            //先頭の座標が一番左上になるように座標を並び替える
-            rotatedCoordinates = topArrange(rotatedCoordinates);
-        }
+        //先頭の座標が一番左上になるように座標を並び替える
+        rotatedCoordinates = topArrange(rotatedCoordinates);
 
         return rotatedCoordinates;
     }
@@ -396,25 +456,25 @@ public class CommonFunctions : MonoBehaviour
     /// </summary> 
     /// <param name="coordinates">並び替えたい座標配列</param>
     /// <returns>並び替えた座標配列</returns>
-    public Vector3[] topArrange(Vector3[] coodinates) {
+    public Vector3[] topArrange(Vector3[] coordinates) {
         //並べ替えた座標配列
-        Vector3[] arrangedCoordinates = new Vector3[coodinates.Length];
+        Vector3[] arrangedCoordinates = new Vector3[coordinates.Length];
 
         //一番小さいx座標を見つける
-        float minX = coodinates[0].x;
-        for (int i = 1; i < coodinates.Length; i++) {
-            if (minX > coodinates[i].x) {
-                minX = coodinates[i].x;
+        float minX = coordinates[0].x;
+        for (int i = 1; i < coordinates.Length; i++) {
+            if (minX > coordinates[i].x) {
+                minX = coordinates[i].x;
             }
         }
 
         //x座標が小さいもののうち，一番大きいy座標を探す
         float maxY = float.MinValue;
-        for (int i = 1; i < coodinates.Length; i++) {
-            if (maxY < coodinates[i].y) {
+        for (int i = 1; i < coordinates.Length; i++) {
+            if (maxY < coordinates[i].y) {
                 //x座標が一番小さいもののうち，このy座標が存在するとき
-                if (coodinates.Contains(new Vector3(minX, coodinates[i].y, 0))) {
-                    maxY = coodinates[i].y;
+                if (coordinates.Contains(new Vector3(minX, coordinates[i].y, 0))) {
+                    maxY = coordinates[i].y;
                 }
             }
         }
@@ -424,16 +484,16 @@ public class CommonFunctions : MonoBehaviour
         
         //先頭の座標と一致する座標のインデックスを見つける
         int topIndex = 0;
-        for (int i = 0; i < coodinates.Length; i++) {
-            if (coodinates[i] == topCoordinates) {
+        for (int i = 0; i < coordinates.Length; i++) {
+            if (coordinates[i] == topCoordinates) {
                 topIndex = i;
                 break;
             }
         }
 
         //topIndexが先頭になるように並び替える
-        for (int i = 0; i < coodinates.Length; i++) {
-            arrangedCoordinates[i] = coodinates[(topIndex+i)%coodinates.Length];
+        for (int i = 0; i < coordinates.Length; i++) {
+            arrangedCoordinates[i] = coordinates[(topIndex+i)%coordinates.Length];
         }
 
         return arrangedCoordinates;
@@ -652,6 +712,30 @@ public class CommonFunctions : MonoBehaviour
     }
 
     /// <summary>
+    /// 多角形（x軸，y軸に平行な辺をしかない）がピッタリ収まる長方形の幅を求める
+    /// </summary> 
+    /// <param name="polygon">多角形の座標</param>
+    /// <returns>多角形がピッタリ収まる長方形の幅</returns>
+    public float CalculateRectangleWidth(Vector3[] polygon) {
+        //返す長方形の幅
+        float width = MakeRectangle(polygon)[1].x - MakeRectangle(polygon)[0].x;
+
+        return width;
+    }
+
+    /// <summary>
+    /// 多角形（x軸，y軸に平行な辺をしかない）がピッタリ収まる長方形の高さを求める
+    /// </summary> 
+    /// <param name="polygon">多角形の座標</param>
+    /// <returns>多角形がピッタリ収まる長方形の高さ</returns>
+    public float CalculateRectangleHeight(Vector3[] polygon) {
+        //返す長方形の高さ
+        float height = MakeRectangle(polygon)[0].y - MakeRectangle(polygon)[3].y;
+
+        return height;
+    }
+
+    /// <summary>
     /// 全ての座標を同じだけ移動させる
     /// </summary> 
     /// <param name="shapes">動かしたい座標配列</param>
@@ -762,5 +846,329 @@ public class CommonFunctions : MonoBehaviour
         }
 
         return flag;
+    }
+
+    /// <summary>
+    /// 多角形が別の多角形の外部（辺上も可）にあるかどうかの判定
+    /// </summary> 
+    /// <param name="polygonA">多角形Aの座標配列</param>
+    /// <param name="polygonB">多角形Bの座標配列</param>
+    /// <returns>多角形が別の多角形の外部にある場合True，ない場合Flase</returns>
+    public bool JudgeOutside(Vector3[] polygonA, Vector3[] polygonB) {
+        bool flag = false;
+        //点がいくつ外側にあるかを数える
+        int outsideCounter = 0;
+
+        //多角形Bの頂点を全て調べる
+        for (int i = 0; i < polygonB.Length; i++) {
+            //まず辺上にあるかどうかを調べる
+            bool onLineFlag = false;
+            for (int j = 0; j < polygonA.Length; j++) {
+                if (OnLineSegment(new Vector3[]{polygonA[j], polygonA[(j+1)%polygonA.Length]}, new Vector3(polygonB[i].x, polygonB[i].y, 0))) {
+                    outsideCounter++;
+                    onLineFlag = true;
+                    break;
+                }
+            }
+
+            //辺上にある場合は次の頂点へ
+            if (onLineFlag) {
+                continue;
+            }
+
+            //次に，外部にあるかどうかを調べる
+            if (!CheckPoint(polygonA, new Vector3(polygonB[i].x, polygonB[i].y, 0))) {
+                outsideCounter++;
+            }
+        }
+        
+        //外側にある点の数が多角形Bの頂点の数と同じ場合，外側にあると判定
+        if (outsideCounter == polygonB.Length) {
+            flag = true;
+        }
+
+        return flag;
+    }
+
+    /// <summary>
+    /// 間取図の重複を削除
+    /// </summary> 
+    /// <param name="allPattern">全ての配置結果</param>
+    /// <returns>重複を削除した結果</returns>
+    public List<Dictionary<string, Dictionary<string, Vector3[]>>> RemoveDuplicates(List<Dictionary<string, Dictionary<string, Vector3[]>>> allPattern) {
+        int trueCounter = 0;
+        int dwellingNumber = pr.getDwellingCoordinatesList().Count;
+
+        //重複を削除
+        for (int i = 0; i < allPattern.Count - 1; i++) {
+            for (int j = i + 1; j < allPattern.Count; j++) {
+
+                trueCounter = 0;
+                for (int k = 0; k < dwellingNumber; k++) {
+                    if (DictionaryEquals(allPattern[i]["Dwelling" + (k + 1)], allPattern[j]["Dwelling" + (k + 1)])) {
+                        trueCounter++;
+                    }  
+                }
+
+                if (trueCounter == dwellingNumber) {
+                    allPattern.RemoveAt(j);
+                    j--;
+                }
+            }
+        }
+
+        
+        // for (int k = 0; k < dwellingNumber; k++) {
+        //     //Debug.Log("調べてる！");
+        //     if (DictionaryEquals(allPattern[2]["Dwelling" + (k + 1)], allPattern[3]["Dwelling" + (k + 1)])) {
+        //         //Debug.Log("同じ！");
+        //         trueCounter++;
+        //     }  
+        // }
+
+        return allPattern;
+    }
+
+    /// <summary>
+    /// 2つの辞書が等しいかどうかを判定
+    /// </summary> 
+    /// <param name="dictionaryA">辞書A</param>
+    /// <param name="dictionaryB">辞書B</param>
+    /// <returns>2つの辞書が等しいときtrue, そうでないときfalse</returns>
+    public bool DictionaryEquals(Dictionary<string, Vector3[]> dictionaryA, Dictionary<string, Vector3[]> dictionaryB) {
+        //判定結果
+        bool flag = false;
+
+        //辞書の要素数が異なる場合
+        if (dictionaryA.Count != dictionaryB.Count) {
+            return flag;
+        }
+
+        //辞書のキーが異なる場合
+        foreach (string key in dictionaryA.Keys) {
+            if (!dictionaryB.ContainsKey(key)) {
+                return flag;
+            }
+        }
+
+        //辞書の値の長さが異なる場合
+        foreach (string key in dictionaryA.Keys) {
+            if (dictionaryA[key].Length != dictionaryB[key].Length) {
+                return flag;
+            }
+        }
+
+        //辞書の値が異なる場合
+        foreach (string key in dictionaryA.Keys) {
+            //住戸とバルコニーは判定しない
+            if (key.Contains("1K") || key.Contains("Balcony")) {
+                continue;
+            }
+
+            for (int i = 0; i < dictionaryA[key].Length; i++) {
+                //Debug.Log(dictionaryA[key][i].x + ", " + dictionaryB[key][i].x);
+                dictionaryA[key][i].x = NumberClean(dictionaryA[key][i].x);
+                if (NumberClean(dictionaryA[key][i].x) != NumberClean(dictionaryB[key][i].x)) {
+                    return flag;
+                }
+
+                //Debug.Log(dictionaryA[key][i].y + ", " + dictionaryB[key][i].y);
+                if (NumberClean(dictionaryA[key][i].y) != NumberClean(dictionaryB[key][i].y)) {
+                    return flag;
+                }
+            }
+        }
+
+        flag = true;
+
+        return flag;
+    }
+
+    /// <summary>
+    /// 数字の小数点以下を切り捨てる
+    /// </summary> 
+    /// <param name="num">数字</param>
+    /// <returns>小数点以下を切り捨てた数字</returns>
+    public float NumberClean (float num) {
+        //返す数字
+        float cleanNum = 0;
+        
+        //小数点以下を切り捨てる
+        cleanNum = (float) Math.Truncate(num);
+        
+        return cleanNum;
+    }
+
+    /// <summary>
+    /// 部屋が重なっているパターンを削除
+    /// </summary> 
+    /// <param name="allPattern">全ての配置結果</param>
+    /// <param name="roomNameToCheck">重なっているか調べたい部屋の名前</param>
+    /// <returns>部屋が重なったものを削除した結果</returns>
+    public List<Dictionary<string, Dictionary<string, Vector3[]>>> RemoveOverlap(List<Dictionary<string, Dictionary<string, Vector3[]>>> allPattern, string roomNameToCheck) {
+        //削除した結果
+        List<Dictionary<string, Dictionary<string, Vector3[]>>> result = DuplicateList(allPattern);
+
+        //各パターンについて調べる
+        for (int i = 0; i < result.Count; i++) {
+            //問題があるかどうか
+            bool problemFlag = false;
+
+            //住戸・階段室のループ
+            foreach (KeyValuePair<string, Dictionary<string, Vector3[]>> planParts in result[i]) {
+                //問題があるとき
+                if (problemFlag) {
+                    //このパターンはもう調べる必要がないので次のパターンへ
+                    break;
+                }
+
+                //住戸のとき
+                if (planParts.Key.Contains("Dwelling")) {
+                    //部屋のループ
+                    foreach (KeyValuePair<string, Vector3[]> room in planParts.Value) {
+                        //調べたい部屋かバルコニーのとき
+                        if (room.Key.Contains(roomNameToCheck) || room.Key.Contains("Balcony")) {
+                            //次の部屋へ
+                            continue;
+                        }
+
+                        //住戸のとき
+                        if (room.Key.Contains("1K")) {
+                            //roomNameToCheckが住戸内にないとき
+                            if (!JudgeInside(room.Value, planParts.Value[roomNameToCheck])) {
+                                //問題あり
+                                problemFlag = true;
+
+                                //このパターンはもう調べる必要がないので次のパターンへ
+                                break;
+                            }
+                        }
+                        //その他の部屋について
+                        else {
+                            //roomNameToCheckがその部屋外にないとき 
+                            if (!JudgeOutside(room.Value, planParts.Value[roomNameToCheck])) {
+                                //問題あり
+                                problemFlag = true;
+
+                                //このパターンはもう調べる必要がないので次のパターンへ
+                                break;
+                            }
+                        }
+                    }            
+                }
+            }
+
+            //問題があるとき
+            if (problemFlag) {
+                //このパターンは削除
+                result.RemoveAt(i);
+                i--;
+            }
+        }
+
+        //結果を返す
+        return result;
+    }
+
+    /// <summary>
+    /// 辺からはみ出しているパターンを削除
+    /// </summary>
+    /// <param name="allPattern">全ての配置結果</param>
+    /// <returns>MBPSが辺からはみ出しているパターンを削除した結果</returns>
+    public List<Dictionary<string, Dictionary<string, Vector3[]>>> RemoveNotOnEdge(List<Dictionary<string, Dictionary<string, Vector3[]>>> allPattern, string roomNameToCheck) {
+        //削除した結果
+        List<Dictionary<string, Dictionary<string, Vector3[]>>> result = DuplicateList(allPattern);
+
+        //各パターンについて調べる
+        for (int i = 0; i < result.Count; i++) {
+            //問題があるかどうか
+            bool problemFlag = false;
+
+            //住戸・階段室のループ
+            foreach (KeyValuePair<string, Dictionary<string, Vector3[]>> planParts in result[i]) {
+                //問題があるとき
+                if (problemFlag) {
+                    //このパターンはもう調べる必要がないので次のパターンへ
+                    break;
+                }
+
+                //住戸のとき
+                if (planParts.Key.Contains("Dwelling")) {
+                    //部屋のループ
+                    foreach (KeyValuePair<string, Vector3[]> room in planParts.Value) {
+                        if (problemFlag) {
+                            //このパターンはもう調べる必要がないので次のパターンへ
+                            break;
+                        }
+                        //調べたい部屋のとき
+                        if (room.Key.Contains(roomNameToCheck)) {
+                            //調べたい部屋の座標
+                            Vector3[] roomCoordinates = room.Value;
+                            //住戸の座標
+                            Vector3[] dwellingCoordinates = planParts.Value["1K"];
+                            
+                            //調べたい部屋の1辺について
+                            for (int j = 0; j < room.Value.Length; j++) {
+                                if (problemFlag) {
+                                    //このパターンはもう調べる必要がないので次のパターンへ
+                                    break;
+                                }
+
+                                //調べたい部屋のj番目の辺の座標
+                                Vector3[] roomEdge = new Vector3[]{roomCoordinates[j], roomCoordinates[(j+1)%roomCoordinates.Length]};
+                                //住戸の1辺について
+                                for (int k = 0; k < planParts.Value["1K"].Length; k++) {
+                                    //住戸のk番目の辺の座標
+                                    Vector3[] dwellingEdge = new Vector3[]{dwellingCoordinates[k], dwellingCoordinates[(k+1)%dwellingCoordinates.Length]};
+
+                                    //1辺が重なっているとき
+                                    if (ContactJudge(roomEdge, dwellingEdge)) {
+                                        //調べたい部屋の端点が住戸の辺上にないとき
+                                        if (!OnLineSegment(dwellingEdge, roomEdge[0]) || !OnLineSegment(dwellingEdge, roomEdge[1])) {
+                                            //問題あり
+                                            problemFlag = true;
+
+                                            //このパターンはもう調べる必要がないので次のパターンへ
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }            
+                }
+            }
+
+            //問題があるとき
+            if (problemFlag) {
+                //このパターンは削除
+                result.RemoveAt(i);
+                i--;
+            }
+        }
+
+        //結果を返す
+        return result;
+    }
+
+    /// <summary>
+    /// 辺からはみ出している，他の部屋と重なっている部屋が含まれるパターン，重複を削除
+    /// </summary> 
+    /// <param name="allPattern">全ての配置結果</param>
+    /// <returns>辺上にない，他の部屋と重なっている部屋が含まれるパターン，重複を削除した結果</returns>
+    public List<Dictionary<string, Dictionary<string, Vector3[]>>> RemoveIrregularPattern(List<Dictionary<string, Dictionary<string, Vector3[]>>> allPattern, string roomNameToCheck) {
+        //結果のリスト
+        var result = DuplicateList(allPattern);
+
+        //重複を削除
+        result = RemoveDuplicates(result);
+
+        //他の部屋と重なっているパターンを削除
+        result = RemoveOverlap(result, roomNameToCheck);
+
+        //辺上にないパターンを削除
+        result = RemoveNotOnEdge(result, roomNameToCheck);
+
+        return result;
     }
 }

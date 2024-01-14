@@ -18,7 +18,7 @@ public class CreateOneDwellingMbps : MonoBehaviour
     /// </summary>
     /// <param name="allPattern">全ての配置結果</param>
     /// <returns>1住戸のMBPSを配置した結果</returns>
-    public List<Dictionary<string, Dictionary<string, Vector3[]>>> placeOneDwellingMbps(List<Dictionary<string, Dictionary<string, Vector3[]>>> allPattern) {
+    public List<Dictionary<string, Dictionary<string, Vector3[]>>> PlaceOneDwellingMbps(List<Dictionary<string, Dictionary<string, Vector3[]>>> allPattern) {
         //配置結果のリスト
         var result = new List<Dictionary<string, Dictionary<string, Vector3[]>>>();
 
@@ -49,7 +49,7 @@ public class CreateOneDwellingMbps : MonoBehaviour
                     int dwellingIndex = int.Parse(planParts.Key.Replace("Dwelling", "")) - 1;
                     
                     //MBPSが配置されていない住戸に配置する
-                    currentPatternResult = placeOneDwellingMbpsInOneDwelling(currentPatternResult, dwellingIndex);
+                    currentPatternResult = PlaceOneDwellingMbpsInOneDwelling(currentPatternResult, dwellingIndex);
                 }
             }
 
@@ -60,12 +60,12 @@ public class CreateOneDwellingMbps : MonoBehaviour
     }
 
     /// <summary>
-    /// 1住戸のMBPSを配置するループ
+    /// 1住戸のMBPSを様々なパターンで配置
     /// </summary>
     /// <param name="currentPlacement">現在の配置結果</param>
     /// <param name="dwellingIndex">1住戸のMBPSを配置する住戸のインデックス</param>
     /// <returns>dwellingIndexで指定された住戸にMBPSを配置した結果</returns>
-    public List<Dictionary<string, Dictionary<string, Vector3[]>>> placeOneDwellingMbpsInOneDwelling(List<Dictionary<string, Dictionary<string, Vector3[]>>> currentPlacement, int dwellingIndex) {
+    public List<Dictionary<string, Dictionary<string, Vector3[]>>> PlaceOneDwellingMbpsInOneDwelling(List<Dictionary<string, Dictionary<string, Vector3[]>>> currentPlacement, int dwellingIndex) {
         //配置結果のリスト
         var result = new List<Dictionary<string, Dictionary<string, Vector3[]>>>();
 
@@ -73,20 +73,20 @@ public class CreateOneDwellingMbps : MonoBehaviour
         Vector3[] currentDwellingCoordinates = dwellingCoordinates[dwellingIndex];
 
         //MBPSをくっつける階段室の辺を求める
-        List<Vector3[]> contactStairsCoodinatesList = cf.ContactCoordinates(stairsCoordinates, currentDwellingCoordinates);
+        List<Vector3[]> contactStairsCoordinatesList = cf.ContactCoordinates(stairsCoordinates, currentDwellingCoordinates);
         
         //currentPlacementの各パターンについて配置を考える
         for (int i = 0; i < currentPlacement.Count; i++) {
             //配置できる全ての辺について
-            for (int j = 0; j < contactStairsCoodinatesList.Count; j++) {
+            for (int j = 0; j < contactStairsCoordinatesList.Count; j++) {
                 //配置する辺
-                Vector3[] placementSide = contactStairsCoodinatesList[j];
+                Vector3[] placementSide = contactStairsCoordinatesList[j];
                 
                 //配置する辺のどちら側に配置するかのループ
                 for (int k = 0; k < placementSide.Length; k++) {
                     //MBPSの形状についてのループ
                     for (int l = 0; l < pa.oneDwellingsMbpsCoordinatesList.Count; l++) {
-                        result.Add(placeOneDwellingMbpsInOneDwellingActually(currentPlacement[i], placementSide, k, pa.oneDwellingsMbpsCoordinatesList[l], dwellingIndex));
+                        result.Add(PlaceOneDwellingMbpsInOneDwellingActually(currentPlacement[i], placementSide, k, pa.oneDwellingsMbpsCoordinatesList[l], dwellingIndex));
                     }
                 }
             }
@@ -104,12 +104,12 @@ public class CreateOneDwellingMbps : MonoBehaviour
     /// <param name="mbpsCoordinates">MBPSの種類のインデックス</param>
     /// <param name="dwellingIndex">配置する住戸のインデックス</param>
     /// <returns>1住戸に1つのMBPSを配置した結果</returns>
-    public Dictionary<string, Dictionary<string, Vector3[]>> placeOneDwellingMbpsInOneDwellingActually(Dictionary<string, Dictionary<string, Vector3[]>> currentPlacement, Vector3[] placementSide, int placementSideIndex, Vector3[] mbpsCoodinates, int dwellingIndex) {
+    public Dictionary<string, Dictionary<string, Vector3[]>> PlaceOneDwellingMbpsInOneDwellingActually(Dictionary<string, Dictionary<string, Vector3[]>> currentPlacement, Vector3[] placementSide, int placementSideIndex, Vector3[] mbpsCoordinates, int dwellingIndex) {
         //配置結果
         var result = cf.DuplicateDictionary(currentPlacement);
 
         //移動させたMBPSの座標
-        Vector3[] correctMbpsCoordinates = mbpsCoodinates;
+        Vector3[] correctMbpsCoordinates = mbpsCoordinates;
 
         //配置する住戸の座標
         Vector3[] currentDwellingCoordinates = dwellingCoordinates[dwellingIndex];
@@ -134,11 +134,11 @@ public class CreateOneDwellingMbps : MonoBehaviour
             }
 
             //MBPSを回転させる
-            correctMbpsCoordinates = cf.Rotation(mbpsCoodinates, rotationAngle);
+            correctMbpsCoordinates = cf.Rotation(mbpsCoordinates, rotationAngle);
 
             //MBPSの幅・高さを求める
-            float width = cf.MakeRectangle(correctMbpsCoordinates)[1].x - cf.MakeRectangle(correctMbpsCoordinates)[0].x;
-            float height = cf.MakeRectangle(correctMbpsCoordinates)[0].y - cf.MakeRectangle(correctMbpsCoordinates)[3].y;
+            float width = cf.CalculateRectangleWidth(correctMbpsCoordinates);
+            float height = cf.CalculateRectangleHeight(correctMbpsCoordinates);
 
             //MBPSを移動させる
             //x軸方向に移動
@@ -169,11 +169,11 @@ public class CreateOneDwellingMbps : MonoBehaviour
             }
 
             //MBPSを回転させる
-            correctMbpsCoordinates = cf.Rotation(mbpsCoodinates, rotationAngle);
+            correctMbpsCoordinates = cf.Rotation(mbpsCoordinates, rotationAngle);
 
             //MBPSの幅・高さを求める
-            float width = cf.MakeRectangle(correctMbpsCoordinates)[1].x - cf.MakeRectangle(correctMbpsCoordinates)[0].x;
-            float height = cf.MakeRectangle(correctMbpsCoordinates)[0].y - cf.MakeRectangle(correctMbpsCoordinates)[3].y;
+            float width = cf.CalculateRectangleWidth(correctMbpsCoordinates);
+            float height = cf.CalculateRectangleHeight(correctMbpsCoordinates);
 
             //MBPSを移動させる
             //x軸方向に移動

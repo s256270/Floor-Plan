@@ -4,15 +4,6 @@ using UnityEngine;
 
 public class Parts : CreateRoom
 {
-    //玄関の座標
-    [HideInInspector]
-    public Vector3[] entranceCoordinates = new Vector3[]{
-        new Vector3(-750, 500, 0),
-        new Vector3(750, 500, 0),
-        new Vector3(750, -500, 0),
-        new Vector3(-750, -500, 0)
-    };
-
     //2住戸のMBPSの座標
     [HideInInspector]
     public List<List<Vector3[]>> twoDwellingsMbpsCoordinatesList = new List<List<Vector3[]>>() {
@@ -98,6 +89,18 @@ public class Parts : CreateRoom
             new Vector3(0, -500, 0),
             new Vector3(0, 200, 0),
             new Vector3(-350, 200, 0)
+        }
+    };
+
+    //玄関の座標
+    [HideInInspector]
+    public List<Vector3[]> entranceCoordinatesList = new List<Vector3[]>{
+        //その1
+        new Vector3[]{
+            new Vector3(-750, 500, 0),
+            new Vector3(750, 500, 0),
+            new Vector3(750, -500, 0),
+            new Vector3(-750, -500, 0)
         }
     };
 

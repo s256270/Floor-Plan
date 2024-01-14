@@ -11,7 +11,8 @@ public class CommonFunctionsTest : CommonFunctions
         //ContactCoordinatesTest();
         //ContactJudgeTest();
         //topArrangeTest();
-        RotationTest();
+        //RotationTest();
+        //SideSubstractionTest();
     }
 
     /// <summary>
@@ -178,5 +179,84 @@ public class CommonFunctionsTest : CommonFunctions
 
             Debug.Log("expect: " + new Vector3(x, y, 0) + ", result: " + Rotation(testPolygon, 270)[i]);
         }
+    }
+
+    /// <summary>
+    /// SideSubstractionの動作テスト
+    /// </summary>
+    public void SideSubstractionTest() {
+        Vector3[] testLineA = new Vector3[2];
+        Vector3[] testLineB = new Vector3[2];
+
+        Debug.Log("testcase1: match");
+        testLineA = new Vector3[] {new Vector3(-5, 0, 0), new Vector3(5, 0, 0)};
+        testLineB = new Vector3[] {new Vector3(-5, 0, 0), new Vector3(5, 0, 0)};
+        Debug.Log("expect: (0, 0, 0) ~ (0, 0, 0), result: " + SideSubstraction(testLineA, testLineB)[0][0] + " ~ " + SideSubstraction(testLineA, testLineB)[0][1]);
+
+        Debug.Log("testcase2: overlap1");
+        testLineA = new Vector3[] {new Vector3(-5, 0, 0), new Vector3(3, 0, 0)};
+        testLineB = new Vector3[] {new Vector3(-3, 0, 0), new Vector3(5, 0, 0)};
+        Debug.Log("expect: (-5, 0, 0) ~ (-3, 0, 0), result: " + SideSubstraction(testLineA, testLineB)[0][0] + " ~ " + SideSubstraction(testLineA, testLineB)[0][1]);
+
+        Debug.Log("testcase2: overlap2");
+        testLineA = new Vector3[] {new Vector3(-3, 0, 0), new Vector3(5, 0, 0)};
+        testLineB = new Vector3[] {new Vector3(-5, 0, 0), new Vector3(3, 0, 0)};
+        Debug.Log("expect: (3, 0, 0) ~ (5, 0, 0), result: " + SideSubstraction(testLineA, testLineB)[0][0] + " ~ " + SideSubstraction(testLineA, testLineB)[0][1]);
+
+        Debug.Log("testcase3: include1");
+        testLineA = new Vector3[] {new Vector3(-5, 0, 0), new Vector3(5, 0, 0)};
+        testLineB = new Vector3[] {new Vector3(-5, 0, 0), new Vector3(3, 0, 0)};
+        Debug.Log("expect: (3, 0, 0) ~ (5, 0, 0), result: " + SideSubstraction(testLineA, testLineB)[0][0] + " ~ " + SideSubstraction(testLineA, testLineB)[0][1]);
+
+        Debug.Log("testcase3: include2");
+        testLineA = new Vector3[] {new Vector3(-5, 0, 0), new Vector3(5, 0, 0)};
+        testLineB = new Vector3[] {new Vector3(-3, 0, 0), new Vector3(5, 0, 0)};
+        Debug.Log("expect: (-5, 0, 0) ~ (-3, 0, 0), result: " + SideSubstraction(testLineA, testLineB)[0][0] + " ~ " + SideSubstraction(testLineA, testLineB)[0][1]);
+
+        Debug.Log("testcase3: include3");
+        testLineA = new Vector3[] {new Vector3(-5, 0, 0), new Vector3(5, 0, 0)};
+        testLineB = new Vector3[] {new Vector3(-3, 0, 0), new Vector3(3, 0, 0)};
+        Debug.Log("expect: (-5, 0, 0) ~ (-3, 0, 0), result: " + SideSubstraction(testLineA, testLineB)[0][0] + " ~ " + SideSubstraction(testLineA, testLineB)[0][1]);
+        Debug.Log("expect: (3, 0, 0) ~ (5, 0, 0), result: " + SideSubstraction(testLineA, testLineB)[1][0] + " ~ " + SideSubstraction(testLineA, testLineB)[1][1]);
+
+        Debug.Log("testcase3: include4");
+        testLineA = new Vector3[] {new Vector3(-5, 0, 0), new Vector3(3, 0, 0)};
+        testLineB = new Vector3[] {new Vector3(-5, 0, 0), new Vector3(5, 0, 0)};
+        Debug.Log("expect: (0, 0, 0) ~ (0, 0, 0), result: " + SideSubstraction(testLineA, testLineB)[0][0] + " ~ " + SideSubstraction(testLineA, testLineB)[0][1]);
+
+        Debug.Log("testcase3: include5");
+        testLineA = new Vector3[] {new Vector3(-3, 0, 0), new Vector3(5, 0, 0)};
+        testLineB = new Vector3[] {new Vector3(-5, 0, 0), new Vector3(5, 0, 0)};
+        Debug.Log("expect: (0, 0, 0) ~ (0, 0, 0), result: " + SideSubstraction(testLineA, testLineB)[0][0] + " ~ " + SideSubstraction(testLineA, testLineB)[0][1]);
+
+        Debug.Log("testcase3: include6");
+        testLineA = new Vector3[] {new Vector3(-3, 0, 0), new Vector3(3, 0, 0)};
+        testLineB = new Vector3[] {new Vector3(-5, 0, 0), new Vector3(5, 0, 0)};
+        Debug.Log("expect: (0, 0, 0) ~ (0, 0, 0), result: " + SideSubstraction(testLineA, testLineB)[0][0] + " ~ " + SideSubstraction(testLineA, testLineB)[0][1]);
+
+        Debug.Log("testcase4: not overlap1");
+        testLineA = new Vector3[] {new Vector3(-5, 0, 0), new Vector3(5, 0, 0)};
+        testLineB = new Vector3[] {new Vector3(-11, 0, 0), new Vector3(-6, 0, 0)};
+        Debug.Log("expect: (-5, 0, 0) ~ (5, 0, 0), result: " + SideSubstraction(testLineA, testLineB)[0][0] + " ~ " + SideSubstraction(testLineA, testLineB)[0][1]);
+
+        Debug.Log("testcase4: not overlap2");
+        testLineA = new Vector3[] {new Vector3(-5, 0, 0), new Vector3(5, 0, 0)};
+        testLineB = new Vector3[] {new Vector3(6, 0, 0), new Vector3(11, 0, 0)};
+        Debug.Log("expect: (-5, 0, 0) ~ (5, 0, 0), result: " + SideSubstraction(testLineA, testLineB)[0][0] + " ~ " + SideSubstraction(testLineA, testLineB)[0][1]);
+
+        Debug.Log("testcase5: point overlap1");
+        testLineA = new Vector3[] {new Vector3(-5, 0, 0), new Vector3(5, 0, 0)};
+        testLineB = new Vector3[] {new Vector3(-10, 0, 0), new Vector3(-5, 0, 0)};
+        Debug.Log("expect: (-5, 0, 0) ~ (5, 0, 0), result: " + SideSubstraction(testLineA, testLineB)[0][0] + " ~ " + SideSubstraction(testLineA, testLineB)[0][1]);
+
+        Debug.Log("testcase5: point overlap2");
+        testLineA = new Vector3[] {new Vector3(-5, 0, 0), new Vector3(5, 0, 0)};
+        testLineB = new Vector3[] {new Vector3(5, 0, 0), new Vector3(10, 0, 0)};
+        Debug.Log("expect: (-5, 0, 0) ~ (5, 0, 0), result: " + SideSubstraction(testLineA, testLineB)[0][0] + " ~ " + SideSubstraction(testLineA, testLineB)[0][1]);
+
+        Debug.Log("testcase6: not straight");
+        testLineA = new Vector3[] {new Vector3(-5, 0, 0), new Vector3(5, 0, 0)};
+        testLineB = new Vector3[] {new Vector3(-5, 1, 0), new Vector3(5, 1, 0)};
+        Debug.Log("expect: (-5, 0, 0) ~ (5, 0, 0), result: " + SideSubstraction(testLineA, testLineB)[0][0] + " ~ " + SideSubstraction(testLineA, testLineB)[0][1]);
     }
 }
