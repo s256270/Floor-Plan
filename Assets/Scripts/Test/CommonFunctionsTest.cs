@@ -13,6 +13,7 @@ public class CommonFunctionsTest : CommonFunctions
         //topArrangeTest();
         //RotationTest();
         //SideSubstractionTest();
+        //OnLineSegmentTest();
     }
 
     /// <summary>
@@ -258,5 +259,20 @@ public class CommonFunctionsTest : CommonFunctions
         testLineA = new Vector3[] {new Vector3(-5, 0, 0), new Vector3(5, 0, 0)};
         testLineB = new Vector3[] {new Vector3(-5, 1, 0), new Vector3(5, 1, 0)};
         Debug.Log("expect: (-5, 0, 0) ~ (5, 0, 0), result: " + SideSubstraction(testLineA, testLineB)[0][0] + " ~ " + SideSubstraction(testLineA, testLineB)[0][1]);
+    }
+
+    /// <summary>
+    /// OnLineSegmentの動作テスト
+    /// </summary>
+    public void OnLineSegmentTest() {
+        Debug.Log("testcase1: True");
+        Debug.Log("expect: True, result: " + OnLineSegment(new Vector3[]{new Vector3(-5, 0, 0), new Vector3(5, 0, 0)}, new Vector3[]{new Vector3(-3, 0, 0), new Vector3(5, 0, 0)}));
+        Debug.Log("expect: True, result: " + OnLineSegment(new Vector3[]{new Vector3(0, -5, 0), new Vector3(0, 5, 0)}, new Vector3[]{new Vector3(0, -5, 0), new Vector3(0, 5, 0)}));
+        Debug.Log("expect: True, result: " + OnLineSegment(new Vector3[]{new Vector3(-5, -5, 0), new Vector3(5, 5, 0)}, new Vector3[]{new Vector3(-3, -3, 0), new Vector3(3, 3, 0)}));
+
+        Debug.Log("testcase2: False");
+        Debug.Log("expect: False, result: " + OnLineSegment(new Vector3[]{new Vector3(-5, 0, 0), new Vector3(5, 0, 0)}, new Vector3[]{new Vector3(-3, 0, 0), new Vector3(6, 0, 0)}));
+        Debug.Log("expect: False, result: " + OnLineSegment(new Vector3[]{new Vector3(0, -5, 0), new Vector3(0, 5, 0)}, new Vector3[]{new Vector3(0, -3, 0), new Vector3(0, 6, 0)}));
+        Debug.Log("expect: False, result: " + OnLineSegment(new Vector3[]{new Vector3(-5, -5, 0), new Vector3(5, 5, 0)}, new Vector3[]{new Vector3(-3, -3, 0), new Vector3(6, 6, 0)}));
     }
 }

@@ -427,6 +427,77 @@ public class CommonFunctions : MonoBehaviour
     }
 
     /// <summary>
+    /// ある線分が別のある線分上にあるかどうかの判定
+    /// </summary>
+    /// <param name="outerSide">線分の座標配列</param>
+    /// <param name="innerSide">線分上にあってほしい線分の座標配列</param>
+    /// <returns>線分が線分上にある場合True，ない場合Flase</returns>
+    public bool OnLineSegment(Vector3[] outerSide, Vector3[] innerSide) {
+        bool flag = true;
+        
+        //線分上にあってほしい線分について
+        for (int i = 0; i < innerSide.Length; i++) {
+            //全ての点が線分上にあるかどうか
+            if (!(flag && OnLineSegment(outerSide, innerSide[i]))) {
+                flag = false;
+                break;
+            }
+        }
+
+        return flag;
+    }
+
+    /// <summary>
+    /// 多角形の辺上(頂点含む)に点が含まれるかどうか
+    /// </summary> 
+    /// <param name="polygon">多角形の座標配列</param>
+    /// <param name="point">含まれるか調べる点の座標</param>
+    /// <returns>内分の場合true，外分の場合flase</returns>
+    public bool OnPolyogon(Vector3[] polygon, Vector3 point) {
+        //判定
+        bool flag = false;
+
+        //多角形の辺に含まれるかどうか
+        for (int i = 0; i < polygon.Length; i++) {
+            //多角形の辺
+            Vector3[] polyognSide = new Vector3[]{polygon[i], polygon[(i+1)%polygon.Length]};
+
+            //多角形の辺上に点が含まれる場合
+            if (OnLineSegment(polyognSide, point)) {
+                flag = true;
+                break;
+            }
+        }
+
+        return flag;
+    }
+
+    /// <summary>
+    /// 多角形の辺上(頂点含む)に線分が含まれるかどうか
+    /// </summary> 
+    /// <param name="polygon">多角形の座標配列</param>
+    /// <param name="line">含まれるか調べる線分の座標</param>
+    /// <returns>内分の場合true，外分の場合flase</returns>
+    public bool OnPolyogon(Vector3[] polygon, Vector3[] line) {
+        //判定
+        bool flag = false;
+
+        //多角形の辺に含まれるかどうか
+        for (int i = 0; i < polygon.Length; i++) {
+            //多角形の辺
+            Vector3[] polyognSide = new Vector3[]{polygon[i], polygon[(i+1)%polygon.Length]};
+
+            //多角形の辺上に線分が含まれる場合
+            if (OnLineSegment(polyognSide, line)) {
+                flag = true;
+                break;
+            }
+        }
+
+        return flag;
+    }
+
+    /// <summary>
     /// 多角形を原点周りに90, 180, 270°回転させる
     /// </summary> 
     /// <param name="polygon">回転させたい多角形の座標配列</param>
@@ -441,13 +512,14 @@ public class CommonFunctions : MonoBehaviour
         
         //回転させる
         for (int i = 0; i < polygon.Length; i++) {
-            rotatedCoordinates[i].x = polygon[i].x * Mathf.Cos(rad) - polygon[i].y * Mathf.Sin(rad);
-            rotatedCoordinates[i].y = polygon[i].x * Mathf.Sin(rad) + polygon[i].y * Mathf.Cos(rad);
+            rotatedCoordinates[i].x = Mathf.Round(polygon[i].x * Mathf.Cos(rad) - polygon[i].y * Mathf.Sin(rad));
+            rotatedCoordinates[i].y = Mathf.Round(polygon[i].x * Mathf.Sin(rad) + polygon[i].y * Mathf.Cos(rad));
         }
             
         //先頭の座標が一番左上になるように座標を並び替える
         rotatedCoordinates = topArrange(rotatedCoordinates);
 
+        //return VectorClean(rotatedCoordinates);
         return rotatedCoordinates;
     }
 
@@ -541,11 +613,38 @@ public class CommonFunctions : MonoBehaviour
     }
 
     /// <summary>
+    /// 線分の長さを求める
+    /// </summary>
+    /// <param name="line">長さを求めたい線分</param>
+    /// <returns>線分の長さ</returns>
+    public float GetLength(Vector3[] line) {
+        try {
+            //lineが線分でなかった場合にエラーを出す
+            if (line.Length != 2) {
+                throw new Exception("line is not line segment in Length");
+            }
+        }
+        catch (Exception e) {
+            //エラーを出力
+            Debug.LogError(e.Message);
+        }
+
+        //線分の長さ
+        float length = 0f;
+
+        //長さを求める
+        length = Vector3.Distance(line[0], line[1]); 
+
+        //線分の長さを返す
+        return length;
+    }
+    
+    /// <summary>
     /// 部屋の面積を計算
     /// </summary>
     /// <param name="room">計算する座標</param>
     /// <returns>部屋の面積(m^2)</returns>
-    public float areaCalculation(Vector3[] room) {
+    public float AreaCalculation(Vector3[] room) {
         float area = 0;
 
         for (int i = 0; i < room.Length; i++) {
@@ -663,6 +762,32 @@ public class CommonFunctions : MonoBehaviour
 
         //結果を返す
         return result;
+    }
+
+    /// <summary>
+    /// 多角形が長方形かの判定
+    /// </summary> 
+    /// <param name="polygon">多角形の座標</param>
+    /// <returns>多角形がピッタリ収まる長方形の座標配列</returns>
+    public bool RectangleJudge(Vector3[] polygon) {
+        //返す値
+        bool flag = false;
+
+        //頂点が4つのとき
+        if (polygon.Length == 4) {
+            //多角形の1辺の長さ
+            float sideLength = Vector3.Distance(polygon[0], polygon[1]);
+            //向かい合わないもう1辺の長さ
+            float anotherSideLength = Vector3.Distance(polygon[1], polygon[2]);
+
+            //多角形の1辺の長さと向かい合わないもう1辺の長さが異なるとき
+            if (sideLength != anotherSideLength) {
+                flag = true;
+            }
+        }
+        
+        //結果を返す
+        return flag;
     }
 
     /// <summary>
@@ -917,15 +1042,6 @@ public class CommonFunctions : MonoBehaviour
             }
         }
 
-        
-        // for (int k = 0; k < dwellingNumber; k++) {
-        //     //Debug.Log("調べてる！");
-        //     if (DictionaryEquals(allPattern[2]["Dwelling" + (k + 1)], allPattern[3]["Dwelling" + (k + 1)])) {
-        //         //Debug.Log("同じ！");
-        //         trueCounter++;
-        //     }  
-        // }
-
         return allPattern;
     }
 
@@ -966,13 +1082,11 @@ public class CommonFunctions : MonoBehaviour
             }
 
             for (int i = 0; i < dictionaryA[key].Length; i++) {
-                //Debug.Log(dictionaryA[key][i].x + ", " + dictionaryB[key][i].x);
                 dictionaryA[key][i].x = NumberClean(dictionaryA[key][i].x);
                 if (NumberClean(dictionaryA[key][i].x) != NumberClean(dictionaryB[key][i].x)) {
                     return flag;
                 }
 
-                //Debug.Log(dictionaryA[key][i].y + ", " + dictionaryB[key][i].y);
                 if (NumberClean(dictionaryA[key][i].y) != NumberClean(dictionaryB[key][i].y)) {
                     return flag;
                 }
@@ -997,6 +1111,24 @@ public class CommonFunctions : MonoBehaviour
         cleanNum = (float) Math.Truncate(num);
         
         return cleanNum;
+    }
+
+    /// <summary>
+    /// 配列の数値の小数点以下を切り捨てる
+    /// </summary> 
+    /// <param name="coordinates">座標配列</param>
+    /// <returns>小数点以下を切り捨てた数字</returns>
+    public Vector3[] VectorClean (Vector3[] coordinates) {
+        //返す数字
+        Vector3[] cleanVec = new Vector3[coordinates.Length];
+        
+        //配列の全ての要素について
+        for (int i = 0; i < coordinates.Length; i++) {
+            //小数点以下を切り捨てる
+            cleanVec[i] = new Vector3(NumberClean(coordinates[i].x), NumberClean(coordinates[i].y), 0);
+        }
+        
+        return cleanVec;
     }
 
     /// <summary>

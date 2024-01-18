@@ -58,8 +58,6 @@ public class CreateTwoDwellingMbps : MonoBehaviour
             }
         }
 
-        //TODO: はみ出しているパターンを削除
-
         return result;
     }
 

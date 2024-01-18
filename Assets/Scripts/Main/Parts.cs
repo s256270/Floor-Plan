@@ -94,7 +94,7 @@ public class Parts : CreateRoom
 
     //玄関の座標
     [HideInInspector]
-    public List<Vector3[]> entranceCoordinatesList = new List<Vector3[]>{
+    public List<Vector3[]> entranceCoordinatesList = new List<Vector3[]>(){
         //その1
         new Vector3[]{
             new Vector3(-750, 500, 0),
@@ -107,67 +107,87 @@ public class Parts : CreateRoom
     //洗面室の座標
     //その1
     [HideInInspector]
-    public Vector3[] washroom_coordinates = new Vector3[]{
-        new Vector3(-800, 800, 0),
-        new Vector3(800, 800, 0),
-        new Vector3(800, -800, 0),
-        new Vector3(-800, -800, 0)
-    };
+    public List<Vector3[]> washroomCoordinatesList = new List<Vector3[]>(){
+        //その1
+        new Vector3[]{
+            new Vector3(-800, 800, 0),
+            new Vector3(800, 800, 0),
+            new Vector3(800, -800, 0),
+            new Vector3(-800, -800, 0)
+        },
 
-    //その2
-    [HideInInspector]
-    public Vector3[] washroomCoordinates2 = new Vector3[]{
-        new Vector3(-1300, 450, 0),
-        new Vector3(1300, 450, 0),
-        new Vector3(1300, -450, 0),
-        new Vector3(-1300, -450, 0)
-    };
+        //その2
+        new Vector3[]{
+            new Vector3(-1300, 450, 0),
+            new Vector3(1300, 450, 0),
+            new Vector3(1300, -450, 0),
+            new Vector3(-1300, -450, 0)
+        },
 
-    //その3
-    [HideInInspector]
-    public Vector3[] washroomCoordinates3 = new Vector3[]{
-        new Vector3(-700, 1200, 0),
-        new Vector3(200, 1200, 0),
-        new Vector3(200, -300, 0),
-        new Vector3(700, -300, 0),
-        new Vector3(700, -1200, 0),
-        new Vector3(-700, -1200, 0)
+        //その3
+        new Vector3[]{
+            new Vector3(-700, 1200, 0),
+            new Vector3(200, 1200, 0),
+            new Vector3(200, -300, 0),
+            new Vector3(700, -300, 0),
+            new Vector3(700, -1200, 0),
+            new Vector3(-700, -1200, 0)
+        }
     };
 
     //UBの座標
     [HideInInspector]
-    public Vector3[] ub_coordinates = new Vector3[]{
-        new Vector3(-900, 700, 0),
-        new Vector3(900, 700, 0),
-        new Vector3(900, -700, 0),
-        new Vector3(-900, -700, 0)
+    public List<Vector3[]> ubCoordinatesList = new List<Vector3[]>(){
+        //その1
+        new Vector3[]{
+            new Vector3(-900, 700, 0),
+            new Vector3(900, 700, 0),
+            new Vector3(900, -700, 0),
+            new Vector3(-900, -700, 0)
+        }
     };
+
+    //洗面室&UBの座標
+    // [HideInInspector]
+    // public List<Vector3[]> washroomAndUbCoordinates = new List<Vector3[]>(){
+    //     //その1
+    //     new Vector3[]{
+    //         new Vector3(-800, 800, 0),
+    //         new Vector3(800, 800, 0),
+    //         new Vector3(800, -800, 0),
+    //         new Vector3(-800, -800, 0)
+    //     },
+    // };
 
     //トイレの座標
     [HideInInspector]
-    public Vector3[] toilet_coordinates = new Vector3[]{
-        new Vector3(-450, 700, 0),
-        new Vector3(450, 700, 0),
-        new Vector3(450, -700, 0),
-        new Vector3(-450, -700, 0)
+    public List<Vector3[]> toiletCoordinatesList = new List<Vector3[]>(){
+        //その1
+        new Vector3[]{
+            new Vector3(-450, 700, 0),
+            new Vector3(450, 700, 0),
+            new Vector3(450, -700, 0),
+            new Vector3(-450, -700, 0)
+        }
     };
 
     //キッチンの座標
-    //その1
     [HideInInspector]
-    public Vector3[] kitchen_coordinates = new Vector3[]{
-        new Vector3(-1200, 350, 0),
-        new Vector3(1200, 350, 0),
-        new Vector3(1200, -350, 0),
-        new Vector3(-1200, -350, 0)
-    };
+    public List<Vector3[]> kitchenCoordinatesList = new List<Vector3[]>(){
+        //その1
+        new Vector3[]{
+            new Vector3(-1200, 350, 0),
+            new Vector3(1200, 350, 0),
+            new Vector3(1200, -350, 0),
+            new Vector3(-1200, -350, 0)
+        },
 
-    //その2
-    [HideInInspector]
-    public Vector3[] kitchenCoordinates2 = new Vector3[]{
-        new Vector3(-850, 350, 0),
-        new Vector3(850, 350, 0),
-        new Vector3(850, -350, 0),
-        new Vector3(-850, -350, 0)
+        //その2
+        new Vector3[]{
+            new Vector3(-850, 350, 0),
+            new Vector3(850, 350, 0),
+            new Vector3(850, -350, 0),
+            new Vector3(-850, -350, 0)
+        }
     };
 }

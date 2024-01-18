@@ -32,7 +32,7 @@ public class FloorPlanner : CreateRoom
         allPattern = ce.PlaceEntrance(allPattern);
 
         //全パターンの配置結果に水回りの部屋を配置
-        //allPattern = cwa.PlaceWetareas(allPattern);
+        allPattern = cwa.PlaceWetareas(allPattern);
 
         //全パターンの配置結果に洋室を配置
         //allPattern = cws.PlaceWestern(allPattern);
