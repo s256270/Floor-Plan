@@ -25,13 +25,13 @@ public class MakeTwoDwellingsMbpsList : MonoBehaviour
         // 階段室のある1辺に接している住戸（dwellingCoordinatesのインデックスで管理）の組のリスト
         // List<List<int>> contactStairs = new List<List<int>>();
 
-        /* 必要な座標の準備 */
+        //必要な座標の準備
         //階段室の座標のみを抜き出し
         stairsCoordinates = pr.getStairsCoordinates();
         //住戸座標のリストを作成
         dwellingCoordinates = pr.getDwellingCoordinatesList();
 
-        /* リストを作成 */
+        //リストを作成
         //階段室の1辺の座標
         for (int i = 0; i < stairsCoordinates.Length; i++) {  
             List<int> contactDwellingsIndex = new List<int>();       
@@ -50,7 +50,7 @@ public class MakeTwoDwellingsMbpsList : MonoBehaviour
             }
         }
 
-        /* contactStairsに含まれる住戸の種類数 */
+        //contactStairsに含まれる住戸の種類数
         //カウントしたかどうかを判別するためだけのリスト
         List<int> countList = new List<int>();
         //接している住戸の種類数
@@ -64,10 +64,10 @@ public class MakeTwoDwellingsMbpsList : MonoBehaviour
             }
         }
         
-        /* contactStairsに3住戸以上の組が含まれるとき，2住戸ずつの組み合わせに分ける */
+        //contactStairsに3住戸以上の組が含まれるとき，2住戸ずつの組み合わせに分ける
         //Coming Soon...
 
-        /* 2住戸にまたがるMBPSの全配置パターンを作成 */
+        //2住戸にまたがるMBPSの全配置パターンを作成
         //組み合わせ決定用の配列
         int[] pattern = new int[contactStairs.Count];
 
@@ -100,11 +100,11 @@ public class MakeTwoDwellingsMbpsList : MonoBehaviour
             return;
         }
 
-        /* num_decided個目の要素を"選ぶ"場合のパターンを作成 */
+        //num_decided個目の要素を"選ぶ"場合のパターンを作成
         pattern[num_decided] = 1;
         combination(pattern, r, num_decided + 1);
 
-        /* num_decided個目の要素を"選ばない"場合のパターンを作成 */
+        //num_decided個目の要素を"選ばない"場合のパターンを作成
         pattern[num_decided] = 0;
         combination(pattern, r, num_decided + 1);
     }
