@@ -9,6 +9,7 @@ public class CreateWetareas : MonoBehaviour
     [SerializeField] CommonFunctions cf;
     [SerializeField] Parts pa;
     [SerializeField] MakeWetareasPermutation mwp;
+    [SerializeField] RemoveIrregularWetareas riw;
 
     //住戸の座標
     Vector3[] dwelling;
@@ -33,7 +34,11 @@ public class CreateWetareas : MonoBehaviour
         var result = new List<Dictionary<string, Dictionary<string, Vector3[]>>>();
 
         //各パターンについて配置
-        for (int i = 0; i < 1/*allPattern.Count*/; i++) {
+        for (int i = 0; i < allPattern.Count; i++) {
+            if (!(i % 6 == 0)) {
+                continue;
+            }
+            //Debug.Log("i: " + i);
             foreach (KeyValuePair<string, Dictionary<string, Vector3[]>> planParts in allPattern[i]) {
                 //住戸オブジェクトに配置していく
                 if (planParts.Key.Contains("Dwelling1")) {
@@ -97,7 +102,7 @@ public class CreateWetareas : MonoBehaviour
             for (int j = 0; j < rotationAllPattern.Count; j++) {
 
                 //キッチンと洗面室の回転は除く
-                if (rotationAllPattern[j][3] == 1 || rotationAllPattern[j][3] == 3) {
+                if (rotationAllPattern[j][1] == 1 || rotationAllPattern[j][3] == 1) {
                     continue;
                 }
                 
@@ -131,7 +136,10 @@ public class CreateWetareas : MonoBehaviour
             for (int j = 0; j < areaToPlaceWetareas[i].Count; j++) {
                 //配置結果をリストに追加
                 currentResult.AddRange(PlaceWetareasOneArea(currentResult, areaToPlaceWetareas[i][j], wetareasPermutation, rotationPattern));
-            }  
+            }
+
+            //問題のある水回りパターンを削除
+            //currentResult = riw.RemoveIrregularWetareasPattern(currentResult);
 
             //必要な部屋がすべて配置されていないものを除く
             for (int j = 0; j < currentResult.Count; j++) {
@@ -142,7 +150,7 @@ public class CreateWetareas : MonoBehaviour
                     j--;
                 }
             }
-
+            
             //洗面室とユニットバスが隣り合っていないものを除く
             for (int j = 0; j < currentResult.Count; j++) {
                 //洗面室とユニットバスが隣り合っていないとき
@@ -152,89 +160,298 @@ public class CreateWetareas : MonoBehaviour
                     j--;
                 }
             }
+
+            //入口がない部屋があるものを除く
+            for (int j = 0; j < currentResult.Count; j++) {
+                //ある部屋が他の部屋の入口を封鎖しないかを確認
+                foreach (KeyValuePair<string, Vector3[]> currentRoom in currentResult[j]) {
+                    //部屋の入口が封鎖されているとき
+                    if (!SecureNecessarySide(currentRoom.Key, currentResult[j])) {
+                        //その配置結果を除く
+                        currentResult.RemoveAt(j);
+                        j--;
+                        //次の配置結果へ
+                        break;
+                    }
+                }
+            }
+
+            //廊下がふさがれていそうなものを除く
+            //住戸の辺のインデックスを平行なもの同士の組み合わせに分割してリスト化
+            List<List<int>> dwellingParallelIndexs = new List<List<int>>();
+            for (int j = 0; j < dwelling.Length-1; j++) {
+                //チェックの起点となる辺
+                Vector3[] checkEdge = new Vector3[]{dwelling[j], dwelling[(j+1)%dwelling.Length]};
+
+                //リスト内に同じ辺がないとき
+                if (!dwellingParallelIndexs.Any(x => x.Contains(j))) {
+
+                    List<int> dwellingParallelIndex = new List<int>{j};
+                    //他の辺と比較
+                    for (int k = j+1; k < dwelling.Length; k++) {
+                        //比較する辺
+                        Vector3[] comparedEdge = new Vector3[]{dwelling[k], dwelling[(k+1)%dwelling.Length]};
+
+                        //平行なとき
+                        if (cf.Slope(checkEdge) == cf.Slope(comparedEdge)) {
+                            //リストに追加
+                            dwellingParallelIndex.Add(k);
+                        }
+                    }
+
+                    if (dwellingParallelIndex.Count > 1) {
+                        //リストを追加
+                        dwellingParallelIndexs.Add(dwellingParallelIndex);
+                    }
+                }
+            }
+
+            //平行な辺に接する住戸をチェック
+            for (int j = 0; j < currentResult.Count; j++) {
+                //水回りの部屋について
+                foreach (KeyValuePair<string, Vector3[]> wetareasRoom1 in currentResult[j]) {
+                    bool breakFlag = false;
+
+                    //部屋が接している辺のインデックス
+                    List<int> contactEdgeIndex1 = new List<int>();
+
+                    //部屋が接している辺のインデックスを取得
+                    for (int k = 0; k < dwelling.Length; k++) {
+                        //部屋が接しているとき
+                        if (cf.ContactJudge(wetareasRoom1.Value, new Vector3[]{dwelling[k], dwelling[(k+1)%dwelling.Length]})) {
+                            //リストに追加
+                            contactEdgeIndex1.Add(k);
+                        }
+                    }
+
+                    //別の水回りの部屋について
+                    foreach (KeyValuePair<string, Vector3[]> wetareasRoom2 in currentResult[j]) {
+                        //同じ部屋のとき
+                        if (wetareasRoom1.Key == wetareasRoom2.Key) {
+                            //次の部屋へ
+                            continue;
+                        }
+
+                        //部屋が接している辺のインデックス
+                        List<int> contactEdgeIndex2 = new List<int>();
+
+                        //部屋が接している辺のインデックスを取得
+                        for (int k = 0; k < dwelling.Length; k++) {
+                            //部屋が接しているとき
+                            if (cf.ContactJudge(wetareasRoom2.Value, new Vector3[]{dwelling[k], dwelling[(k+1)%dwelling.Length]})) {
+                                //リストに追加
+                                contactEdgeIndex2.Add(k);
+                            }
+                        }
+                        
+                        //2つのインデックスの組み合わせについて
+                        for (int k = 0; k < contactEdgeIndex1.Count; k++) {
+                            for (int l = 0; l < contactEdgeIndex2.Count; l++) {
+                                //同じインデックスの組み合わせのとき
+                                if (contactEdgeIndex1[k] == contactEdgeIndex2[l]) {
+                                    //次の組み合わせへ
+                                    continue;
+                                }
+
+                                //2つの部屋が接している辺が平行なとき
+                                if (dwellingParallelIndexs.Any(x => x.Contains(contactEdgeIndex1[k]) && x.Contains(contactEdgeIndex2[l]))) {
+                                    //部屋1と部屋2が接しているとき
+                                    if (cf.ContactJudge(wetareasRoom1.Value, wetareasRoom2.Value)) {
+                                        //その配置結果を除く
+                                        currentResult.RemoveAt(j);
+                                        j--;
+                                        breakFlag = true;
+                                        //次の配置結果へ
+                                        break;
+                                    }
+                                }
+                            }
+
+                            //次の配置結果へ
+                            if (breakFlag) {
+                                break;
+                            }
+                        }
+
+                        //次の配置結果へ
+                        if (breakFlag) {
+                            break;
+                        }
+                    }
+
+                    //次の配置結果へ
+                    if (breakFlag) {
+                        break;
+                    }
+                }   
+            }
             
-            //玄関が接して封鎖されているものを除く
+            //玄関周りの廊下がふさがれているものを除く
             for (int j = 0; j < currentResult.Count; j++) {
                 //全ての要素がなくなった時
-                if (currentResult[j].Count == 0) {
+                if (currentResult.Count == 0) {
                     //終了
                     break;
                 }
+
+                //玄関の廊下に続く辺の長さ
+                float entranceToHallwayLength = cf.GetLength(entranceToHallway[i]);
+                //玄関の廊下に続く辺の座標
+                Vector3[] actEntranceToHallway = entranceToHallway[i];
+                bool flag = false;
+
                 //配置された水回りの部屋について
                 foreach (Vector3[] wetareasRoom in currentResult[j].Values) {
+
                     //玄関の廊下に続く辺と接しているとき
                     if (cf.ContactJudge(entranceToHallway[i], wetareasRoom)) {
                         //接してない部分の座標
-                        Vector3[] actEntranceToHallway = cf.SideSubstraction(entranceToHallway[i], cf.ContactCoordinates(entranceToHallway[i], wetareasRoom)[0])[0];
+                        actEntranceToHallway = cf.SideSubstraction(entranceToHallway[i], cf.ContactCoordinates(entranceToHallway[i], wetareasRoom)[0])[0];
                         //接してない部分の長さ
-                        float entranceToHallwayLength = cf.GetLength(actEntranceToHallway);
+                        entranceToHallwayLength = cf.GetLength(actEntranceToHallway);
                         //長さが900mmより短いとき
                         if (entranceToHallwayLength < 900f) {
                             //その配置結果を除く
                             currentResult.RemoveAt(j);
                             j--;
                             //次の配置結果へ
+                            flag = true;
                             break;
                         }
-                        //長さが900mmより長いとき
-                        else {
-                            //entranceToHallwayLength×900の長方形が入るかを判定
-                            //判定するための長方形の座標
-                            Vector3[] JudgeSquare = new Vector3[4];
-                            //配置する辺がy軸に平行なとき
-                            if (cf.Slope(actEntranceToHallway) == Mathf.Infinity) {
-                                JudgeSquare = new Vector3[]{new Vector3(-450, entranceToHallwayLength/2, 0), new Vector3(450, entranceToHallwayLength/2, 0), new Vector3(450, -entranceToHallwayLength/2, 0), new Vector3(-450, -entranceToHallwayLength/2, 0)};
+                    }
+                }
 
-                                //動かす方向
-                                int wetareasShiftDirection = cf.ShiftJudge(range, actEntranceToHallway);
+                //長さが900mmより短いとき
+                if (flag) {
+                    continue;
+                }
 
-                                //x座標・y座標の移動
-                                //部屋を辺の左側にするとき
-                                if (wetareasShiftDirection < 0) {
-                                    JudgeSquare = cf.CorrectCoordinates(JudgeSquare, new Vector3(actEntranceToHallway[0].x - 450, (actEntranceToHallway[0].y + actEntranceToHallway[1].y)/2, 0));
-                                }
-                                //部屋を辺の右側にするとき
-                                else if (wetareasShiftDirection > 0) {
-                                    JudgeSquare = cf.CorrectCoordinates(JudgeSquare, new Vector3(actEntranceToHallway[0].x + 450, (actEntranceToHallway[0].y + actEntranceToHallway[1].y)/2, 0));
-                                }
-                            }
-                            //配置する辺がx軸に平行なとき
-                            else {
-                                JudgeSquare = new Vector3[]{new Vector3(-entranceToHallwayLength/2, 450, 0), new Vector3(entranceToHallwayLength/2, 450, 0), new Vector3(entranceToHallwayLength/2, -450, 0), new Vector3(-entranceToHallwayLength/2, -450, 0)};
+                //entranceToHallwayLength×900の長方形が入るかを判定
+                //判定するための長方形の座標
+                Vector3[] JudgeSquare = new Vector3[4];
+                //配置する辺がy軸に平行なとき
+                if (cf.Slope(actEntranceToHallway) == Mathf.Infinity) {
+                    JudgeSquare = new Vector3[]{new Vector3(-450, entranceToHallwayLength/2, 0), new Vector3(450, entranceToHallwayLength/2, 0), new Vector3(450, -entranceToHallwayLength/2, 0), new Vector3(-450, -entranceToHallwayLength/2, 0)};
 
-                                //動かす方向
-                                int wetareasShiftDirection = cf.ShiftJudge(range, actEntranceToHallway);
+                    //動かす方向
+                    int wetareasShiftDirection = cf.ShiftJudge(range, actEntranceToHallway);
 
-                                //x座標・y座標の移動
-                                //部屋を辺の上側にするとき
-                                if (wetareasShiftDirection > 0) {
-                                    JudgeSquare = cf.CorrectCoordinates(JudgeSquare, new Vector3((actEntranceToHallway[0].x + actEntranceToHallway[1].x)/2, actEntranceToHallway[0].y + 450, 0));
-                                }
-                                //部屋を辺の下側にするとき
-                                else if (wetareasShiftDirection < 0) {
-                                    JudgeSquare = cf.CorrectCoordinates(JudgeSquare, new Vector3((actEntranceToHallway[0].x + actEntranceToHallway[1].x)/2, actEntranceToHallway[0].y - 450, 0));
-                                }
-                            }
+                    //x座標・y座標の移動
+                    //部屋を辺の左側にするとき
+                    if (wetareasShiftDirection < 0) {
+                        JudgeSquare = cf.CorrectCoordinates(JudgeSquare, new Vector3(actEntranceToHallway[0].x - 450, (actEntranceToHallway[0].y + actEntranceToHallway[1].y)/2, 0));
+                    }
+                    //部屋を辺の右側にするとき
+                    else if (wetareasShiftDirection > 0) {
+                        JudgeSquare = cf.CorrectCoordinates(JudgeSquare, new Vector3(actEntranceToHallway[0].x + 450, (actEntranceToHallway[0].y + actEntranceToHallway[1].y)/2, 0));
+                    }
+                }
+                //配置する辺がx軸に平行なとき
+                else {
+                    JudgeSquare = new Vector3[]{new Vector3(-entranceToHallwayLength/2, 450, 0), new Vector3(entranceToHallwayLength/2, 450, 0), new Vector3(entranceToHallwayLength/2, -450, 0), new Vector3(-entranceToHallwayLength/2, -450, 0)};
 
-                            //配置された水回りの部屋について
-                            foreach (Vector3[] wetareasRooom in currentResult[j].Values) {
-                                //判定するための長方形の外側にないとき
-                                if (!cf.JudgeOutside(JudgeSquare, wetareasRooom)) {
-                                    //その配置結果を除く
-                                    currentResult.RemoveAt(j);
-                                    j--;
-                                    //次の配置結果へ
-                                    break;
-                                }
-                                if (!cf.JudgeOutside(wetareasRooom, JudgeSquare)) {
-                                    //その配置結果を除く
-                                    currentResult.RemoveAt(j);
-                                    j--;
-                                    //次の配置結果へ
-                                    break;
-                                }
-                            }
+                    //動かす方向
+                    int wetareasShiftDirection = cf.ShiftJudge(range, actEntranceToHallway);
+
+                    //x座標・y座標の移動
+                    //部屋を辺の上側にするとき
+                    if (wetareasShiftDirection > 0) {
+                        JudgeSquare = cf.CorrectCoordinates(JudgeSquare, new Vector3((actEntranceToHallway[0].x + actEntranceToHallway[1].x)/2, actEntranceToHallway[0].y + 450, 0));
+                    }
+                    //部屋を辺の下側にするとき
+                    else if (wetareasShiftDirection < 0) {
+                        JudgeSquare = cf.CorrectCoordinates(JudgeSquare, new Vector3((actEntranceToHallway[0].x + actEntranceToHallway[1].x)/2, actEntranceToHallway[0].y - 450, 0));
+                    }
+                }
+
+                //配置された水回りの部屋について
+                foreach (Vector3[] wetareasRooom in currentResult[j].Values) {
+                    //判定するための長方形の外側にないとき
+                    if (!cf.JudgeOutside(JudgeSquare, wetareasRooom)) {
+                        //その配置結果を除く
+                        currentResult.RemoveAt(j);
+                        j--;
+                        //次の配置結果へ
+                        break;
+                    }
+                    if (!cf.JudgeOutside(wetareasRooom, JudgeSquare)) {
+                        //その配置結果を除く
+                        currentResult.RemoveAt(j);
+                        j--;
+                        //次の配置結果へ
+                        break;
+                    }
+                }
+            }
+
+            //部屋が他の部屋と完璧に重なっていないかの判定
+            for (int j = 0; j < currentResult.Count; j++) {
+                foreach (KeyValuePair<string, Vector3[]> wetareasRoom1 in currentResult[j]) {
+                    bool breakFlag = false;
+                    foreach (KeyValuePair<string, Vector3[]> wetareasRoom2 in currentResult[j]) {
+                        //比較する部屋が同じ部屋のとき
+                        if (wetareasRoom1.Key == wetareasRoom2.Key) {
+                            //次の部屋へ
+                            continue;
                         }
+
+                        //部屋1の各辺について
+                        for (int k = 0; k < wetareasRoom1.Value.Length; k++) {
+                            //辺の中点
+                            Vector3[] midPoint = new Vector3[]{(wetareasRoom1.Value[k] + wetareasRoom1.Value[(k+1)%wetareasRoom1.Value.Length])/2};
+
+                            //部屋1の辺の中点が部屋2の外側にないとき
+                            if (!cf.JudgeOutside(wetareasRoom2.Value, midPoint)) {
+                                //その配置結果を除く
+                                currentResult.RemoveAt(j);
+                                j--;
+                                breakFlag = true;
+                                break;
+                            }  
+                        }
+
+                        //次の配置結果へ
+                        if (breakFlag) {
+                            break;
+                        }
+                    }
+
+                    //次の配置結果へ
+                    if (breakFlag) {
+                        break;
+                    }
+                }
+            }
+
+            //部屋が他の部屋と重なっていないかの判定
+            for (int j = 0; j < currentResult.Count; j++) {
+                foreach (KeyValuePair<string, Vector3[]> wetareasRoom1 in currentResult[j]) {
+                    bool breakFlag = false;
+                    foreach (KeyValuePair<string, Vector3[]> wetareasRoom2 in currentResult[j]) {
+                        //比較する部屋が同じ部屋のとき
+                        if (wetareasRoom1.Key == wetareasRoom2.Key) {
+                            //次の部屋へ
+                            continue;
+                        }
+
+                        //配置した部屋が他の部屋の外側にないとき
+                        if (!cf.JudgeOutside(wetareasRoom1.Value, wetareasRoom2.Value)) {
+                            //その配置結果を除く
+                            currentResult.RemoveAt(j);
+                            j--;
+                            breakFlag = true;
+                            break;
+                        }
+
+                        //次の配置結果へ
+                        if (breakFlag) {
+                            break;
+                        }
+                    }
+
+                    //次の配置結果へ
+                    if (breakFlag) {
+                        break;
                     }
                 }
             }
@@ -256,6 +473,16 @@ public class CreateWetareas : MonoBehaviour
 
         //玄関の廊下に続く辺を決める
         List<Vector3[]> entranceSide = cf.ContactCoordinates(entrance, range);
+        //最も長い辺を廊下に続く辺とする
+        float entranceSideLength = cf.GetLength(entranceSide[0]);
+        int entranceSideIndex = 0;
+        for (int i = 1; i < entranceSide.Count; i++) {
+            if (entranceSideLength < cf.GetLength(entranceSide[i])) {
+                entranceSideLength = cf.GetLength(entranceSide[i]);
+                entranceSideIndex = i;
+            }
+        }
+        entranceSide = new List<Vector3[]>{entranceSide[entranceSideIndex]};
 
         //洋室の廊下に続く辺を決める
         List<Vector3[]> westernSide = cf.ContactCoordinates(balcony, range);
@@ -681,18 +908,6 @@ public class CreateWetareas : MonoBehaviour
 
             //部屋が他の部屋と重なっていないかの判定
             foreach (Vector3[] wetareasRoom in currentPattern.Values) {
-                // //配置した部屋が他の部屋の内側にあるとき
-                // if (cf.JudgeInside(wetareasRoom, result)) {
-                //     //座標を空にする
-                //     result = new Vector3[0];
-                //     break;
-                // }
-                // //他の部屋が配置した部屋の内側にあるとき
-                // if (cf.JudgeInside(result, wetareasRoom)) {
-                //     //座標を空にする
-                //     result = new Vector3[0];
-                //     break;
-                // }
                 //配置した部屋が他の部屋の外側にないとき
                 if (!cf.JudgeOutside(wetareasRoom, result)) {
                     //座標を空にする
@@ -798,6 +1013,126 @@ public class CreateWetareas : MonoBehaviour
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// 部屋の開けておなかなければならない辺が空いているかどうかを判定
+    /// </summary> 
+    /// <param name="checkRoom">調べる部屋</param>
+    /// <param name="surroundingRooms">周りの部屋</param>
+    /// <returns>部屋の開けておなかなければならない辺が空いているかどうか</returns>
+    public bool SecureNecessarySide(string checkRoomName, Dictionary<string, Vector3[]> surroundingRooms) {
+        //判定結果
+        bool flag = true;
+
+        //調べる部屋を1辺ずつに分割
+        List<Vector3[]> checkRoomSides = new List<Vector3[]>(); //調べる部屋の辺のリスト
+        Vector3[] checkRoomCoordinates = surroundingRooms[checkRoomName]; //調べる部屋の座標
+        //調べる部屋の辺のリストを作成
+        for (int i = 0; i < checkRoomCoordinates.Length; i++) {
+            checkRoomSides.Add(new Vector3[]{checkRoomCoordinates[i], checkRoomCoordinates[(i+1)%checkRoomCoordinates.Length]});
+        }
+
+        //水回り範囲との共通部分を調べる
+        //水回り範囲の各辺について
+        for (int i = 0; i < range.Length; i++) {
+            Vector3[] checkRangeSide = new Vector3[]{range[i], range[(i+1)%range.Length]};
+
+            //調べる部屋の各辺について
+            for (int j = 0; j < checkRoomSides.Count; j++) {
+                Vector3[] checkRoomSide = checkRoomSides[j];
+
+                //2辺が接しているとき
+                if (cf.ContactJudge(checkRoomSide, checkRangeSide)) {
+                    //水回り範囲との共通部分を除いた辺が存在しないとき
+                    if (cf.GetLength(cf.SideSubstraction(checkRoomSide, checkRangeSide)[0]) == 0.0f) {
+                        //その辺を削除
+                        checkRoomSides.RemoveAt(j);
+                        j--;
+                    }
+                    else {
+                        //共通部分を除いた辺に更新
+                        checkRoomSides[j] = cf.SideSubstraction(checkRoomSide, checkRangeSide)[0];
+                    }
+                }
+            }
+        }
+
+        //周りの部屋について調べる
+        foreach (KeyValuePair<string, Vector3[]> surroundingRoom in surroundingRooms) {
+            //調べる部屋と周りの部屋が同じ場合
+            if (surroundingRoom.Key == checkRoomName) {
+                //スキップ
+                continue;
+            }
+
+            //調べる部屋と周りの部屋が接しているとき
+            if (cf.ContactJudge(surroundingRoom.Value, checkRoomCoordinates)) {
+                //周りの部屋との共通部分につい調べる
+                //周りの部屋の各辺について
+                for (int i = 0; i < surroundingRoom.Value.Length; i++) {
+                    Vector3[] surroundingRoomSide = new Vector3[]{surroundingRoom.Value[i], surroundingRoom.Value[(i+1)%surroundingRoom.Value.Length]};
+
+                    //調べる部屋の各辺について
+                    for (int j = 0; j < checkRoomSides.Count; j++) {
+                        Vector3[] checkRoomSide = checkRoomSides[j];
+
+                        //2辺が接しているとき
+                        if (cf.ContactJudge(checkRoomSide, surroundingRoomSide)) {
+                            //周りの部屋との共通部分を除いた辺が存在しないとき
+                            if (cf.GetLength(cf.SideSubstraction(checkRoomSide, surroundingRoomSide)[0]) == 0.0f) {
+                                //その辺を削除
+                                checkRoomSides.RemoveAt(j);
+                                j--;
+                            }
+                            else {
+                                //共通部分を除いた辺に更新
+                                checkRoomSides[j] = cf.SideSubstraction(checkRoomSide, surroundingRoomSide)[0];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        //残った辺が必要な長さがあるかを調べる
+        //残った辺が存在するとき
+        if (checkRoomSides.Count > 0) {     
+            //調べる部屋の辺の一番長いものを求める
+            float checkRoomSideMax = Vector3.Distance(checkRoomSides[0][0], checkRoomSides[0][1]);
+            for (int i = 0; i < checkRoomSides.Count; i++) {
+                if (checkRoomSideMax < Vector3.Distance(checkRoomSides[i][0], checkRoomSides[i][1])) {
+                    checkRoomSideMax = Vector3.Distance(checkRoomSides[i][0], checkRoomSides[i][1]);
+                }
+            }
+
+            if (checkRoomName == "Washroom") {
+                //洗面室の場合
+                if (checkRoomSideMax < 900.0f) {
+                    flag = false;
+                }
+            }
+            else if (checkRoomName == "Toilet") {
+                //トイレの場合
+                if (checkRoomSideMax < 800.0f) {
+                    flag = false;
+                }
+            }
+            else if (checkRoomName == "Kitchen") {
+                //キッチンの場合
+                if (checkRoomSideMax < 2400.0f) {
+                    flag = false;
+                }
+            }
+        }
+        //残った辺が存在しないとき
+        else {
+            if (checkRoomName == "Washroom" || checkRoomName == "Toilet" || checkRoomName == "Kitchen") {
+                flag = false;
+            }
+        }
+
+        return flag;
     }
 
     /// <summary>
@@ -1020,15 +1355,22 @@ public class CreateWetareas : MonoBehaviour
         return newOuter.ToArray();
     }
 
-    ///辺が長い順のインデックスの配列を返す
-    public int[] LongIndex(Vector3[] room) {
-        int[] result = new int[room.Length];
+    /// <summary>
+    /// 多角形の辺の長い順のインデックスを求める
+    /// </summary> 
+    /// <param name="polygon">多角形の座標</param>
+    /// <returns>多角形の辺の長い順のインデックスの配列</returns>
+    public int[] LongIndex(Vector3[] polygon) {
+        //結果
+        int[] result = new int[polygon.Length];
 
+        //辺のインデックスと長さの辞書を作成
         var length = new Dictionary<int, float>();
-        for (int i = 0; i < room.Length; i++) {
-            length.Add(i, Vector3.Distance(room[i], room[(i+1)%room.Length]));
+        for (int i = 0; i < polygon.Length; i++) {
+            length.Add(i, Vector3.Distance(polygon[i], polygon[(i+1)%polygon.Length]));
         }
 
+        //辺の長さの降順にインデックスの配列を作成
         for (int i = 0; i < result.Length; i++) {
             result[i] = length.FirstOrDefault(x => x.Value == length.Values.Max()).Key;
             length.Remove(result[i]);

@@ -23,7 +23,7 @@ public class FloorPlanner : CreateRoom
         var allPattern = new List<Dictionary<string, Dictionary<string, Vector3[]>>>();
 
         //配置結果にプラン図を追加
-        //allPattern.Add(pr.plan);
+        allPattern.Add(pr.plan);
 
         //全パターンの配置結果にMBPSを配置
         allPattern = cm.PlaceMbps(allPattern);
@@ -34,8 +34,17 @@ public class FloorPlanner : CreateRoom
         //全パターンの配置結果に水回りの部屋を配置
         allPattern = cwa.PlaceWetareas(allPattern);
 
+        //テスト用
+        // allPattern.Add(pr.plan);
+        // allPattern[0]["Dwelling1"].Add("Mbps", new Vector3[]{new Vector3(-2850, 200, 0), new Vector3(-1850, 200, 0), new Vector3(-1850, -150, 0), new Vector3(-2850, -150, 0)});
+        // allPattern[0]["Dwelling1"].Add("Entrance", new Vector3[]{new Vector3(-2850, 1700, 0), new Vector3(-1850, 1700, 0), new Vector3(-1850, 200, 0), new Vector3(-2850, 200, 0)});
+        // allPattern[0]["Dwelling1"].Add("UB", new Vector3[]{new Vector3(-3250, 3650, 0), new Vector3(-1850, 3650, 0), new Vector3(-1850, 1850, 0), new Vector3(-3250, 1850, 0)});
+        // allPattern[0]["Dwelling1"].Add("Washroom", new Vector3[]{new Vector3(-4850, 3650, 0), new Vector3(-3250, 3650, 0), new Vector3(-3250, 2050, 0), new Vector3(-4850, 2050, 0)});
+        // allPattern[0]["Dwelling1"].Add("Toilet", new Vector3[]{new Vector3(-5750, 3650, 0), new Vector3(-4850, 3650, 0), new Vector3(-4850, 2250, 0), new Vector3(-5750, 2250, 0)});
+        // allPattern[0]["Dwelling1"].Add("Kitchen", new Vector3[]{new Vector3(-5250, 550, 0), new Vector3(-2850, 550, 0), new Vector3(-2850, -150, 0), new Vector3(-5250, -150, 0)});
+
         //全パターンの配置結果に洋室を配置
-        //allPattern = cws.PlaceWestern(allPattern);
+        allPattern = cws.PlaceWestern(allPattern);
 
         return allPattern;
     }

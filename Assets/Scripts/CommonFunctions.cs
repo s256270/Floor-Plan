@@ -517,7 +517,7 @@ public class CommonFunctions : MonoBehaviour
         }
             
         //先頭の座標が一番左上になるように座標を並び替える
-        rotatedCoordinates = topArrange(rotatedCoordinates);
+        rotatedCoordinates = TopArrange(rotatedCoordinates);
 
         //return VectorClean(rotatedCoordinates);
         return rotatedCoordinates;
@@ -528,7 +528,7 @@ public class CommonFunctions : MonoBehaviour
     /// </summary> 
     /// <param name="coordinates">並び替えたい座標配列</param>
     /// <returns>並び替えた座標配列</returns>
-    public Vector3[] topArrange(Vector3[] coordinates) {
+    public Vector3[] TopArrange(Vector3[] coordinates) {
         //並べ替えた座標配列
         Vector3[] arrangedCoordinates = new Vector3[coordinates.Length];
 
@@ -569,6 +569,36 @@ public class CommonFunctions : MonoBehaviour
         }
 
         return arrangedCoordinates;
+    }
+
+    /// <summary>
+    /// 要らない座標（頂点を含まない辺上にある座標）を除く
+    /// </summary> 
+    /// <param name="coordinates">調べたい座標配列</param>
+    /// <returns>要らない座標（頂点を含まない辺上にある座標）を除いた座標配列</returns>
+    public Vector3[] RemoveExtraPoint(Vector3[] coordinates) {
+        //要らない座標を除いた座標配列
+        List<Vector3> result = new List<Vector3>();
+
+        //座標配列をリストに変換
+        List<Vector3> coordinatesList = new List<Vector3>(coordinates);
+
+        //それぞれの辺について
+        for (int i = 0; i < coordinatesList.Count; i++) {
+            //調べる辺
+            Vector3[] sideA = new Vector3[]{coordinatesList[(i+1)%coordinatesList.Count], coordinatesList[i]};
+            Vector3[] sideB = new Vector3[]{coordinatesList[(i+1)%coordinatesList.Count], coordinatesList[(i+2)%coordinatesList.Count]};
+
+            //座標配列で連続する2辺の内積を計算
+            if (Vector3.Dot(sideA[1] - sideA[0], sideB[1] - sideB[0]) == - Vector3.Distance(sideA[1], sideA[0]) * Vector3.Distance(sideB[1], sideB[0])) {
+                //座標配列から削除
+                coordinatesList.Remove(sideA[0]);
+                i--;
+            }
+        }
+
+        //リストを配列に変換して返す
+        return coordinatesList.ToArray();
     }
 
     /// <summary>
@@ -637,6 +667,58 @@ public class CommonFunctions : MonoBehaviour
 
         //線分の長さを返す
         return length;
+    }
+
+    /// <summary>
+    /// 多角形のxかy座標の最大値か最小値を求める
+    /// </summary>
+    /// <param name="polygon">多角形の座標</param>
+    /// <param name="axis">x, y座標どちらを求めるか</param>
+    /// <param name="maxOrMin">最大値と最小値どちらを求めるか</param>
+    /// <returns>多角形のxかy座標の最大値か最小値</returns>
+    public float GetMaxOrMin(Vector3[] polygon, string axis, string maxOrMin) {
+        //求める値
+        float value = 0f;
+
+        //求める値を初期化
+        if (axis == "x") {
+            value = polygon[0].x;
+        }
+        else if (axis == "y") {
+            value = polygon[0].y;
+        }
+            
+
+        //最大値か最小値を求める
+        for (int i = 1; i < polygon.Length; i++) {
+            if (axis == "x") {
+                if (maxOrMin == "max") {
+                    if (value < polygon[i].x) {
+                        value = polygon[i].x;
+                    }
+                }
+                else if (maxOrMin == "min") {
+                    if (value > polygon[i].x) {
+                        value = polygon[i].x;
+                    }
+                }
+            
+            }
+            else if (axis == "y") {
+                if (maxOrMin == "max") {
+                    if (value < polygon[i].y) {
+                        value = polygon[i].y;
+                    }
+                }
+                else if (maxOrMin == "min") {
+                    if (value > polygon[i].y) {
+                        value = polygon[i].y;
+                    }
+                }
+            }
+        }
+
+        return value;
     }
     
     /// <summary>

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class CommonFunctionsTest : CommonFunctions
 {
@@ -10,10 +11,16 @@ public class CommonFunctionsTest : CommonFunctions
         //LinePositionRelationTest();
         //ContactCoordinatesTest();
         //ContactJudgeTest();
-        //topArrangeTest();
+        //TopArrangeTest();
         //RotationTest();
         //SideSubstractionTest();
         //OnLineSegmentTest();
+
+        Vector3[] Washroom = new Vector3[] {new Vector3(-5650, 2250, 0), new Vector3(-4250, 2250, 0), new Vector3(-4250, -150, 0), new Vector3(-5150, -150, 0), new Vector3(-5150, 1350, 0), new Vector3(-5650, 1350, 0)};
+        Vector3[] UB = new Vector3[] {new Vector3(-6560, 1650, 0), new Vector3(-5150, 1650, 0), new Vector3(-5150, -150, 0), new Vector3(-6550, -150, 0)};
+
+        Debug.Log(JudgeOutside(UB, Washroom));
+        
     }
 
     /// <summary>
@@ -123,7 +130,7 @@ public class CommonFunctionsTest : CommonFunctions
     /// <summary>
     /// topArrangeの動作テスト
     /// </summary>
-    public void topArrangeTest() {
+    public void TopArrangeTest() {
         // Debug.Log("testcase1");
         // Debug.Log("expect: (-3, 3, 0), result: " + topArrange(new Vector3[] {new Vector3(0, 0, 0), new Vector3(-3, 0, 0), new Vector3(-3, 3, 0), new Vector3(3, 3, 0), new Vector3(3, -5, 0), new Vector3(0, -5, 0)})[0]);
         // Debug.Log("expect: (3, 3, 0), result: " + topArrange(new Vector3[] {new Vector3(0, 0, 0), new Vector3(-3, 0, 0), new Vector3(-3, 3, 0), new Vector3(3, 3, 0), new Vector3(3, -5, 0), new Vector3(0, -5, 0)})[1]);
@@ -133,12 +140,12 @@ public class CommonFunctionsTest : CommonFunctions
         // Debug.Log("expect: (-3, 0, 0), result: " + topArrange(new Vector3[] {new Vector3(0, 0, 0), new Vector3(-3, 0, 0), new Vector3(-3, 3, 0), new Vector3(3, 3, 0), new Vector3(3, -5, 0), new Vector3(0, -5, 0)})[5]);
 
         Debug.Log("testcase2");
-        Debug.Log("expect: (-5, 0, 0), result: " + topArrange(new Vector3[] {new Vector3(3, 3, 0), new Vector3(3, -3, 0), new Vector3(-5, -3, 0), new Vector3(-5, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 3, 0)})[0]);
-        Debug.Log("expect: (0, 0, 0), result: " + topArrange(new Vector3[] {new Vector3(3, 3, 0), new Vector3(3, -3, 0), new Vector3(-5, -3, 0), new Vector3(-5, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 3, 0)})[1]);
-        Debug.Log("expect: (0, 3, 0), result: " + topArrange(new Vector3[] {new Vector3(3, 3, 0), new Vector3(3, -3, 0), new Vector3(-5, -3, 0), new Vector3(-5, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 3, 0)})[2]);
-        Debug.Log("expect: (3, 3, 0), result: " + topArrange(new Vector3[] {new Vector3(3, 3, 0), new Vector3(3, -3, 0), new Vector3(-5, -3, 0), new Vector3(-5, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 3, 0)})[3]);
-        Debug.Log("expect: (3, -3, 0), result: " + topArrange(new Vector3[] {new Vector3(3, 3, 0), new Vector3(3, -3, 0), new Vector3(-5, -3, 0), new Vector3(-5, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 3, 0)})[4]);
-        Debug.Log("expect: (-5, -3, 0), result: " + topArrange(new Vector3[] {new Vector3(3, 3, 0), new Vector3(3, -3, 0), new Vector3(-5, -3, 0), new Vector3(-5, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 3, 0)})[5]);
+        Debug.Log("expect: (-5, 0, 0), result: " + TopArrange(new Vector3[] {new Vector3(3, 3, 0), new Vector3(3, -3, 0), new Vector3(-5, -3, 0), new Vector3(-5, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 3, 0)})[0]);
+        Debug.Log("expect: (0, 0, 0), result: " + TopArrange(new Vector3[] {new Vector3(3, 3, 0), new Vector3(3, -3, 0), new Vector3(-5, -3, 0), new Vector3(-5, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 3, 0)})[1]);
+        Debug.Log("expect: (0, 3, 0), result: " + TopArrange(new Vector3[] {new Vector3(3, 3, 0), new Vector3(3, -3, 0), new Vector3(-5, -3, 0), new Vector3(-5, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 3, 0)})[2]);
+        Debug.Log("expect: (3, 3, 0), result: " + TopArrange(new Vector3[] {new Vector3(3, 3, 0), new Vector3(3, -3, 0), new Vector3(-5, -3, 0), new Vector3(-5, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 3, 0)})[3]);
+        Debug.Log("expect: (3, -3, 0), result: " + TopArrange(new Vector3[] {new Vector3(3, 3, 0), new Vector3(3, -3, 0), new Vector3(-5, -3, 0), new Vector3(-5, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 3, 0)})[4]);
+        Debug.Log("expect: (-5, -3, 0), result: " + TopArrange(new Vector3[] {new Vector3(3, 3, 0), new Vector3(3, -3, 0), new Vector3(-5, -3, 0), new Vector3(-5, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 3, 0)})[5]);
     }
 
     /// <summary>
