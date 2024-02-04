@@ -17,16 +17,11 @@ public class Main : MonoBehaviour
 
     void Start()
     {
-        //部屋を配置
+        //間取図を作成
         allPattern = fp.Placement();
 
-        //allPattern.Add(pr.plan);
-
-        //重複を削除
-        //allPattern = RemoveDuplicates(allPattern);
-
         //間取図を評価  
-        //allPattern = ev.EvaluateFloorPlan(allPattern);
+        allPattern = ev.EvaluateFloorPlan(allPattern);
 
         limit = allPattern.Count;
         Debug.Log("総パターン数：" + limit);

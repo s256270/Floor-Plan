@@ -30,7 +30,7 @@ public class CreateWestern : MonoBehaviour
 
         //各パターンについて配置
         for (int i = 0; i < allPattern.Count; i++) {
-            Debug.Log("i: " + i);
+            //Debug.Log("i: " + i);
             foreach (KeyValuePair<string, Dictionary<string, Vector3[]>> planParts in allPattern[i]) {
                 //住戸オブジェクトに配置していく
                 if (planParts.Key.Contains("Dwelling1")) {
