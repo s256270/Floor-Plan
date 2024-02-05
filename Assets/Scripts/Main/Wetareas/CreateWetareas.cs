@@ -328,10 +328,10 @@ public class CreateWetareas : MonoBehaviour
 
                 //entranceToHallwayLength×900の長方形が入るかを判定
                 //判定するための長方形の座標
-                Vector3[] JudgeSquare = new Vector3[4];
+                Vector3[] judgeSquare = new Vector3[4];
                 //配置する辺がy軸に平行なとき
                 if (cf.Slope(actEntranceToHallway) == Mathf.Infinity) {
-                    JudgeSquare = new Vector3[]{new Vector3(-450, entranceToHallwayLength/2, 0), new Vector3(450, entranceToHallwayLength/2, 0), new Vector3(450, -entranceToHallwayLength/2, 0), new Vector3(-450, -entranceToHallwayLength/2, 0)};
+                    judgeSquare = new Vector3[]{new Vector3(-450, entranceToHallwayLength/2, 0), new Vector3(450, entranceToHallwayLength/2, 0), new Vector3(450, -entranceToHallwayLength/2, 0), new Vector3(-450, -entranceToHallwayLength/2, 0)};
 
                     //動かす方向
                     int wetareasShiftDirection = cf.ShiftJudge(range, actEntranceToHallway);
@@ -339,16 +339,16 @@ public class CreateWetareas : MonoBehaviour
                     //x座標・y座標の移動
                     //部屋を辺の左側にするとき
                     if (wetareasShiftDirection < 0) {
-                        JudgeSquare = cf.CorrectCoordinates(JudgeSquare, new Vector3(actEntranceToHallway[0].x - 450, (actEntranceToHallway[0].y + actEntranceToHallway[1].y)/2, 0));
+                        judgeSquare = cf.CorrectCoordinates(judgeSquare, new Vector3(actEntranceToHallway[0].x - 450, (actEntranceToHallway[0].y + actEntranceToHallway[1].y)/2, 0));
                     }
                     //部屋を辺の右側にするとき
                     else if (wetareasShiftDirection > 0) {
-                        JudgeSquare = cf.CorrectCoordinates(JudgeSquare, new Vector3(actEntranceToHallway[0].x + 450, (actEntranceToHallway[0].y + actEntranceToHallway[1].y)/2, 0));
+                        judgeSquare = cf.CorrectCoordinates(judgeSquare, new Vector3(actEntranceToHallway[0].x + 450, (actEntranceToHallway[0].y + actEntranceToHallway[1].y)/2, 0));
                     }
                 }
                 //配置する辺がx軸に平行なとき
                 else {
-                    JudgeSquare = new Vector3[]{new Vector3(-entranceToHallwayLength/2, 450, 0), new Vector3(entranceToHallwayLength/2, 450, 0), new Vector3(entranceToHallwayLength/2, -450, 0), new Vector3(-entranceToHallwayLength/2, -450, 0)};
+                    judgeSquare = new Vector3[]{new Vector3(-entranceToHallwayLength/2, 450, 0), new Vector3(entranceToHallwayLength/2, 450, 0), new Vector3(entranceToHallwayLength/2, -450, 0), new Vector3(-entranceToHallwayLength/2, -450, 0)};
 
                     //動かす方向
                     int wetareasShiftDirection = cf.ShiftJudge(range, actEntranceToHallway);
@@ -356,25 +356,25 @@ public class CreateWetareas : MonoBehaviour
                     //x座標・y座標の移動
                     //部屋を辺の上側にするとき
                     if (wetareasShiftDirection > 0) {
-                        JudgeSquare = cf.CorrectCoordinates(JudgeSquare, new Vector3((actEntranceToHallway[0].x + actEntranceToHallway[1].x)/2, actEntranceToHallway[0].y + 450, 0));
+                        judgeSquare = cf.CorrectCoordinates(judgeSquare, new Vector3((actEntranceToHallway[0].x + actEntranceToHallway[1].x)/2, actEntranceToHallway[0].y + 450, 0));
                     }
                     //部屋を辺の下側にするとき
                     else if (wetareasShiftDirection < 0) {
-                        JudgeSquare = cf.CorrectCoordinates(JudgeSquare, new Vector3((actEntranceToHallway[0].x + actEntranceToHallway[1].x)/2, actEntranceToHallway[0].y - 450, 0));
+                        judgeSquare = cf.CorrectCoordinates(judgeSquare, new Vector3((actEntranceToHallway[0].x + actEntranceToHallway[1].x)/2, actEntranceToHallway[0].y - 450, 0));
                     }
                 }
 
                 //配置された水回りの部屋について
                 foreach (Vector3[] wetareasRooom in currentResult[j].Values) {
                     //判定するための長方形の外側にないとき
-                    if (!cf.JudgeOutside(JudgeSquare, wetareasRooom)) {
+                    if (!cf.JudgeOutside(judgeSquare, wetareasRooom)) {
                         //その配置結果を除く
                         currentResult.RemoveAt(j);
                         j--;
                         //次の配置結果へ
                         break;
                     }
-                    if (!cf.JudgeOutside(wetareasRooom, JudgeSquare)) {
+                    if (!cf.JudgeOutside(wetareasRooom, judgeSquare)) {
                         //その配置結果を除く
                         currentResult.RemoveAt(j);
                         j--;
