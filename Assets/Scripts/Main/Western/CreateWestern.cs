@@ -714,14 +714,19 @@ public class CreateWestern : MonoBehaviour
                         continue;
                     }
 
+                    //調べる長方形が水回り範囲の内側にないとき
+                    if (!cf.JudgeInside(range, judgeSquare)) {
+                        flag = false;
+                        return flag;
+                    }
                     //調べる長方形が他の部屋の外側にないとき
                     if (!cf.JudgeOutside(surroundingRoom.Value, judgeSquare)) {
-                        flag = true;
+                        flag = false;
                         return flag;
                     }
                     //他の部屋が調べる長方形外側にないとき
                     if (!cf.JudgeOutside(judgeSquare, surroundingRoom.Value)) {
-                        flag = true;
+                        flag = false;
                         return flag;
                     }
                 }
