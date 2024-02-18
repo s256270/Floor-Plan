@@ -34,14 +34,31 @@ public class CreateWetareas : MonoBehaviour
         var result = new List<Dictionary<string, Dictionary<string, Vector3[]>>>();
 
         //各パターンについて配置
-        for (int i = 0; i < allPattern.Count; i++) {
-            if (!(i % 6 == 0)) {
-                continue;
-            }
+        for (int i = 0; i < 1/*allPattern.Count*/; i++) {
+            //住戸1のとき
+            // if (!(i % 6 == 0)) {
+            //     continue;
+            // }
+
+            //住戸2のとき
+            // if (!(i == 0 || i == 3)) {
+            //     continue;
+            // }
+
+            // //住戸3のとき(パターンが少ない)
+            // if (!(i == 0 || i == 1 || i == 2)) {
+            //     continue;
+            // }
+
+            //住戸4のとき
+            // if (!(i == 0)) {
+            //     continue;
+            // }
+
             //Debug.Log("i: " + i);
             foreach (KeyValuePair<string, Dictionary<string, Vector3[]>> planParts in allPattern[i]) {
                 //住戸オブジェクトに配置していく
-                if (planParts.Key.Contains("Dwelling1")) {
+                if (planParts.Key.Contains("Dwelling4")) {
                     //必要な座標の準備
                     //住戸の座標を取得
                     dwelling = planParts.Value["1K"];
@@ -56,8 +73,14 @@ public class CreateWetareas : MonoBehaviour
                     mbps = planParts.Value["Mbps"];
 
                     //配置範囲の座標を作成
-                    range = FrameChange(dwelling, entrance);
-                    range = FrameChange(range, mbps);
+                    range = FrameChange(dwelling, mbps);
+                    //cf.CreateRoom("range", range);
+                    range = FrameChange(range, entrance);
+
+                    //cf.CreateRoom("range", range);
+
+                    // cf.CreateRoom("dwelling", dwelling);
+                    // cf.CreateRoom("range", range);
 
                     //水回りを配置したリストを作成
                     List<Dictionary<string, Vector3[]>> placeWetareasResult = MakeWetareasAddList(new int[]{0, 1, 2, 3});
@@ -134,6 +157,7 @@ public class CreateWetareas : MonoBehaviour
 
             //2つの領域に配置
             for (int j = 0; j < areaToPlaceWetareas[i].Count; j++) {
+                //cf.CreateRoom("areaToPlaceWetareas", areaToPlaceWetareas[i][j]);
                 //配置結果をリストに追加
                 currentResult.AddRange(PlaceWetareasOneArea(currentResult, areaToPlaceWetareas[i][j], wetareasPermutation, rotationPattern));
             }
@@ -331,7 +355,7 @@ public class CreateWetareas : MonoBehaviour
                 Vector3[] judgeSquare = new Vector3[4];
                 //配置する辺がy軸に平行なとき
                 if (cf.Slope(actEntranceToHallway) == Mathf.Infinity) {
-                    judgeSquare = new Vector3[]{new Vector3(-450, entranceToHallwayLength/2, 0), new Vector3(450, entranceToHallwayLength/2, 0), new Vector3(450, -entranceToHallwayLength/2, 0), new Vector3(-450, -entranceToHallwayLength/2, 0)};
+                    judgeSquare = new Vector3[]{new Vector3(-550, entranceToHallwayLength/2, 0), new Vector3(550, entranceToHallwayLength/2, 0), new Vector3(550, -entranceToHallwayLength/2, 0), new Vector3(-550, -entranceToHallwayLength/2, 0)};
 
                     //動かす方向
                     int wetareasShiftDirection = cf.ShiftJudge(range, actEntranceToHallway);
@@ -339,11 +363,11 @@ public class CreateWetareas : MonoBehaviour
                     //x座標・y座標の移動
                     //部屋を辺の左側にするとき
                     if (wetareasShiftDirection < 0) {
-                        judgeSquare = cf.CorrectCoordinates(judgeSquare, new Vector3(actEntranceToHallway[0].x - 450, (actEntranceToHallway[0].y + actEntranceToHallway[1].y)/2, 0));
+                        judgeSquare = cf.CorrectCoordinates(judgeSquare, new Vector3(actEntranceToHallway[0].x - 550, (actEntranceToHallway[0].y + actEntranceToHallway[1].y)/2, 0));
                     }
                     //部屋を辺の右側にするとき
                     else if (wetareasShiftDirection > 0) {
-                        judgeSquare = cf.CorrectCoordinates(judgeSquare, new Vector3(actEntranceToHallway[0].x + 450, (actEntranceToHallway[0].y + actEntranceToHallway[1].y)/2, 0));
+                        judgeSquare = cf.CorrectCoordinates(judgeSquare, new Vector3(actEntranceToHallway[0].x + 550, (actEntranceToHallway[0].y + actEntranceToHallway[1].y)/2, 0));
                     }
                 }
                 //配置する辺がx軸に平行なとき
@@ -486,6 +510,16 @@ public class CreateWetareas : MonoBehaviour
 
         //洋室の廊下に続く辺を決める
         List<Vector3[]> westernSide = cf.ContactCoordinates(balcony, range);
+        //最も長い辺を廊下に続く辺とする
+        float westernSideLength = cf.GetLength(westernSide[0]);
+        int westernSideIndex = 0;
+        for (int i = 1; i < westernSide.Count; i++) {
+            if (westernSideLength < cf.GetLength(westernSide[i])) {
+                westernSideLength = cf.GetLength(westernSide[i]);
+                westernSideIndex = i;
+            }
+        }
+        westernSide = new List<Vector3[]>{westernSide[westernSideIndex]};
 
         //玄関の廊下に続く辺について
         for (int i = 0; i < entranceSide.Count; i++) {
@@ -502,6 +536,7 @@ public class CreateWetareas : MonoBehaviour
 
                 //辺1を通るように切る
                 List<Vector3[]> wetareas1Candidates = Slice(range, hallwaySide1);
+
                 //辺1で分割したそれぞれの領域について
                 for (int k = 0; k < wetareas1Candidates.Count; k++) {
                     //wetareasに領域が1つあるとき
@@ -520,14 +555,16 @@ public class CreateWetareas : MonoBehaviour
                         //辺2のもう一方の端点が含まれていないとき
                         else {
                             //玄関から洋室へつながる辺を変更
-                            hallwaySide1 = new Vector3[]{entranceSide[k][0], westernSide[k][1]};
-                            hallwaySide2 = new Vector3[]{entranceSide[k][1], westernSide[k][0]};
+                            hallwaySide1 = new Vector3[]{entranceSide[i][0], westernSide[j][1]};
+                            hallwaySide2 = new Vector3[]{entranceSide[i][1], westernSide[j][0]};
+                            //hallwaySide1 = new Vector3[]{entranceSide[k][0], westernSide[k][1]};
+                            //hallwaySide2 = new Vector3[]{entranceSide[k][1], westernSide[k][0]};
 
                             //辺1を通るように切る
                             wetareas1Candidates = Slice(range, hallwaySide1);
 
                             //辺1で分割したそれぞれの領域について
-                            for (int l = 0; j < wetareas1Candidates.Count; l++) {
+                            for (int l = 0; l < wetareas1Candidates.Count; l++) {
                                 //片方の領域に辺2のある端点が含まれているとき
                                 if (cf.OnPolyogon(wetareas1Candidates[l], hallwaySide2[0])) {
                                     //もう一方の領域を水回りを配置する領域のリストに追加
@@ -1333,6 +1370,22 @@ public class CreateWetareas : MonoBehaviour
 
         //外側の頂点と内側の頂点をくっつける
         if (needInside.Count != 0) {
+            //endCoodinatesのミスを無理やり修正
+            //newOuterに斜めの辺が含まれるとき
+            for (int i = 0; i < newOuter.Count; i++) {
+                //newOuterの辺
+                Vector3[] newOuterSide = new Vector3[]{newOuter[i], newOuter[(i+1)%newOuter.Count]};
+                if (cf.Slope(newOuterSide) != 0.0f && cf.Slope(newOuterSide) != Mathf.Infinity) {
+                    if (newOuter[i] == startCoordinates) {
+                        endCoordinates = newOuter[(i+1)%newOuter.Count];
+                    }
+                    else if (newOuter[(i+1)%newOuter.Count] == startCoordinates) {
+                        endCoordinates = newOuter[i];
+                    }
+                    break;
+                }
+            }
+
             int outside_end_index = newOuter.IndexOf(endCoordinates);
             newOuter.InsertRange(outside_end_index, needInside);
         }

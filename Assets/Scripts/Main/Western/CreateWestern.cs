@@ -48,8 +48,10 @@ public class CreateWestern : MonoBehaviour
                     mbps = planParts.Value["Mbps"];
 
                     //配置範囲の座標を作成
-                    range = FrameChange(dwelling, entrance);
-                    range = FrameChange(range, mbps);
+                    range = FrameChange(dwelling, mbps);
+                    range = FrameChange(range, entrance);
+
+                    //cf.CreateRoom("range", range);
 
                     //水回りの部屋のみの辞書を作成
                     //水回りの部屋のみの辞書
@@ -63,6 +65,7 @@ public class CreateWestern : MonoBehaviour
 
                         //辞書に追加
                         wetareasPattern.Add(planPartsElements.Key, planPartsElements.Value);
+                        //cf.CreateRoom(planPartsElements.Key, planPartsElements.Value);
                     }
 
                     //洋室の座標を決定
@@ -109,6 +112,20 @@ public class CreateWestern : MonoBehaviour
         foreach (KeyValuePair<string, Vector3[]> wetareasRoom in wetareasPattern) {
             //水回りの範囲から水回りの部屋を除く
             westernRange = FrameChange(westernRange, wetareasRoom.Value);
+            //cf.CreateRoom("westernRange", westernRange);
+        }
+
+        //緊急措置
+        //westernRangeに斜めの辺が含まれるとき洋室を配置しない
+        for (int i = 0; i < westernRange.Length; i++) {
+            //配置範囲の辺
+            Vector3[] westernRangeSide = new Vector3[]{westernRange[i], westernRange[(i+1)%westernRange.Length]};
+            //配置範囲の辺が斜めのとき
+            if (cf.Slope(westernRangeSide) != 0.0f && cf.Slope(westernRangeSide) != Mathf.Infinity) {
+                //Debug.Log("斜めの辺が含まれるため洋室を配置しません");
+                //終了
+                return result;
+            }
         }
 
         //配置する範囲とバルコニーが接する辺を求める
@@ -136,6 +153,7 @@ public class CreateWestern : MonoBehaviour
 
         //洋室の限界
         float limit = 0.0f;
+        int conditionalExpressionContoroler = 1;
         //洋室の基準
         float nearestWetareasCoordinates = 0.0f;
         //洋室の移動単位
@@ -166,13 +184,14 @@ public class CreateWestern : MonoBehaviour
             //基準となる辺が右側にあるとき
             else {
                 limit = min;
+                conditionalExpressionContoroler = -1;
 
                 //最も洋室と近くなる水回りの部屋を求める
                 //座標の初期化
                 nearestWetareasCoordinates = cf.GetMaxOrMin(wetareasPattern["UB"], "x", "max");
                 //最も洋室と近くなる水回りの部屋の座標を求める
                 foreach (KeyValuePair<string, Vector3[]> wetareasRoom in wetareasPattern) {
-                    if (nearestWetareasCoordinates > cf.GetMaxOrMin(wetareasRoom.Value, "x", "max")) {
+                    if (nearestWetareasCoordinates < cf.GetMaxOrMin(wetareasRoom.Value, "x", "max")) {
                         nearestWetareasCoordinates = cf.GetMaxOrMin(wetareasRoom.Value, "x", "max");
                     }
                 }
@@ -182,13 +201,13 @@ public class CreateWestern : MonoBehaviour
             }
 
             //基準となる辺が元の基準となる辺に近すぎるとき
-            if (nearestWetareasCoordinates - westernStandardSide[0].x < 2000.0f) {
-                //終了
-                return result;
-            }
+            // if (nearestWetareasCoordinates - westernStandardSide[0].x < 2000.0f) {
+            //     //終了
+            //     return result;
+            // }
 
             //基準となる辺からlimit方向へ動かして洋室範囲を決定
-            for (float x = nearestWetareasCoordinates; x <= limit; x += unitLength) {
+            for (float x = nearestWetareasCoordinates; conditionalExpressionContoroler * x <= conditionalExpressionContoroler * limit; x += unitLength) {
                 //Debug.Log("x: " + x);
                 //配置範囲との交点を求める
                 //切り取るための交点の候補
@@ -243,7 +262,8 @@ public class CreateWestern : MonoBehaviour
 
                     //交点の座標が含まれる方を洋室の座標とする
                     for (int k = 0; k < westernCoordinatesCandidate.Count; k++) {
-                        if (cf.OnPolyogon(westernCoordinatesCandidate[k], intersection[j][0]) && cf.OnPolyogon(westernCoordinatesCandidate[k], intersection[j][1])) {
+                        //if (cf.OnPolyogon(westernCoordinatesCandidate[k], intersection[j][0]) && cf.OnPolyogon(westernCoordinatesCandidate[k], intersection[j][1])) {nearestWetareasCoordinates
+                        if (cf.OnPolyogon(westernCoordinatesCandidate[k], westernStandardSide)) {
                             westernCoordinates = westernCoordinatesCandidate[k];
                             break;
                         }
@@ -316,7 +336,7 @@ public class CreateWestern : MonoBehaviour
 
                 unitLength = 10.0f;
             }
-            //基準となる辺が右側にあるとき
+            //基準となる辺が上側にあるとき
             else {
                 limit = min;
 
@@ -395,7 +415,8 @@ public class CreateWestern : MonoBehaviour
 
                     //交点の座標が含まれる方を洋室の座標とする
                     for (int k = 0; k < westernCoordinatesCandidate.Count; k++) {
-                        if (cf.OnPolyogon(westernCoordinatesCandidate[k], intersection[j][0]) && cf.OnPolyogon(westernCoordinatesCandidate[k], intersection[j][1])) {
+                        //if (cf.OnPolyogon(westernCoordinatesCandidate[k], intersection[j][0]) && cf.OnPolyogon(westernCoordinatesCandidate[k], intersection[j][1])) {
+                        if (cf.OnPolyogon(westernCoordinatesCandidate[k], westernStandardSide)) {
                             westernCoordinates = westernCoordinatesCandidate[k];
                             break;
                         }
@@ -423,9 +444,12 @@ public class CreateWestern : MonoBehaviour
 
                     //部屋の入口を封鎖するとき
                     if (!SecureNecessarySide(currentRoom.Key, currentPattern)) {
-                        //洋室が小さすぎないかを確認
-                        if (cf.GetMaxOrMin(result, "y", "max") - cf.GetMaxOrMin(result, "y", "min") < 2700.0f) {
-                            result = new Vector3[0];
+                        //resultが空でないとき
+                        if (result.Length > 0) {
+                            //洋室が小さすぎないかを確認
+                            if (cf.GetMaxOrMin(result, "y", "max") - cf.GetMaxOrMin(result, "y", "min") < 2700.0f) {
+                                result = new Vector3[0];
+                            }
                         }
 
                         //終了
@@ -889,7 +913,6 @@ public class CreateWestern : MonoBehaviour
         //外側の部屋の必要な座標を追加
         //外側の部屋の辺をひとつずつ確認
         for (int i = 0; i < outside.Length; i++) {
-            //Vector3[] contactCoordinates = cf.ContactCoordinates(new Vector3[]{outside[i], outside[(i+1)%outside.Length]}, inside)[0];
 
             //内側の部屋と接していない場合
             if (!cf.ContactJudge(new Vector3[]{outside[i], outside[(i+1)%outside.Length]}, inside)) {
@@ -899,7 +922,6 @@ public class CreateWestern : MonoBehaviour
             else {
                 //接している辺の組み合わせを探す
                 for (int j = 0; j < inside.Length; j++) {
-                    //contactCoordinates = cf.ContactCoordinates(new Vector3[]{outside[i], outside[(i+1)%outside.Length]}, new Vector3[]{inside[j], inside[(j+1)%inside.Length]})[0];
 
                     //接していない辺の組み合わせの場合
                     if (!cf.ContactJudge(new Vector3[]{outside[i], outside[(i+1)%outside.Length]}, new Vector3[]{inside[j], inside[(j+1)%inside.Length]})) {
@@ -1008,6 +1030,22 @@ public class CreateWestern : MonoBehaviour
 
         //外側の頂点と内側の頂点をくっつける
         if (needInside.Count != 0) {
+            //endCoodinatesのミスを無理やり修正
+            //newOuterに斜めの辺が含まれるとき
+            for (int i = 0; i < newOuter.Count; i++) {
+                //newOuterの辺
+                Vector3[] newOuterSide = new Vector3[]{newOuter[i], newOuter[(i+1)%newOuter.Count]};
+                if (cf.Slope(newOuterSide) != 0.0f && cf.Slope(newOuterSide) != Mathf.Infinity) {
+                    if (newOuter[i] == startCoordinates) {
+                        endCoordinates = newOuter[(i+1)%newOuter.Count];
+                    }
+                    else if (newOuter[(i+1)%newOuter.Count] == startCoordinates) {
+                        endCoordinates = newOuter[i];
+                    }
+                    break;
+                }
+            }
+
             int outside_end_index = newOuter.IndexOf(endCoordinates);
             newOuter.InsertRange(outside_end_index, needInside);
         }

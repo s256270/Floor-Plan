@@ -26,10 +26,65 @@ public class FloorPlanner : CreateRoom
         allPattern.Add(pr.plan);
 
         //全パターンの配置結果にMBPSを配置
-        allPattern = cm.PlaceMbps(allPattern);
+        //allPattern = cm.PlaceMbps(allPattern);
 
         //全パターンの配置結果に玄関を配置
-        allPattern = ce.PlaceEntrance(allPattern);
+        //allPattern = ce.PlaceEntrance(allPattern);
+
+        //テスト用
+        // allPattern.Add(new Dictionary<string, Dictionary<string, Vector3[]>>(){
+        //     {
+        //         "Dwelling1",
+        //         new Dictionary<string, Vector3[]>(){
+        //             {
+        //                 "1K",
+        //                 new Vector3[]{
+        //                     new Vector3(-2250, 3550, 0),
+        //                     new Vector3(2250, 3550, 0),
+        //                     new Vector3(2250, -3550, 0),
+        //                     new Vector3(750, -3550, 0),
+        //                     new Vector3(750, -2350, 0),
+        //                     new Vector3(-2250, -2350, 0)
+        //                 }
+        //             },
+
+        //             {
+        //                 "Balcony",
+        //                 new Vector3[]{
+        //                     new Vector3(-2250, -2350, 0),
+        //                     new Vector3(750, -2350, 0),
+        //                     new Vector3(750, -3550, 0),
+        //                     new Vector3(-2250, -3550, 0)
+        //                 }
+        //             }
+        //         }
+        //     }
+        // });
+        // allPattern[0]["Dwelling1"].Add("Mbps", new Vector3[]{
+        //     new Vector3(-2250, 3550, 0),
+        //     new Vector3(-1150, 3550, 0),
+        //     new Vector3(-1150, 3200, 0),
+        //     new Vector3(-2250, 3200, 0)
+        // });
+        // allPattern[0]["Dwelling1"].Add("Entrance", new Vector3[]{
+        //     new Vector3(-2250, 3200, 0),
+        //     new Vector3(-1150, 3200, 0),
+        //     new Vector3(-1150, 2050, 0),
+        //     new Vector3(-2250, 2050, 0)
+        // });
+
+        // allPattern[0]["Dwelling2"].Add("Mbps", new Vector3[]{
+        //     new Vector3(-150, 2900, 0),
+        //     new Vector3(200, 2900, 0),
+        //     new Vector3(200, 1800, 0),
+        //     new Vector3(-150, 1800, 0)
+        // });
+        // allPattern[0]["Dwelling2"].Add("Entrance", new Vector3[]{
+        //     new Vector3(200, 2900, 0),
+        //     new Vector3(1350, 2900, 0),
+        //     new Vector3(1350, 1800, 0),
+        //     new Vector3(200, 1800, 0)
+        // });
 
         //全パターンの配置結果に水回りの部屋を配置
         allPattern = cwa.PlaceWetareas(allPattern);

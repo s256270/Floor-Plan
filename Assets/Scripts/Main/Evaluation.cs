@@ -133,6 +133,9 @@ public class Evaluation : CreateRoom
         //評価指標のリストをもとにパターンを絞る
         //全パターンのリストのうち，前からselectedNum個を選択
         int selectedNum = 20;
+        if (selectedNum > sortedAllPattern.Count) {
+            selectedNum = sortedAllPattern.Count;
+        }
         //selectedNum = sortedAllPattern.Count; //全パターンを選択
         for (int i = 0; i < selectedNum; i++) {
             result.Add(sortedAllPattern[i]);

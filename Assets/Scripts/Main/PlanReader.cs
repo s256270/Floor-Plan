@@ -77,7 +77,6 @@ public class PlanReader : MonoBehaviour
             }
         },
 
-
         //住戸3
         {
             "Dwelling3",
@@ -136,6 +135,282 @@ public class PlanReader : MonoBehaviour
             }
         }
     };
+
+    // public Dictionary<string, Dictionary<string, Vector3[]>> plan = new Dictionary<string, Dictionary<string, Vector3[]>>() {
+    //     //階段室
+    //     {
+    //         "Stairs",
+    //         new Dictionary<string, Vector3[]>() {
+    //             {
+    //                 "Stairs",
+    //                 new Vector3[]{
+    //                     new Vector3(-1650, 1800, 0),
+    //                     new Vector3(1350, 1800, 0),
+    //                     new Vector3(1350, -4200, 0),
+    //                     new Vector3(-1650, -4200, 0)
+                        
+    //                 }
+    //             }
+    //         }
+    //     },
+
+    //     //住戸1
+    //     {
+    //         "Dwelling1",
+    //         new Dictionary<string, Vector3[]>() {
+    //             {
+    //                 "1K",
+    //                 new Vector3[]{
+    //                     new Vector3(-6950, 6300, 0),
+    //                     new Vector3(-150, 6300, 0),
+    //                     new Vector3(-150, 1800, 0),
+    //                     new Vector3(-6950, 1800, 0)
+    //                 }
+    //             },
+
+    //             {
+    //                 "Balcony",
+    //                 new Vector3[]{
+    //                     new Vector3(-6950, 1800, 0),
+    //                     new Vector3(-5750, 1800, 0),
+    //                     new Vector3(-5750, -1200, 0),
+    //                     new Vector3(-6950, -1200, 0)
+    //                 }
+    //             }
+    //         }
+    //     },
+
+    //     //住戸2
+    //     {
+    //         "Dwelling2",
+    //         new Dictionary<string, Vector3[]>() {
+    //             {
+    //                 "1K",
+    //                 new Vector3[]{
+    //                     new Vector3(-150, 6300, 0),
+    //                     new Vector3(6950, 6300, 0),
+    //                     new Vector3(6950, 4800, 0),
+    //                     new Vector3(5750, 4800, 0),
+    //                     new Vector3(5750, 1800, 0),
+    //                     new Vector3(-150, 1800, 0)
+    //                 }
+    //             },
+
+    //             {
+    //                 "Balcony",
+    //                 new Vector3[]{
+    //                     new Vector3(5750, 4800, 0),
+    //                     new Vector3(6950, 4800, 0),
+    //                     new Vector3(6950, 1800, 0),
+    //                     new Vector3(5750, 1800, 0)
+    //                 }
+    //             }
+    //         }
+    //     },
+
+
+    //     //住戸3
+    //     {
+    //         "Dwelling3",
+    //         new Dictionary<string, Vector3[]>() {
+    //             {
+    //                 "1K",
+    //                 new Vector3[]{
+    //                     new Vector3(-5750, 1800, 0),
+    //                     new Vector3(-1650, 1800, 0),
+    //                     new Vector3(-1650, -5100, 0),
+    //                     new Vector3(-5750, -5100, 0)
+    //                 }
+    //             },
+
+    //             {
+    //                 "Balcony",
+    //                 new Vector3[]{
+    //                     new Vector3(-4650, -5100, 0),
+    //                     new Vector3(-1650, -5100, 0),
+    //                     new Vector3(-1650, -6300, 0),
+    //                     new Vector3(-4650, -6300, 0)
+    //                 }
+    //             }
+    //         }
+    //     },
+
+    //     //住戸4
+    //     {
+    //         "Dwelling4",
+    //         new Dictionary<string, Vector3[]>() {
+    //             {
+    //                 "1K",
+    //                 new Vector3[]{
+    //                     new Vector3(1350, 1800, 0),
+    //                     new Vector3(5750, 1800, 0),
+    //                     new Vector3(5750, -1200, 0),
+    //                     new Vector3(6950, -1200, 0),
+    //                     new Vector3(6950, -4200, 0),
+    //                     new Vector3(1350, -4200, 0)
+    //                 }
+    //             },
+
+    //             {
+    //                 "Balcony",
+    //                 new Vector3[]{
+    //                     new Vector3(5750, 1800, 0),
+    //                     new Vector3(6950, 1800, 0),
+    //                     new Vector3(6950, -1200, 0),
+    //                     new Vector3(5750, -1200, 0)
+    //                 }
+    //             }
+    //         }
+    //     }
+    // };
+
+    // public Dictionary<string, Dictionary<string, Vector3[]>> plan = new Dictionary<string, Dictionary<string, Vector3[]>>() {
+    //     //階段室
+    //     {
+    //         "Stairs",
+    //         new Dictionary<string, Vector3[]>() {
+    //             {
+    //                 "Stairs",
+    //                 new Vector3[]{
+    //                     new Vector3(-4200, 1650, 0),
+    //                     new Vector3(1800, 1650, 0),
+    //                     new Vector3(1800, -1350, 0),
+    //                     new Vector3(-4200, -1350, 0)
+                        
+    //                 }
+    //             }
+    //         }
+    //     },
+
+    //     //住戸1
+    //     {
+    //         "Dwelling1",
+    //         new Dictionary<string, Vector3[]>() {
+    //             {
+    //                 "1K",
+    //                 new Vector3[]{
+    //                     new Vector3(-5100, 5750, 0),
+    //                     new Vector3(1800, 5750, 0),
+    //                     new Vector3(1800, 1650, 0),
+    //                     new Vector3(-5100, 1650, 0)
+    //                 }
+    //             },
+
+    //             {
+    //                 "Balcony",
+    //                 new Vector3[]{
+    //                     new Vector3(-6300, 4650, 0),
+    //                     new Vector3(-5100, 4650, 0),
+    //                     new Vector3(-5100, 1650, 0),
+    //                     new Vector3(-6300, 1650, 0)
+    //                 }
+    //             }
+    //         }
+    //     },
+
+    //     //住戸2
+    //     {
+    //         "Dwelling2",
+    //         new Dictionary<string, Vector3[]>() {
+    //             {
+    //                 "1K",
+    //                 new Vector3[]{
+    //                     new Vector3(1800, 6950, 0),
+    //                     new Vector3(6300, 6950, 0),
+    //                     new Vector3(6300, 150, 0),
+    //                     new Vector3(1800, 150, 0)
+    //                 }
+    //             },
+
+    //             {
+    //                 "Balcony",
+    //                 new Vector3[]{
+    //                     new Vector3(-1200, 6950, 0),
+    //                     new Vector3(1800, 6950, 0),
+    //                     new Vector3(1800, 5750, 0),
+    //                     new Vector3(-1200, 5750, 0)
+    //                 }
+    //             }
+    //         }
+    //     },
+
+
+    //     //住戸3
+    //     {
+    //         "Dwelling3",
+    //         new Dictionary<string, Vector3[]>() {
+    //             {
+    //                 "1K",
+    //                 new Vector3[]{
+    //                     new Vector3(-4200, -1350, 0),
+    //                     new Vector3(1800, -1350, 0),
+    //                     new Vector3(1800, -5750, 0),
+    //                     new Vector3(-1200, -5750, 0),
+    //                     new Vector3(-1200, -6950, 0),
+    //                     new Vector3(-4200, -6950, 0)
+    //                 }
+    //             },
+
+    //             {
+    //                 "Balcony",
+    //                 new Vector3[]{
+    //                     new Vector3(-1200, -5750, 0),
+    //                     new Vector3(1800, -5750, 0),
+    //                     new Vector3(1800, -6950, 0),
+    //                     new Vector3(-1200, -6950, 0)
+    //                 }
+    //             }
+    //         }
+    //     },
+
+    //     //住戸4
+    //     {
+    //         "Dwelling4",
+    //         new Dictionary<string, Vector3[]>() {
+    //             {
+    //                 "1K",
+    //                 new Vector3[]{
+    //                     new Vector3(1800, 150, 0),
+    //                     new Vector3(6300, 150, 0),
+    //                     new Vector3(6300, -6950, 0),
+    //                     new Vector3(4800, -6950, 0),
+    //                     new Vector3(4800, -5750, 0),
+    //                     new Vector3(1800, -5750, 0)
+    //                 }
+    //             },
+
+    //             {
+    //                 "Balcony",
+    //                 new Vector3[]{
+    //                     new Vector3(1800, -5750, 0),
+    //                     new Vector3(4800, -5750, 0),
+    //                     new Vector3(4800, -6950, 0),
+    //                     new Vector3(1800, -6950, 0)
+    //                 }
+    //             },
+
+    //             {
+    //                 "Mbps",
+    //                 new Vector3[]{
+    //                     new Vector3(1800, 150, 0),
+    //                     new Vector3(2900, 150, 0),
+    //                     new Vector3(2900, -200, 0),
+    //                     new Vector3(1800, -200, 0)
+    //                 }
+    //             },
+
+    //             {
+    //                 "Entrance",
+    //                 new Vector3[]{
+    //                     new Vector3(1800, -200, 0),
+    //                     new Vector3(2900, -200, 0),
+    //                     new Vector3(2900, -1350, 0),
+    //                     new Vector3(1800, -1350, 0)
+    //                 }
+    //             }
+    //         }
+    //     }
+    // };
 
     public Vector3[] stairsCoordinates;
     public List<Vector3[]> dwellingCoordinates;
