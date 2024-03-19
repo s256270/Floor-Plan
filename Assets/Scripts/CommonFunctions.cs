@@ -1104,7 +1104,8 @@ public class CommonFunctions : MonoBehaviour
     /// <returns>重複を削除した結果</returns>
     public List<Dictionary<string, Dictionary<string, Vector3[]>>> RemoveDuplicates(List<Dictionary<string, Dictionary<string, Vector3[]>>> allPattern) {
         int trueCounter = 0;
-        int dwellingNumber = 1/*pr.getDwellingCoordinatesList().Count*/;
+        int dwellingNumber = pr.getDwellingCoordinatesList().Count;
+        //int dwellingNumber = 1;
 
         //重複を削除
         for (int i = 0; i < allPattern.Count - 1; i++) {

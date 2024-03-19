@@ -26,10 +26,10 @@ public class FloorPlanner : CreateRoom
         allPattern.Add(pr.plan);
 
         //全パターンの配置結果にMBPSを配置
-        //allPattern = cm.PlaceMbps(allPattern);
+        allPattern = cm.PlaceMbps(allPattern);
 
         //全パターンの配置結果に玄関を配置
-        //allPattern = ce.PlaceEntrance(allPattern);
+        allPattern = ce.PlaceEntrance(allPattern);
 
         //テスト用
         // allPattern.Add(new Dictionary<string, Dictionary<string, Vector3[]>>(){
@@ -90,7 +90,7 @@ public class FloorPlanner : CreateRoom
         allPattern = cwa.PlaceWetareas(allPattern);
 
         //全パターンの配置結果に洋室を配置
-        allPattern = cws.PlaceWestern(allPattern);
+        //allPattern = cws.PlaceWestern(allPattern);
 
         return allPattern;
     }

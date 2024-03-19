@@ -32,7 +32,7 @@ public class Evaluation : CreateRoom
 
             foreach (KeyValuePair<string, Dictionary<string, Vector3[]>> planParts in allPattern[i]) {
                 //住戸ごとに評価
-                if (planParts.Key.Contains("Dwelling1")) {
+                if (planParts.Key.Contains("Dwelling4")) {
                     //必要な座標の準備
                     //住戸の座標を取得
                     Vector3[] dwellingCoordinates = planParts.Value["1K"];

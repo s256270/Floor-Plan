@@ -34,11 +34,11 @@ public class CreateWetareas : MonoBehaviour
         var result = new List<Dictionary<string, Dictionary<string, Vector3[]>>>();
 
         //各パターンについて配置
-        for (int i = 0; i < 1/*allPattern.Count*/; i++) {
+        for (int i = 0; i < allPattern.Count; i++) {
             //住戸1のとき
-            // if (!(i % 6 == 0)) {
-            //     continue;
-            // }
+            if (!(i % 6 == 0)) {
+                continue;
+            }
 
             //住戸2のとき
             // if (!(i == 0 || i == 3)) {
@@ -58,7 +58,7 @@ public class CreateWetareas : MonoBehaviour
             //Debug.Log("i: " + i);
             foreach (KeyValuePair<string, Dictionary<string, Vector3[]>> planParts in allPattern[i]) {
                 //住戸オブジェクトに配置していく
-                if (planParts.Key.Contains("Dwelling4")) {
+                if (planParts.Key.Contains("Dwelling1")) {
                     //必要な座標の準備
                     //住戸の座標を取得
                     dwelling = planParts.Value["1K"];
@@ -83,7 +83,8 @@ public class CreateWetareas : MonoBehaviour
                     // cf.CreateRoom("range", range);
 
                     //水回りを配置したリストを作成
-                    List<Dictionary<string, Vector3[]>> placeWetareasResult = MakeWetareasAddList(new int[]{0, 1, 2, 3});
+                    //List<Dictionary<string, Vector3[]>> placeWetareasResult = MakeWetareasAddList(new int[]{0, 1, 2, 3});
+                    List<Dictionary<string, Vector3[]>> placeWetareasResult = MakeWetareasAddList(new int[]{0, 1, 2});
 
                     //作成したリストを配置結果のリストに追加
                     for (int j = 0; j < placeWetareasResult.Count; j++) {
@@ -125,7 +126,7 @@ public class CreateWetareas : MonoBehaviour
             for (int j = 0; j < rotationAllPattern.Count; j++) {
 
                 //キッチンと洗面室の回転は除く
-                if (rotationAllPattern[j][1] == 1 || rotationAllPattern[j][3] == 1) {
+                if (rotationAllPattern[j][0] == 1 || rotationAllPattern[j][2] == 1) {
                     continue;
                 }
                 
@@ -168,7 +169,8 @@ public class CreateWetareas : MonoBehaviour
             //必要な部屋がすべて配置されていないものを除く
             for (int j = 0; j < currentResult.Count; j++) {
                 //必要な部屋がすべて配置されていないとき
-                if (!(currentResult[j].ContainsKey("UB") && currentResult[j].ContainsKey("Washroom") && currentResult[j].ContainsKey("Toilet") && currentResult[j].ContainsKey("Kitchen"))) {
+                //if (!(currentResult[j].ContainsKey("UB") && currentResult[j].ContainsKey("Washroom") && currentResult[j].ContainsKey("Toilet") && currentResult[j].ContainsKey("Kitchen"))) {
+                if (!(currentResult[j].ContainsKey("UBandWashroom") && currentResult[j].ContainsKey("Toilet") && currentResult[j].ContainsKey("Kitchen"))) {
                     //その配置結果を除く
                     currentResult.RemoveAt(j);
                     j--;
@@ -176,14 +178,14 @@ public class CreateWetareas : MonoBehaviour
             }
             
             //洗面室とユニットバスが隣り合っていないものを除く
-            for (int j = 0; j < currentResult.Count; j++) {
-                //洗面室とユニットバスが隣り合っていないとき
-                if (!cf.ContactJudge(currentResult[j]["UB"], currentResult[j]["Washroom"])) {
-                    //その配置結果を除く
-                    currentResult.RemoveAt(j);
-                    j--;
-                }
-            }
+            // for (int j = 0; j < currentResult.Count; j++) {
+            //     //洗面室とユニットバスが隣り合っていないとき
+            //     if (!cf.ContactJudge(currentResult[j]["UB"], currentResult[j]["Washroom"])) {
+            //         //その配置結果を除く
+            //         currentResult.RemoveAt(j);
+            //         j--;
+            //     }
+            // }
 
             //入口がない部屋があるものを除く
             for (int j = 0; j < currentResult.Count; j++) {
@@ -672,7 +674,8 @@ public class CreateWetareas : MonoBehaviour
                 }
 
                 //全ての部屋が配置されている場合
-                if (currentPattern.ContainsKey("UB") && currentPattern.ContainsKey("Washroom") && currentPattern.ContainsKey("Toilet") && currentPattern.ContainsKey("Kitchen")) {
+                //if (currentPattern.ContainsKey("UB") && currentPattern.ContainsKey("Washroom") && currentPattern.ContainsKey("Toilet") && currentPattern.ContainsKey("Kitchen")) {
+                if (currentPattern.ContainsKey("UBandWashroom") && currentPattern.ContainsKey("Toilet") && currentPattern.ContainsKey("Kitchen")) {
                     //そのまま追加して，これ以降はスキップ
                     currentResultList.Add(currentPattern);
                     continue;
@@ -972,15 +975,15 @@ public class CreateWetareas : MonoBehaviour
         string result = "";
 
         if (wetareasIndex == 0) {
-            result = "UB";
+            result = "UBandWashroom";
         } 
+        // else if (wetareasIndex == 1) {
+        //     result = "Washroom";
+        // }
         else if (wetareasIndex == 1) {
-            result = "Washroom";
-        }
-        else if (wetareasIndex == 2) {
             result = "Toilet";
         }
-        else if (wetareasIndex == 3) {
+        else if (wetareasIndex == 2) {
             result = "Kitchen";
         }
 
@@ -996,15 +999,15 @@ public class CreateWetareas : MonoBehaviour
         List<Vector3[]> result = new List<Vector3[]>();
 
         if (wetareasKindsIndex == 0) {
-            result = pa.ubCoordinatesList;
+            result = pa.ubAndWashroomCoordinatesList;
         } 
+        // else if (wetareasKindsIndex == 1) {
+        //     result = pa.washroomCoordinatesList;
+        // }
         else if (wetareasKindsIndex == 1) {
-            result = pa.washroomCoordinatesList;
-        }
-        else if (wetareasKindsIndex == 2) {
             result = pa.toiletCoordinatesList;
         }
-        else if (wetareasKindsIndex == 3) {
+        else if (wetareasKindsIndex == 2) {
             result = pa.kitchenCoordinatesList;
         }
 
@@ -1143,13 +1146,13 @@ public class CreateWetareas : MonoBehaviour
                 }
             }
 
-            if (checkRoomName == "Washroom") {
-                //洗面室の場合
-                if (checkRoomSideMax < 900.0f) {
-                    flag = false;
-                }
-            }
-            else if (checkRoomName == "Toilet") {
+            // if (checkRoomName == "Washroom") {
+            //     //洗面室の場合
+            //     if (checkRoomSideMax < 900.0f) {
+            //         flag = false;
+            //     }
+            // }
+            if (checkRoomName == "Toilet") {
                 //トイレの場合
                 if (checkRoomSideMax < 800.0f) {
                     flag = false;

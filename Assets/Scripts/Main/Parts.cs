@@ -148,16 +148,69 @@ public class Parts : CreateRoom
     };
 
     //洗面室&UBの座標
-    // [HideInInspector]
-    // public List<Vector3[]> washroomAndUbCoordinates = new List<Vector3[]>(){
-    //     //その1
-    //     new Vector3[]{
-    //         new Vector3(-800, 800, 0),
-    //         new Vector3(800, 800, 0),
-    //         new Vector3(800, -800, 0),
-    //         new Vector3(-800, -800, 0)
-    //     },
-    // };
+    [HideInInspector]
+    public List<Vector3[]> ubAndWashroomCoordinatesList = new List<Vector3[]>(){
+        //洗面室正方形のやつ
+        //その1
+        new Vector3[]{
+            new Vector3(-1700, 800, 0),
+            new Vector3(1700, 800, 0),
+            new Vector3(1700, -800, 0),
+            new Vector3(-1700, -800, 0)
+        },
+
+        //その2
+        new Vector3[]{
+            new Vector3(-1500, 900, 0),
+            new Vector3(1500, 900, 0),
+            new Vector3(1500, -700, 0),
+            new Vector3(-100, -700, 0),
+            new Vector3(-100, -900, 0),
+            new Vector3(-1500, -900, 0)
+        },
+
+        //その3
+        new Vector3[]{
+            new Vector3(-1500, 900, 0),
+            new Vector3(1500, 900, 0),
+            new Vector3(1500, -900, 0),
+            new Vector3(100, -900, 0),
+            new Vector3(100, -700, 0),
+            new Vector3(-1500, -700, 0)
+        },
+
+        //洗面室細長いやつ
+        //その1
+        new Vector3[]{
+            new Vector3(-500, 1150, 0),
+            new Vector3(1300, 1150, 0),
+            new Vector3(1300, -1150, 0),
+            new Vector3(-1300, -1150, 0),
+            new Vector3(-1300, -250, 0),
+            new Vector3(-500, -250, 0)
+        },
+
+        //その2
+        new Vector3[]{
+            new Vector3(-1300, 1150, 0),
+            new Vector3(500, 1150, 0),
+            new Vector3(500, -250, 0),
+            new Vector3(1300, -250, 0),
+            new Vector3(1300, -1150, 0),
+            new Vector3(-1300, -1150, 0)
+        },
+
+        //洗面室曲がってるやつ
+        //その1
+        new Vector3[]{
+            new Vector3(-1350, 1200, 0),
+            new Vector3(1350, 1200, 0),
+            new Vector3(1350, -200, 0),
+            new Vector3(50, -200, 0),
+            new Vector3(50, -1200, 0),
+            new Vector3(-1350, -1200, 0)
+        }
+    };
 
     //トイレの座標
     [HideInInspector]
